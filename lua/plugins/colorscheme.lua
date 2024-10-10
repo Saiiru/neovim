@@ -133,7 +133,7 @@ return {
             })
         end,
     },
-    {
+     {
 	"jesseleite/nvim-noirbuddy",
 	dependencies = {
 		"tjdevries/colorbuddy.nvim",
@@ -141,7 +141,7 @@ return {
 	priority = 1000,
 	config = function()
 		require("noirbuddy").setup({
-			preset = "minimal",
+			preset = "oxide",
 			styles = {
 				italic = true,
 				bold = true,
@@ -154,68 +154,66 @@ return {
 				secondary = "#ffffff",
 				noir_0 = "#f1f1f1",
 				noir_1 = "#e2e2e2",
-				noir_2 = "#666666",
+				noir_2 = "#b0b0b0", -- Ajustado para melhor visibilidade
 				noir_3 = "#a7a7a7",
-				noir_4 = "#555555",
-				noir_5 = "#444444",
+				noir_4 = "#666666",
+				noir_5 = "#555555",
 				noir_6 = "#444444",
 				noir_7 = "#444444",
 				noir_8 = "#333333",
 				noir_9 = "#111111",
-				hotpink = "#ff69b4",  -- Adding hot pink color
 			},
 		})
 
 		-- Tokens colors
-		vim.cmd("highlight @variable guifg=#ffffff")
-		vim.cmd("highlight @variable.builtin guifg=#ffffff")
-		vim.cmd("highlight @variable.member guifg=#666666")
+		vim.cmd("highlight @variable guifg=#e2e2e2") -- Ajuste para mais contraste
+		vim.cmd("highlight @variable.builtin guifg=#e2e2e2")
+		vim.cmd("highlight @variable.member guifg=#b0b0b0") -- Ajuste para mais visibilidade
 
-		vim.cmd("highlight @constant guifg=#777777")
+		vim.cmd("highlight @constant guifg=#b0b0b0") -- Melhor visibilidade para constantes
 
-		vim.cmd("highlight @keyword guifg=#444444")
-		vim.cmd("highlight @keyword.operator guifg=#555555")
-		vim.cmd("highlight @keyword.function guifg=#666666")
-		vim.cmd("highlight @keyword.return guifg=#666666")
+		vim.cmd("highlight @keyword guifg=#666666")
+		vim.cmd("highlight @keyword.operator guifg=#777777") -- Ajuste para mais contraste
+		vim.cmd("highlight @keyword.function guifg=#b0b0b0") -- Ajuste para mais visibilidade
+		vim.cmd("highlight @keyword.return guifg=#b0b0b0")
 
-		vim.cmd("highlight @punctuation.bracket guifg=#555555")
+		vim.cmd("highlight @punctuation.bracket guifg=#666666")
 
 		vim.cmd("highlight @constructor guifg=#888888")
 
-		vim.cmd("highlight @operator guifg=#444444")
-		vim.cmd("highlight @comment guifg=#222222")
+		vim.cmd("highlight @operator guifg=#666666")
+		vim.cmd("highlight @comment guifg=#999999") -- Ajuste para comentários mais visíveis
 		vim.cmd("highlight @string guifg=#444444")
 
-		vim.cmd("highlight @keyword.coroutine guifg=#444444")
+		vim.cmd("highlight @keyword.coroutine guifg=#666666")
 
-		vim.cmd("highlight @function.builtin guifg=#999999")
-		vim.cmd("highlight @function.call guifg=#999999")
-		vim.cmd("highlight @function.method.call guifg=#999999")
+		vim.cmd("highlight @function.builtin guifg=#b0b0b0") -- Ajuste para melhor visibilidade
+		vim.cmd("highlight @function.call guifg=#b0b0b0")
+		vim.cmd("highlight @function.method.call guifg=#b0b0b0")
 
 		vim.cmd("highlight @tag guifg=#888888")
 		vim.cmd("highlight @tag.delimiter guifg=#888888")
-		vim.cmd("highlight @tag.attribute guifg=#444444")
+		vim.cmd("highlight @tag.attribute guifg=#666666")
 
 		vim.cmd("highlight @lsp.type.parameter guifg=#999999 gui=italic")
 
 		vim.cmd("highlight @type guifg=#e2e2e2")
-		vim.cmd("highlight @type.qualifier guifg=#444444")
+		vim.cmd("highlight @type.qualifier guifg=#666666")
 
 		-- Vim command line error colors
 		vim.cmd("highlight ErrorMsg guifg=#444444 guibg=#ff8989")
 
 		-- NvimTree colors
-		vim.cmd("highlight NvimTreeFolderIcon guifg=#555555")
-		vim.cmd("highlight NvimTreeFolderName guifg=#999999")
+		vim.cmd("highlight NvimTreeFolderIcon guifg=#666666") -- Ajuste para melhor contraste
+		vim.cmd("highlight NvimTreeFolderName guifg=#b0b0b0")
 		vim.cmd("highlight NvimTreeFileIcon guifg=#444444")
 		vim.cmd("highlight NvimTreeFileName guifg=#444444")
-		vim.cmd("highlight NvimTreeIndentMarker guifg=#222222")
-		vim.cmd("highlight NvimTreeNormal guibg=NONE guifg=#555555")
+		vim.cmd("highlight NvimTreeIndentMarker guifg=#999999") -- Melhor visibilidade
+		vim.cmd("highlight NvimTreeNormal guibg=NONE guifg=#666666")
 		vim.cmd("highlight NvimTreeVertSplit guibg=NONE guifg=NONE")
 
 		vim.cmd("highlight NvimTreeCursorLine guibg=#171717 guifg=NONE gui=bold")
 
-		-- Git colors
 		vim.cmd("highlight NvimTreeGitDirty guifg=#f0c674")
 		vim.cmd("highlight NvimTreeGitNew guifg=#9bcea5")
 		vim.cmd("highlight NvimTreeGitStaged guifg=#89B4FA")
@@ -295,11 +293,22 @@ return {
 		vim.cmd("highlight NoiceCmdlinePopupBorder guibg=NONE guifg=#222222")
 
 		-- Devicons colors
-		vim.cmd("highlight DevIconDefault guifg=#555555")
+		vim.cmd("highlight DevIconDefault guifg=#999999")
+		vim.cmd("highlight DevIconUnknown guifg=#999999")
 
-		-- Hot pink accents
-		vim.cmd("highlight @keyword guifg=#ff69b4")  -- Hot pink for keywords
-		vim.cmd("highlight @function guifg=#ff69b4")  -- Hot pink for functions
+		-- Notify colors
+		vim.cmd("highlight NotifyERRORBorder guifg=#ff8989")
+		vim.cmd("highlight NotifyINFOBorder guifg=#89B4FA")
+		vim.cmd("highlight NotifyWARNBorder guifg=#f0c674")
+		vim.cmd("highlight NotifyDEBUGBorder guifg=#888888")
+
+		-- Indent-Blankline colors
+		vim.cmd("highlight IndentBlanklineChar guifg=#666666")
+		vim.cmd("highlight IndentBlanklineContextChar guifg=#444444")
+
+		-- Which-key colors
+		vim.cmd("highlight WhichKey guifg=#666666")
+		vim.cmd("highlight WhichKeyDesc guifg=#666666")
 	end,
 }
 ,
