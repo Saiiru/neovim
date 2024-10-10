@@ -68,3 +68,11 @@ vim.cmd([[
 vim.g.mapleader = " "             -- set leader key to space
 vim.g.maplocalleader = " "
 
+-- Highlighting for Italics and Bold
+vim.cmd([[
+  highlight Comment cterm=italic gui=italic
+  highlight Keyword cterm=bold gui=bold
+  highlight Function cterm=bold,italic gui=bold,italic
+  highlight Type cterm=bold gui=bold
+  highlight Constructor cterm=bold,italic gui=bold,italic
+]])
