@@ -111,7 +111,7 @@ keymap.set("n", "<leader>td", "<cmd>TodoQuickFix<CR>", { desc = "Quick fix for t
 -- Additional Keymaps -------------------
 
 -- Open netrw file explorer
-keymap.set("n", "<leader>pv", vim.cmd.Ex) 
+keymap.set("n", "<leader>pv", vim.cmd.Ex)
 
 -- Move selected text
 keymap.set("v", "J", ":m '>+1<CR>gv=gv") -- Move selected lines down
@@ -137,4 +137,10 @@ end, { desc = "Stop Vim With Me" })
 
 -- Chmod keymap
 keymap.set("n", "<leader>ch", ":!chmod +x %<CR>", { desc = "Make current file executable" })
+
+-- nvimtree
+keymap.set("n", "<leader>ee", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" }) -- toggle file explorer
+keymap.set("n", "<leader>ef", "<cmd>NvimTreeFindFileToggle<CR>", { desc = "Toggle file explorer on current file" }) -- toggle file explorer on current file
+keymap.set("n", "<leader>ec", "<cmd>NvimTreeCollapse<CR>", { desc = "Collapse file explorer" }) -- collapse file explorer
+keymap.set("n", "<leader>er", "<cmd>NvimTreeRefresh<CR>", { desc = "Refresh file explorer" }) -- refresh file explorer
 

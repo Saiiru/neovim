@@ -1,19 +1,22 @@
+-- Função para aplicar o esquema de cores
 function ColorMyPencils(color)
-    color = color or "carbonfox"
-    vim.cmd.colorscheme(color)
+  color = color or "carbonfox"  -- Esquema de cores padrão
+    vim.cmd("colorscheme " .. color)  -- Carregar o esquema de cores
+    vim.cmd([[autocmd VimEnter * lua vim.cmd('colorscheme carbonfox')]])
 
-    -- Ajusta fundo transparente
+    -- Ajustes de fundo transparente
     vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
     vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 
-    -- Forçando itálicos em comentários e palavras-chave
+    -- Personalizações de destaque
     vim.api.nvim_set_hl(0, "Comment", { italic = true })
     vim.api.nvim_set_hl(0, "Keyword", { italic = true, bold = true })
     vim.api.nvim_set_hl(0, "Function", { italic = true })
     vim.api.nvim_set_hl(0, "Variable", { italic = true })
-    vim.api.nvim_set_hl(0, "String", { italic = false })
-end
+    vim.api.nvim_set_hl(0, "String", { italic = true })
+  end
 
+-- Retornando a configuração dos plugins
 return {
     {
         "erikbackman/brightburn.vim",
@@ -24,7 +27,7 @@ return {
         lazy = false,
         opts = {},
         config = function()
-            ColorMyPencils()
+            ColorMyPencils()  -- Chame a função aqui
         end,
     },
 
@@ -33,7 +36,7 @@ return {
         name = "gruvbox",
         config = function()
             require("gruvbox").setup({
-                terminal_colors = true, -- adicionar cores ao terminal
+                terminal_colors = true,
                 undercurl = true,
                 underline = false,
                 bold = true,
@@ -49,12 +52,13 @@ return {
                 invert_signs = false,
                 invert_tabline = false,
                 invert_intend_guides = false,
-                inverse = true, -- inverter fundo para pesquisa, diffs, etc.
-                contrast = "", -- pode ser "hard", "soft" ou string vazia
+                inverse = true,
+                contrast = "",
                 overrides = {},
                 dim_inactive = false,
                 transparent_mode = false,
             })
+            ColorMyPencils()  -- Chame a função aqui
         end,
     },
 
@@ -68,59 +72,74 @@ return {
                     italic = false,
                 },
             })
+            ColorMyPencils("carbonfox")  -- Chame a função aqui
         end,
     },
 
-    -- Configuração do Nightfox com a paleta 'carbonfox'
-{
-	"EdenEast/nightfox.nvim",
-	priority = 1000,
-	config = function()
-		require("nightfox").setup({
-			options = {
-				transparent = true,
-				styles = {
-					comments = "italic",
-					keywords = "bold",
-				},
-			},
-		})
+    {
+        "EdenEast/nightfox.nvim",
+        priority = 1000,
+        config = function()
+            require("nightfox").setup({
+                options = {
+                    transparent = true,
+                    styles = {
+                        comments = "italic",
+                        keywords = "bold",
+                    },
+                },
+            })
 
-		-- Definindo as cores neon personalizadas
-		local colors = {
-			bg = "#101010",          -- Fundo
-			fg = "#ffffff",          -- Texto
-			black = "#333333",       -- Preto
-			red = "#ff4c4c",         -- Vermelho Neon
-			green = "#00ff7f",       -- Verde Neon
-			yellow = "#ffff00",      -- Amarelo Neon
-			blue = "#00bfff",        -- Azul Neon
-			magenta = "#ff00ff",     -- Magenta Neon
-			cyan = "#00ffff",        -- Ciano Neon
-			white = "#f1f1f1",       -- Branco
-			gray = "#666666",        -- Cinza
-		}
+            -- Definindo a paleta de cores neon
+            local palette = {
+                bg = "#1a1a2e",
+                fg = "#ffffff",
+                black = "#0f0f10",
+                red = "#ff2e63",
+                green = "#00ff99",
+                yellow = "#ffcc00",
+                blue = "#00bfff",
+                magenta = "#ff5e99",
+                cyan = "#00e0ff",
+                white = "#f1f1f1",
+                gray = "#b0b0b0",
+            }
 
-		-- Definindo os grupos de destaque
-		vim.cmd("highlight Normal guibg=" .. colors.bg .. " guifg=" .. colors.fg)
-		vim.cmd("highlight Comment guifg=" .. colors.gray .. " gui=italic")
-		vim.cmd("highlight Keyword guifg=" .. colors.magenta .. " gui=bold")
-		vim.cmd("highlight String guifg=" .. colors.green)
-		vim.cmd("highlight Function guifg=" .. colors.blue)
-		vim.cmd("highlight Variable guifg=" .. colors.white)
+            -- Definindo os grupos de destaque
+            vim.cmd("highlight Normal guibg=" .. palette.bg .. " guifg=" .. palette.fg)
+            vim.cmd("highlight Comment guifg=" .. palette.gray .. " gui=italic")
+            vim.cmd("highlight Keyword guifg=" .. palette.magenta .. " gui=bold")
+            vim.cmd("highlight String guifg=" .. palette.green)
+            vim.cmd("highlight Function guifg=" .. palette.blue)
+            vim.cmd("highlight Variable guifg=" .. palette.white)
 
-		-- Outras configurações de destaque...
-		vim.cmd("highlight CursorLine guibg=#181818")
-		vim.cmd("highlight LineNr guifg=" .. colors.gray)
-		vim.cmd("highlight DiagnosticError guifg=" .. colors.red)
-		vim.cmd("highlight DiagnosticWarn guifg=" .. colors.yellow)
-		vim.cmd("highlight DiagnosticInfo guifg=" .. colors.blue)
-		vim.cmd("highlight DiagnosticHint guifg=" .. colors.green)
-		-- Adicione mais destaques conforme necessário
-	end,
-},
+            -- Erros e avisos
+            vim.cmd("highlight DiagnosticError guifg=" .. palette.red .. " gui=bold")
+            vim.cmd("highlight DiagnosticWarn guifg=" .. palette.yellow .. " gui=bold")
+            vim.cmd("highlight DiagnosticInfo guifg=" .. palette.blue .. " gui=bold")
+            vim.cmd("highlight DiagnosticHint guifg=" .. palette.green .. " gui=bold")
 
+            -- Sublinhados para erros e avisos
+            vim.cmd("highlight DiagnosticUnderlineError guisp=" .. palette.red .. " gui=undercurl")
+            vim.cmd("highlight DiagnosticUnderlineWarn guisp=" .. palette.yellow .. " gui=undercurl")
+            vim.cmd("highlight DiagnosticUnderlineInfo guisp=" .. palette.blue .. " gui=undercurl")
+            vim.cmd("highlight DiagnosticUnderlineHint guisp=" .. palette.green .. " gui=undercurl")
 
+            -- Outros tipos de token
+            vim.cmd("highlight Identifier guifg=" .. palette.cyan)
+            vim.cmd("highlight Type guifg=" .. palette.magenta)
+            vim.cmd("highlight Operator guifg=" .. palette.yellow)
+            vim.cmd("highlight Statement guifg=" .. palette.red)
+            vim.cmd("highlight PreProc guifg=" .. palette.green)
+            vim.cmd("highlight Special guifg=" .. palette.blue)
+
+            -- Outras configurações de destaque
+            vim.cmd("highlight CursorLine guibg=#2a2a3e")
+            vim.cmd("highlight LineNr guifg=#3b3b55")
+
+            ColorMyPencils("carbonfox")  -- Chame a função aqui
+        end,
+    },
 }
 
 
