@@ -2,205 +2,142 @@
 vim.g.mapleader = " "
 
 local keymap = vim.keymap -- for conciseness
+local opts = { noremap = true, silent = true }
 
 ---------------------
 -- General Keymaps -------------------
 
 -- Exit insert mode with jk
-keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
+keymap.set("i", "jk", "<ESC>", opts)
 
 -- Clear search highlights
-keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
+keymap.set("n", "<leader>nh", ":nohl<CR>", opts)
 
 -- Increment/decrement numbers
-keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" }) -- increment
-keymap.set("n", "<leader>-", "<C-x>", { desc = "Decrement number" }) -- decrement
+keymap.set("n", "<leader>+", "<C-a>", opts)
+keymap.set("n", "<leader>-", "<C-x>", opts)
 
 ---------------------
 -- Window Management -------------------
 
 -- Split window management
-keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
-keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
-keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" })
-keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" })
+keymap.set("n", "<leader>sv", "<C-w>v", opts)
+keymap.set("n", "<leader>sh", "<C-w>s", opts)
+keymap.set("n", "<leader>se", "<C-w>=", opts)
+keymap.set("n", "<leader>sx", "<cmd>close<CR>", opts)
 
 ---------------------
 -- Tab Management -------------------
 
--- Tab navigation
-keymap.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "Open new tab" })
-keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" })
-keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" })
-keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" })
-keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" })
+keymap.set("n", "<leader>to", "<cmd>tabnew<CR>", opts)
+keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", opts)
+keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", opts)
+keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", opts)
+keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", opts)
 
 ---------------------
 -- Miscellaneous -------------------
 
 -- Black hole paste with delay
 keymap.set("x", "<leader>p", function()
-    vim.defer_fn(function()
-        vim.cmd([[silent! put!]])
-    end, 100) -- Delay de 100 ms
-end, { desc = "Paste without losing yanked content" })
+    vim.defer_fn(function() vim.cmd([[silent! put!]]) end, 100)
+end, opts)
 
--- Move line up and down
-keymap.set("n", "<A-j>", ":move .+1<CR>==", { desc = "Move line down" })
-keymap.set("n", "<A-k>", ":move .-2<CR>==", { desc = "Move line up" })
-
--- Move visual selection up and down
-keymap.set("x", "<A-j>", ":move '>+1<CR>gv-gv", { desc = "Move selection down" })
-keymap.set("x", "<A-k>", ":move '<-2<CR>gv-gv", { desc = "Move selection up" })
+-- Move line up/down
+keymap.set("n", "<A-j>", ":move .+1<CR>==", opts)
+keymap.set("n", "<A-k>", ":move .-2<CR>==", opts)
+keymap.set("x", "<A-j>", ":move '>+1<CR>gv-gv", opts)
+keymap.set("x", "<A-k>", ":move '<-2<CR>gv-gv", opts)
 
 ---------------------
 -- Navigation -------------------
 
 -- Sane split navigation
-keymap.set("n", "<C-j>", "<C-W><C-J>", { desc = "Move to the split below" })
-keymap.set("n", "<C-k>", "<C-W><C-K>", { desc = "Move to the split above" })
-keymap.set("n", "<C-l>", "<C-W><C-L>", { desc = "Move to the split right" })
-keymap.set("n", "<C-h>", "<C-W><C-H>", { desc = "Move to the split left" })
-
--- File browser
-keymap.set("n", "<leader>o", "<cmd>Oil<CR>", { desc = "Open file browser" })
+keymap.set("n", "<C-j>", "<C-W><C-J>", opts)
+keymap.set("n", "<C-k>", "<C-W><C-K>", opts)
+keymap.set("n", "<C-l>", "<C-W><C-L>", opts)
+keymap.set("n", "<C-h>", "<C-W><C-H>", opts)
+-- Navigate buffers
+keymap.set("n", "<S-l>", ":bnext<CR>", opts)
+keymap.set("n", "<S-h>", ":bprevious<CR>", opts)
+-- Open file browser
+keymap.set("n", "<leader>o", "<cmd>Oil<CR>", opts)
 
 -- Trim whitespace
-keymap.set("n", "<leader>wt", ":lua MiniTrailspace.trim()<CR>", { desc = "Trim whitespace" })
+keymap.set("n", "<leader>wt", ":lua MiniTrailspace.trim()<CR>", opts)
 
 ---------------------
--- Copilot and Telescope -------------------
+-- Copilot & Telescope -------------------
 
--- Copilot key binding
-keymap.set("i", "<C-l>", 'copilot#Accept("<CR>")', { expr = true, script = true, desc = "Accept Copilot suggestion" })
+-- Copilot suggestion
+keymap.set("i", "<C-l>", 'copilot#Accept("<CR>")', { expr = true, script = true })
 
 -- Telescope bindings
-keymap.set("n", "<C-p>", "<cmd>Telescope find_files<CR>", { desc = "Find files (telescope) [Ctrl-p]" })
-keymap.set("n", "<C-e>", "<cmd>Telescope live_grep<CR>", { desc = "Search with grep (telescope) [Ctrl-e]" })
-keymap.set("n", "<C-b>", "<cmd>Telescope buffers<CR>", { desc = "Find buffers (telescope)" })
-keymap.set("n", "<leader>bf", "<cmd>Telescope current_buffer_fuzzy_find<CR>", { desc = "Fuzzy find in current buffer" })
-keymap.set("n", "<leader>ds", "<cmd>Telescope lsp_document_symbols<CR>", { desc = "Document symbols (telescope)" })
-keymap.set("n", "<leader>fh", "<cmd>Telescope help_tags<CR>", { desc = "Find help tags (telescope)" })
-keymap.set("n", "<leader>ft", "<cmd>Telescope git_files<CR>", { desc = "Find git files (telescope)" })
-keymap.set("n", "<leader>ts", "<cmd>Telescope tagstack<CR>", { desc = "View tag stack (telescope)" })
-keymap.set("n", "<leader>mk", "<cmd>Telescope marks<CR>", { desc = "Find marks (telescope)" })
+keymap.set("n", "<C-p>", "<cmd>Telescope find_files<CR>", opts)
+keymap.set("n", "<C-e>", "<cmd>Telescope live_grep<CR>", opts)
+keymap.set("n", "<C-b>", "<cmd>Telescope buffers<CR>", opts)
+keymap.set("n", "<leader>bf", "<cmd>Telescope current_buffer_fuzzy_find<CR>", opts)
+keymap.set("n", "<leader>ds", "<cmd>Telescope lsp_document_symbols<CR>", opts)
+keymap.set("n", "<leader>fh", "<cmd>Telescope help_tags<CR>", opts)
+keymap.set("n", "<leader>ft", "<cmd>Telescope git_files<CR>", opts)
+keymap.set("n", "<leader>ts", "<cmd>Telescope tagstack<CR>", opts)
+keymap.set("n", "<leader>mk", "<cmd>Telescope marks<CR>", opts)
 
 ---------------------
 -- Undo Management -------------------
 
--- Undotree
-keymap.set("n", "<leader>ut", "<cmd>UndotreeToggle<CR>", { desc = "Toggle undotree" })
+-- Undotree toggle
+keymap.set("n", "<leader>ut", "<cmd>UndotreeToggle<CR>", opts)
 
 ---------------------
--- Scrolling and Searching -------------------
+-- Scrolling & Searching -------------------
 
 -- Better vertical movements
-keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center" })
-keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up and center" })
+keymap.set("n", "<C-d>", "<C-d>zz", opts)
+keymap.set("n", "<C-u>", "<C-u>zz", opts)
 
--- Better search jumps
-keymap.set("n", "n", "nzzzv", { desc = "Next search result (centered)" })
-keymap.set("n", "N", "Nzzzv", { desc = "Previous search result (centered)" })
+-- Centered search jumps
+keymap.set("n", "n", "nzzzv", opts)
+keymap.set("n", "N", "Nzzzv", opts)
 
 ---------------------
 -- Todo Comments -------------------
 
-keymap.set("n", "<leader>td", "<cmd>TodoQuickFix<CR>", { desc = "Quick fix for todo comments" })
+keymap.set("n", "<leader>td", "<cmd>TodoQuickFix<CR>", opts)
 
 ---------------------
 -- Additional Keymaps -------------------
 
 -- Open netrw file explorer
-keymap.set("n", "<leader>pv", vim.cmd.Ex)
+keymap.set("n", "<leader>pv", vim.cmd.Ex, opts)
 
 -- Move selected text
-keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected lines down" })
-keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected lines up" })
+keymap.set("v", "J", ":m '>+1<CR>gv=gv", opts)
+keymap.set("v", "K", ":m '<-2<CR>gv=gv", opts)
 
 -- Keep cursor position after joining lines
-keymap.set("n", "J", "mzJ`z")
+keymap.set("n", "J", "mzJ`z", opts)
 
 -- Restart LSP
-keymap.set("n", "<leader>zig", "<cmd>LspRestart<cr>", { desc = "Restart LSP" })
+keymap.set("n", "<leader>zig", "<cmd>LspRestart<CR>", opts)
 
--- Vim With Me functionality
-keymap.set("n", "<leader>vwm", function()
-    require("vim-with-me").StartVimWithMe()
-end, { desc = "Start Vim With Me" })
-
-keymap.set("n", "<leader>svwm", function()
-    require("vim-with-me").StopVimWithMe()
-end, { desc = "Stop Vim With Me" })
+-- Vim With Me
+keymap.set("n", "<leader>vwm", function() require("vim-with-me").StartVimWithMe() end, opts)
+keymap.set("n", "<leader>svwm", function() require("vim-with-me").StopVimWithMe() end, opts)
 
 ---------------------
--- Make Current File Executable -------------------
+-- Make File Executable -------------------
 
--- Chmod keymap
-keymap.set("n", "<leader>ch", ":!chmod +x %<CR>", { desc = "Make current file executable" })
+keymap.set("n", "<leader>ch", ":!chmod +x %<CR>", opts)
 
--- nvimtree
-keymap.set("n", "<leader>ee", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" }) -- toggle file explorer
-keymap.set("n", "<leader>ef", "<cmd>NvimTreeFindFileToggle<CR>", { desc = "Toggle file explorer on current file" }) -- toggle file explorer on current file
-keymap.set("n", "<leader>ec", "<cmd>NvimTreeCollapse<CR>", { desc = "Collapse file explorer" }) -- collapse file explorer
-keymap.set("n", "<leader>er", "<cmd>NvimTreeRefresh<CR>", { desc = "Refresh file explorer" })
+-- NvimTree keymaps
+keymap.set("n", "<leader>ee", "<cmd>NvimTreeToggle<CR>", opts)
+keymap.set("n", "<leader>ef", "<cmd>NvimTreeFindFileToggle<CR>", opts)
+keymap.set("n", "<leader>ec", "<cmd>NvimTreeCollapse<CR>", opts)
+keymap.set("n", "<leader>er", "<cmd>NvimTreeRefresh<CR>", opts)
 
--- Transfer keymaps from the -- New Keymaps -- section
-keymap.set("n", "<leader>a", "<cmd>Alpha<cr>", { desc = "Alpha" })
-keymap.set("n", "<leader>b", "<cmd>lua require('telescope.builtin').buffers(require('telescope.themes').get_dropdown{previewer = false})<cr>", { desc = "Buffers" })
-keymap.set("n", "<leader>e", "<cmd>NvimTreeToggle<cr>", { desc = "Explorer" })
-keymap.set("n", "<leader>w", "<cmd>w!<CR>", { desc = "Save" })
-keymap.set("n", "<leader>q", "<cmd>q!<CR>", { desc = "Quit" })
-keymap.set("n", "<leader>c", "<cmd>Bdelete!<CR>", { desc = "Close Buffer" })
-keymap.set("n", "<leader>h", "<cmd>nohlsearch<CR>", { desc = "No Highlight" })
-keymap.set("n", "<leader>f", "<cmd>lua require('telescope.builtin').find_files(require('telescope.themes').get_dropdown{previewer = false})<cr>", { desc = "Find files" })
-keymap.set("n", "<leader>F", "<cmd>Telescope live_grep theme=ivy<cr>", { desc = "Find Text" })
-keymap.set("n", "<leader>P", "<cmd>lua require('telescope').extensions.projects.projects()<cr>", { desc = "Projects" })
+-- Alpha shortcut
+keymap.set("n", "<leader>a", "<cmd>Alpha<CR>", opts)
 
--- Git keymaps
-keymap.set("n", "<leader>gg", "<cmd>lua _LAZYGIT_TOGGLE()<CR>", { desc = "Lazygit" })
-keymap.set("n", "<leader>gj", "<cmd>lua require 'gitsigns'.next_hunk()<cr>", { desc = "Next Hunk" })
-keymap.set("n", "<leader>gk", "<cmd>lua require 'gitsigns'.prev_hunk()<cr>", { desc = "Prev Hunk" })
-keymap.set("n", "<leader>gl", "<cmd>lua require 'gitsigns'.blame_line()<cr>", { desc = "Blame" })
-keymap.set("n", "<leader>gp", "<cmd>lua require 'gitsigns'.preview_hunk()<cr>", { desc = "Preview Hunk" })
-keymap.set("n", "<leader>gr", "<cmd>lua require 'gitsigns'.reset_hunk()<cr>", { desc = "Reset Hunk" })
-keymap.set("n", "<leader>gR", "<cmd>lua require 'gitsigns'.reset_buffer()<cr>", { desc = "Reset Buffer" })
-keymap.set("n", "<leader>gs", "<cmd>lua require 'gitsigns'.stage_hunk()<cr>", { desc = "Stage Hunk" })
-keymap.set("n", "<leader>gu", "<cmd>lua require 'gitsigns'.undo_stage_hunk()<cr>", { desc = "Undo Stage Hunk" })
-keymap.set("n", "<leader>go", "<cmd>Telescope git_status<cr>", { desc = "Open changed file" })
-keymap.set("n", "<leader>gb", "<cmd>Telescope git_branches<cr>", { desc = "Checkout branch" })
-keymap.set("n", "<leader>gc", "<cmd>Telescope git_commits<cr>", { desc = "Checkout commit" })
-keymap.set("n", "<leader>gd", "<cmd>Gitsigns diffthis HEAD<cr>", { desc = "Diff" })
-
--- LSP keymaps
-keymap.set("n", "<leader>la", "<cmd>lua vim.lsp.buf.code_action()<cr>", { desc = "Code Action" })
-keymap.set("n", "<leader>ld", "<cmd>Telescope diagnostics bufnr=0<cr>", { desc = "Document Diagnostics" })
-keymap.set("n", "<leader>lw", "<cmd>Telescope diagnostics<cr>", { desc = "Workspace Diagnostics" })
-keymap.set("n", "<leader>lf", "<cmd>lua vim.lsp.buf.format{async=true}<cr>", { desc = "Format" })
-keymap.set("n", "<leader>li", "<cmd>LspInfo<cr>", { desc = "Info" })
-keymap.set("n", "<leader>lI", "<cmd>LspInstallInfo<cr>", { desc = "Installer Info" })
-keymap.set("n", "<leader>lj", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", { desc = "Next Diagnostic" })
-keymap.set("n", "<leader>lk", "<cmd>lua vim.lsp.diagnostic.goto_prev()<cr>", { desc = "Prev Diagnostic" })
-keymap.set("n", "<leader>ll", "<cmd>lua vim.lsp.codelens.run()<cr>", { desc = "CodeLens Action" })
-keymap.set("n", "<leader>lq", "<cmd>lua vim.diagnostic.setloclist()<cr>", { desc = "Quickfix" })
-keymap.set("n", "<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", { desc = "Rename" })
-keymap.set("n", "<leader>ls", "<cmd>Telescope lsp_document_symbols<cr>", { desc = "Document Symbols" })
-keymap.set("n", "<leader>lS", "<cmd>Telescope lsp_dynamic_workspace_symbols<cr>", { desc = "Workspace Symbols" })
-
--- Search keymaps
-keymap.set("n", "<leader>sb", "<cmd>Telescope git_branches<cr>", { desc = "Checkout branch" })
-keymap.set("n", "<leader>sc", "<cmd>Telescope colorscheme<cr>", { desc = "Colorscheme" })
-keymap.set("n", "<leader>sh", "<cmd>Telescope help_tags<cr>", { desc = "Find Help" })
-keymap.set("n", "<leader>sM", "<cmd>Telescope man_pages<cr>", { desc = "Man Pages" })
-keymap.set("n", "<leader>sr", "<cmd>Telescope oldfiles<cr>", { desc = "Open Recent File" })
-keymap.set("n", "<leader>sR", "<cmd>Telescope registers<cr>", { desc = "Registers" })
-keymap.set("n", "<leader>sk", "<cmd>Telescope keymaps<cr>", { desc = "Keymaps" })
-keymap.set("n", "<leader>sC", "<cmd>Telescope commands<cr>", { desc = "Commands" })
-
--- Terminal keymaps
-keymap.set("n", "<leader>tn", "<cmd>lua _NODE_TOGGLE()<cr>", { desc = "Node" })
-keymap.set("n", "<leader>tu", "<cmd>lua _NCDU_TOGGLE()<cr>", { desc = "NCDU" })
-keymap.set("n", "<leader>tt", "<cmd>lua _HTOP_TOGGLE()<cr>", { desc = "Htop" })
-keymap.set("n", "<leader>tp", "<cmd>lua _PYTHON_TOGGLE()<cr>", { desc = "Python" })
-keymap.set("n", "<leader>tf", "<cmd>ToggleTerm direction=float<cr>", { desc = "Float" })
-keymap.set("n", "<leader>th", "<cmd>ToggleTerm size=10 direction=horizontal<cr>", { desc = "Horizontal" })
-keymap.set("n", "<leader>tv", "<cmd>ToggleTerm size=80 direction=vertical<cr>", { desc = "Vertical" })
+-- Buffer dropdown
+keymap.set("n", "<leader>b", "<cmd>lua require('telescope.builtin').buffers(require('telescope.themes').get_dropdown{previewer = false})<CR>", opts)

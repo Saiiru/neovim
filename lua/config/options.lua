@@ -35,7 +35,7 @@ opt.mouse = "a"
 opt.linebreak = true
 opt.pumheight = 10
 opt.showmode = false
-opt.timeoutlen = 300
+opt.timeoutlen = 1000 -- time to wait for a mapped sequence to complete (in milliseconds)
 opt.undofile = true
 opt.numberwidth = 4
 opt.whichwrap = "bs<>[]hl"
@@ -87,3 +87,15 @@ vim.opt.shortmess:append "c"
 vim.opt.iskeyword:append "-"
 vim.opt.formatoptions:remove({ "c", "r", "o" })
 vim.opt.runtimepath:remove("/usr/share/vim/vimfiles")
+
+
+vim.g.netrw_banner = 0
+vim.opt.fillchars = vim.opt.fillchars + "eob: "
+vim.opt.fillchars:append {
+  stl = " ",
+}
+
+vim.opt.shortmess:append "c"
+
+vim.cmd "set whichwrap+=<,>,[,],h,l"
+vim.cmd [[set iskeyword+=-]]
