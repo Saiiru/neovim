@@ -33,7 +33,6 @@ return {
             ["sql"] = icons.kind.SQL,          -- Ícone para arquivos SQL
             -- Adicione mais extensões conforme necessário
         }
-
         -- Desabilitar netrw
         vim.g.loaded_netrw = 1
         vim.g.loaded_netrwPlugin = 1
@@ -41,6 +40,8 @@ return {
         nvim_tree.setup({
             hijack_netrw = true,
             auto_reload_on_write = true,
+            respect_buf_cwd = false,
+
             sync_root_with_cwd = true,
             filters = {
                 dotfiles = true,

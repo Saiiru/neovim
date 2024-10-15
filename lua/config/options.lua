@@ -1,5 +1,6 @@
 local cmd = vim.cmd
 local opt = vim.opt
+local g = vim.g
 
 -- General Options
 opt.number = true                    -- Show line numbers
@@ -105,4 +106,6 @@ vim.cmd [[
     autocmd Syntax * syntax clear ConstantNumeric
     autocmd Syntax * syntax clear CommentBlock
 ]]
-
+-- let g:nvim_tree_auto_close=1
+-- Workaround for deprecated nvim_tree_auto_close option
+g.nvim_tree_auto_close = 1
