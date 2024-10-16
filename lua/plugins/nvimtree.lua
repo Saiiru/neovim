@@ -44,7 +44,7 @@ return {
 
             sync_root_with_cwd = true,
             filters = {
-                dotfiles = true,
+                dotfiles = false,
             },
             view = {
                 side = "left",

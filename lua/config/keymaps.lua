@@ -128,7 +128,7 @@ keymap.set("n", "<leader>svwm", function() require("vim-with-me").StopVimWithMe(
 ---------------------
 -- Make File Executable -------------------
 
-keymap.set("n", "<leader>ch", ":!chmod +x %<CR>", opts)
+keymap.set("n", "<leader>ceh", ":!chmod +x %<CR>", opts)
 
 -- NvimTree keymaps
 keymap.set("n", "<leader>ee", "<cmd>NvimTreeToggle<CR>", opts)
