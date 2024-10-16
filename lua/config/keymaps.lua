@@ -71,18 +71,18 @@ keymap.set("n", "<leader>wt", ":lua MiniTrailspace.trim()<CR>", opts)
 
 -- Copilot suggestion
 keymap.set("i", "<C-l>", 'copilot#Accept("<CR>")', { expr = true, script = true })
-
--- Telescope bindings
-keymap.set("n", "<C-p>", "<cmd>Telescope find_files<CR>", opts)
-keymap.set("n", "<C-e>", "<cmd>Telescope live_grep<CR>", opts)
-keymap.set("n", "<C-b>", "<cmd>Telescope buffers<CR>", opts)
-keymap.set("n", "<leader>bf", "<cmd>Telescope current_buffer_fuzzy_find<CR>", opts)
-keymap.set("n", "<leader>ds", "<cmd>Telescope lsp_document_symbols<CR>", opts)
-keymap.set("n", "<leader>fh", "<cmd>Telescope help_tags<CR>", opts)
-keymap.set("n", "<leader>ft", "<cmd>Telescope git_files<CR>", opts)
-keymap.set("n", "<leader>ts", "<cmd>Telescope tagstack<CR>", opts)
-keymap.set("n", "<leader>mk", "<cmd>Telescope marks<CR>", opts)
-
+--
+-- -- Telescope bindings
+-- keymap.set("n", "<C-p>", "<cmd>Telescope find_files<CR>", opts)
+-- keymap.set("n", "<C-e>", "<cmd>Telescope live_grep<CR>", opts)
+-- keymap.set("n", "<C-b>", "<cmd>Telescope buffers<CR>", opts)
+-- keymap.set("n", "<leader>bf", "<cmd>Telescope current_buffer_fuzzy_find<CR>", opts)
+-- keymap.set("n", "<leader>ds", "<cmd>Telescope lsp_document_symbols<CR>", opts)
+-- keymap.set("n", "<leader>fh", "<cmd>Telescope help_tags<CR>", opts)
+-- keymap.set("n", "<leader>ft", "<cmd>Telescope git_files<CR>", opts)
+-- keymap.set("n", "<leader>ts", "<cmd>Telescope tagstack<CR>", opts)
+-- keymap.set("n", "<leader>mk", "<cmd>Telescope marks<CR>", opts)
+--
 ---------------------
 -- Undo Management -------------------
 
@@ -139,5 +139,4 @@ keymap.set("n", "<leader>er", "<cmd>NvimTreeRefresh<CR>", opts)
 -- Alpha shortcut
 keymap.set("n", "<leader>a", "<cmd>Alpha<CR>", opts)
 
--- Buffer dropdown
-keymap.set("n", "<leader>b", "<cmd>lua require('telescope.builtin').buffers(require('telescope.themes').get_dropdown{previewer = false})<CR>", opts)
+
