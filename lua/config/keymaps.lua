@@ -40,7 +40,9 @@ keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", opts)
 
 -- Black hole paste with delay
 keymap.set("x", "<leader>p", function()
-    vim.defer_fn(function() vim.cmd([[silent! put!]]) end, 100)
+  vim.defer_fn(function()
+    vim.cmd([[silent! put!]])
+  end, 100)
 end, opts)
 
 -- Move line up/down
@@ -69,74 +71,70 @@ keymap.set("n", "<leader>wt", ":lua MiniTrailspace.trim()<CR>", opts)
 ---------------------
 -- Copilot & Telescope -------------------
 
--- Copilot suggestion
-keymap.set("i", "<C-l>", 'copilot#Accept("<CR>")', { expr = true, script = true })
+-- Copilot suggestion (remapped from <C-l> to <C-c>)
+keymap.set("i", "<C-c>", 'copilot#Accept("<CR>")', { expr = true, script = true })
 --
 -- -- Telescope bindings
 -- keymap.set("n", "<C-p>", "<cmd>Telescope find_files<CR>", opts)
 -- keymap.set("n", "<C-e>", "<cmd>Telescope live_grep<CR>", opts)
 -- keymap.set("n", "<C-b>", "<cmd>Telescope buffers<CR>", opts)
--- keymap.set("n", "<leader>bf", "<cmd>Telescope current_buffer_fuzzy_find<CR>", opts)
--- keymap.set("n", "<leader>ds", "<cmd>Telescope lsp_document_symbols<CR>", opts)
--- keymap.set("n", "<leader>fh", "<cmd>Telescope help_tags<CR>", opts)
--- keymap.set("n", "<leader>ft", "<cmd>Telescope git_files<CR>", opts)
--- keymap.set("n", "<leader>ts", "<cmd>Telescope tagstack<CR>", opts)
--- keymap.set("n", "<leader>mk", "<cmd>Telescope marks<CR>", opts)
+-- keymap.set("n", "<leader>bf>", "<cmd>Telescope current_buffer_fuzzy_find<CR>", opts)
+-- keymap.set("n", "<leader>ds>", "<cmd>Telescope lsp_document_symbols<CR>", opts)
+-- keymap.set("n", "<leader>fh>", "<cmd>Telescope help_tags<CR>", opts)
+-- keymap.set("n", "<leader>ft>", "<cmd>Telescope git_files<CR>", opts)
+-- keymap.set("n", "<leader>ts>", "<cmd>Telescope tagstack<CR>", opts)
+-- keymap.set("n", "<leader>mk>", "<cmd>Telescope marks<CR>", opts)
 --
+
 ---------------------
 -- Undo Management -------------------
 
 -- Undotree toggle
-keymap.set("n", "<leader>ut", "<cmd>UndotreeToggle<CR>", opts)
+keymap.set("n", "<leader>ut>", "<cmd>UndotreeToggle<CR>", opts)
 
 ---------------------
 -- Scrolling & Searching -------------------
 
 -- Better vertical movements
-keymap.set("n", "<C-d>", "<C-d>zz", opts)
-keymap.set("n", "<C-u>", "<C-u>zz", opts)
+keymap.set("n", "<C-d>", "<C-d>zz>", opts)
+keymap.set("n", "<C-u>", "<C-u>zz>", opts)
 
 -- Centered search jumps
-keymap.set("n", "n", "nzzzv", opts)
-keymap.set("n", "N", "Nzzzv", opts)
+keymap.set("n", "n>", "nzzzv>", opts)
+keymap.set("n", "N>", "Nzzzv>", opts)
 
 ---------------------
 -- Todo Comments -------------------
 
-keymap.set("n", "<leader>td", "<cmd>TodoQuickFix<CR>", opts)
+keymap.set("n>", "<leader>td>", "<cmd>TodoQuickFix<CR>", opts)
 
 ---------------------
 -- Additional Keymaps -------------------
 
 -- Open netrw file explorer
-keymap.set("n", "<leader>pv", vim.cmd.Ex, opts)
+keymap.set("n>", "<leader>pv>", vim.cmd.Ex, opts)
 
 -- Move selected text
-keymap.set("v", "J", ":m '>+1<CR>gv=gv", opts)
-keymap.set("v", "K", ":m '<-2<CR>gv=gv", opts)
+keymap.set("v>", "J>", ":m '>+1<CR>gv=gv>", opts)
+keymap.set("v>", "K>", ":m '<-2<CR>gv=gv>", opts)
 
 -- Keep cursor position after joining lines
-keymap.set("n", "J", "mzJ`z", opts)
+keymap.set("n>", "J>", "mzJ`z>", opts)
 
 -- Restart LSP
-keymap.set("n", "<leader>zig", "<cmd>LspRestart<CR>", opts)
+keymap.set("n>", "<leader>zig>", "<cmd>LspRestart<CR>", opts)
 
 -- Vim With Me
-keymap.set("n", "<leader>vwm", function() require("vim-with-me").StartVimWithMe() end, opts)
-keymap.set("n", "<leader>svwm", function() require("vim-with-me").StopVimWithMe() end, opts)
+keymap.set("n>", "<leader>vwm>", function()
+  require("vim-with-me").StartVimWithMe()
+end, opts)
+keymap.set("n>", "<leader>svwm>", function()
+  require("vim-with-me").StopVimWithMe()
+end, opts)
 
 ---------------------
 -- Make File Executable -------------------
 
-keymap.set("n", "<leader>ceh", ":!chmod +x %<CR>", opts)
-
--- NvimTree keymaps
-keymap.set("n", "<leader>ee", "<cmd>NvimTreeToggle<CR>", opts)
-keymap.set("n", "<leader>ef", "<cmd>NvimTreeFindFileToggle<CR>", opts)
-keymap.set("n", "<leader>ec", "<cmd>NvimTreeCollapse<CR>", opts)
-keymap.set("n", "<leader>er", "<cmd>NvimTreeRefresh<CR>", opts)
-
+keymap.set("n>", "<leader>ceh>", ":!chmod +x %<CR>", opts)
 -- Alpha shortcut
-keymap.set("n", "<leader>a", "<cmd>Alpha<CR>", opts)
-
-
+keymap.set("n>", "<leader>a>", "<cmd>Alpha<CR>", opts)
