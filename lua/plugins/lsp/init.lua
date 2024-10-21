@@ -3,7 +3,6 @@ return {
     {
         "williamboman/mason.nvim",
         opts = function(_, opts)
-            -- Garante que opts seja uma tabela, mesmo que esteja nil
             opts = opts or {}
             opts.ensure_installed = opts.ensure_installed or {}
 
@@ -16,7 +15,7 @@ return {
                 "css-lsp",
             })
 
-            return opts  -- Retorna a tabela modificada
+            return opts
         end,
     },
 
@@ -108,7 +107,12 @@ return {
                     },
                 },
             },
-            setup = {},
+            -- Adiciona a configuração de setup para cada servidor
+            setup = function(server_name)
+                require("lspconfig")[server_name].setup({
+                    capabilities = require("cmp_nvim_lsp").default_capabilities(),
+                })
+            end,
         },
     },
 
@@ -117,11 +121,11 @@ return {
         "nvim-cmp",
         dependencies = { "hrsh7th/cmp-emoji" },
         opts = function(_, opts)
-            opts = opts or {}  -- Garante que opts não seja nil
+            opts = opts or {}
             opts.sources = opts.sources or {}
             table.insert(opts.sources, { name = "emoji" })
 
-            return opts  -- Retorna a tabela modificada
+            return opts
         end,
     },
 }
