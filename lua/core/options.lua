@@ -44,7 +44,7 @@ vim.opt.splitright = true                 -- Splitting a new window at the right
 vim.opt.tabstop = 2                       -- Number of spaces in a tab.
 vim.opt.termguicolors = true              -- Enable 24-bit RGB color in the TUI.
 vim.opt.undofile = true                   -- Enable persistent undo between sessions.
-vim.opt.updatetime = 300                  -- Length of time to wait before triggering the plugin.
+vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"  -- Undo directory
 vim.opt.wrap = false                      -- Disable wrapping of lines longer than the width of the window.
 
 -- Configure tabs based on file types
@@ -69,16 +69,9 @@ vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 -- Additional options
 vim.opt.hlsearch = false                 -- Disable highlight on search
 vim.opt.incsearch = true                 -- Incremental search
-vim.opt.termguicolors = true            -- Enable true color support
 
--- Save undo history
-vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"  -- Undo directory
-vim.opt.undofile = true                  -- Enable persistent undo
-
--- Enable line numbers
-vim.opt.number = true                    -- Show line numbers
-vim.opt.relativenumber = true            -- Show relative line numbers
-vim.opt.cursorline = true                -- Highlight the line where the cursor is
+-- Ensure that comments are treated well
+vim.opt.formatoptions:append { "r" }     -- Add asterisks in block comments
 
 -- Sync clipboard between OS and Neovim
 vim.schedule(function()
@@ -94,6 +87,6 @@ vim.opt.scrolloff = 10                   -- Minimal number of screen lines to ke
 vim.opt.signcolumn = 'yes'               -- Keep signcolumn on by default
 vim.opt.updatetime = 250                  -- Decrease update time
 
--- Ensure that comments are treated well
-vim.opt.formatoptions:append { "r" }     -- Add asterisks in block comments
+-- Disable swap files
+vim.opt.swapfile = false  -- Disable swap files
 

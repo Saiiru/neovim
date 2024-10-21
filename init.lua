@@ -29,7 +29,6 @@ local opts = {
         notify = false,
     },
 }
-
 -- Load the options from the core/options.lua file
 require("core.options")
 
