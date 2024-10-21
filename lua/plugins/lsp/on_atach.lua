@@ -1,23 +1,19 @@
--- Função on_attach expandida com keymaps e lógica específica para diferentes LSPs
 local M = {}
 
 M.on_attach = function(client, bufnr)
     local opts = { noremap = true, silent = true }
     local keymap = vim.api.nvim_buf_set_keymap
 
-    -- Desativar formatação se for TSServer ou Lua LS, pois vamos usar outros formatadores
     if client.name == "ts_ls" or client.name == "lua_ls" then
         client.server_capabilities.document_formatting = false
     end
 
-    -- Configurações específicas para o TypeScript
     if client.name == "ts_ls" then
         keymap(bufnr, "n", "gd", "<cmd>TypescriptGoToSourceDefinition<CR>", opts)
     else
         keymap(bufnr, "n", "gd", "<cmd>Trouble lsp_definitions<CR>", opts)
     end
 
-    -- Keymaps gerais para todos os LSPs
     keymap(bufnr, "n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", opts)
     keymap(bufnr, "n", "gt", "<cmd>Trouble lsp_type_definitions<CR>", opts)
     keymap(bufnr, "n", "gi", "<cmd>Trouble lsp_implementations<CR>", opts)
@@ -30,7 +26,6 @@ M.on_attach = function(client, bufnr)
     keymap(bufnr, "n", "[d", "<cmd>lua vim.diagnostic.goto_prev()<CR>", opts)
     keymap(bufnr, "n", "d]", "<cmd>lua vim.diagnostic.goto_next()<CR>", opts)
 
-    -- Keymaps adicionais usando <Space> como prefixo, para integração com Telescope
     vim.keymap.set("n", "<leader>ch", vim.lsp.buf.hover, { desc = "[C]ode [H]over Documentation", buffer = bufnr })
     vim.keymap.set("n", "<leader>cd", vim.lsp.buf.definition, { desc = "[C]ode Goto [D]efinition", buffer = bufnr })
     vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "[C]ode [A]ctions", buffer = bufnr })
@@ -41,4 +36,3 @@ M.on_attach = function(client, bufnr)
 end
 
 return M
-
