@@ -1,25 +1,58 @@
 return {
-    -- tools
+    -- Mason setup
     {
         "williamboman/mason.nvim",
-        opts = function(_, opts)
-            opts = opts or {}
-            opts.ensure_installed = opts.ensure_installed or {}
-
-            vim.list_extend(opts.ensure_installed, {
-                "luacheck",
-                "shellcheck",
-                "shfmt",
-                "tailwindcss-language-server",
-                "typescript-language-server",
-                "css-lsp",
-            })
-
-            return opts
-        end,
+        config = function()
+            require("mason").setup()
+        end   
     },
 
-    -- lsp servers
+    -- Mason LSP Config
+    {
+        "williamboman/mason-lspconfig.nvim",
+        config = function()
+            require("mason-lspconfig").setup({
+                ensure_installed = { 
+                    "lua_ls", 
+                    "ts_ls", 
+                    "jdtls",  
+                    "pylsp", 
+                    "bashls", 
+                    "gopls", 
+                    "dockerls", 
+                    "html", 
+                    "cssls", 
+                    "jsonls", 
+                    "eslint", 
+                    "tailwindcss", 
+                    "emmet_ls", 
+                    "solargraph", 
+                    "kotlin_language_server", 
+                    "phpactor",
+                },
+            })
+        end
+    },
+
+    -- Mason DAP Config
+    {
+        "jay-babu/mason-nvim-dap.nvim",
+        config = function()
+            require("mason-nvim-dap").setup({
+                ensure_installed = { "java-debug-adapter", "java-test", "python-debug-adapter", "js-debug-adapter", "codelldb" }
+            })
+        end
+    },
+
+    -- Java language server utility
+    {
+        "mfussenegger/nvim-jdtls",
+        dependencies = {
+            "mfussenegger/nvim-dap",
+        }
+    },
+
+    -- LSP Config
     {
         "neovim/nvim-lspconfig",
         opts = {
@@ -31,7 +64,7 @@ return {
                         return require("lspconfig.util").root_pattern(".git")(...)
                     end,
                 },
-                tsserver = {
+                ts_ls = {
                     root_dir = function(...)
                         return require("lspconfig.util").root_pattern(".git")(...)
                     end,
@@ -107,13 +140,25 @@ return {
                     },
                 },
             },
-            -- Adiciona a configuração de setup para cada servidor
+            -- Setup para cada servidor
             setup = function(server_name)
                 require("lspconfig")[server_name].setup({
                     capabilities = require("cmp_nvim_lsp").default_capabilities(),
                 })
             end,
         },
+        config = function()
+            local lspconfig = require("lspconfig")
+
+            -- Mapeamento de teclas para ações LSP
+            vim.keymap.set("n", "<leader>ch", vim.lsp.buf.hover, { desc = "[C]ode [H]over Documentation" })
+            vim.keymap.set("n", "<leader>cd", vim.lsp.buf.definition, { desc = "[C]ode Goto [D]efinition" })
+            vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "[C]ode [A]ctions" })
+            vim.keymap.set("n", "<leader>cr", require("telescope.builtin").lsp_references, { desc = "[C]ode Goto [R]eferences" })
+            vim.keymap.set("n", "<leader>ci", require("telescope.builtin").lsp_implementations, { desc = "[C]ode Goto [I]mplementations" })
+            vim.keymap.set("n", "<leader>cR", vim.lsp.buf.rename, { desc = "[C]ode [R]ename" })
+            vim.keymap.set("n", "<leader>cD", vim.lsp.buf.declaration, { desc = "[C]ode Goto [D]eclaration" })
+        end
     },
 
     -- Completion source for emoji
@@ -124,7 +169,6 @@ return {
             opts = opts or {}
             opts.sources = opts.sources or {}
             table.insert(opts.sources, { name = "emoji" })
-
             return opts
         end,
     },

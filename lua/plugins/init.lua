@@ -16,10 +16,8 @@ return {
         })
     end,
 },
- {
-        "b0o/schemastore.nvim",
-        config = function()
-            require("schemastore").setup()
-        end
-    },
+{
+    "b0o/schemastore.nvim",
+
+}
 }
