@@ -15,6 +15,24 @@ return {
 		-- https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim
 		{ "WhoIsSethDaniel/mason-tool-installer.nvim" },
 
+		"williamboman/mason.nvim",
+		"williamboman/mason-lspconfig.nvim",
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
+		"j-hui/fidget.nvim",
+		"folke/neodev.nvim",
+		"ray-x/lsp_signature.nvim",
+		"hrsh7th/cmp-emoji",
+		"hrsh7th/cmp-nvim-lua",
+		"smjonas/inc-rename.nvim",
+		"onsails/lspkind.nvim",
+		"jay-babu/mason-nvim-dap.nvim",
+		"mfussenegger/nvim-dap",
+		"mfussenegger/nvim-jdtls",
+		"kosayoda/nvim-lightbulb",
+		"SmiteshP/nvim-navic",
+		"folke/todo-comments.nvim",
+		"folke/trouble.nvim",
+		"utilyre/barbecue.nvim",
 		-- Useful status updates for LSP
 		-- https://github.com/j-hui/fidget.nvim
 		{ "j-hui/fidget.nvim", opts = {} },
