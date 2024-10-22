@@ -31,6 +31,46 @@ return {
                     "phpactor",
                 },
             })
+      
+    -- Diagnostic and handlers configuration
+    local signs = {
+        { name = "DiagnosticSignError", text = "" },
+        { name = "DiagnosticSignWarn", text = "" },
+        { name = "DiagnosticSignHint", text = "" },
+        { name = "DiagnosticSignInfo", text = "" },
+    }
+
+    for _, sign in ipairs(signs) do
+        vim.fn.sign_define(sign.name, { texthl = sign.name, text = sign.text, numhl = "" })
+    end
+
+    local config = {
+        virtual_text = true,
+        signs = {
+            active = signs,
+        },
+        update_in_insert = true,
+        underline = true,
+        severity_sort = true,
+        float = {
+            focusable = false,
+            style = "minimal",
+            border = "rounded",
+            source = "always",
+            header = "",
+            prefix = "",
+        },
+    }
+
+    vim.diagnostic.config(config)
+
+    vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+        border = "rounded",
+    })
+
+    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+        border = "rounded",
+    })
         end,
     },
 
@@ -180,87 +220,7 @@ return {
         end
     },
 
-    -- Null-ls for linting and formatting
-    {
-        "jose-elias-alvarez/null-ls.nvim",
-        dependencies = { "jay-babu/mason-null-ls.nvim" },
-        event = { "BufReadPre", "BufNewFile" },
-        config = function()
-            local null_ls = require("null-ls")
-            local mason_null_ls = require("mason-null-ls")
-            mason_null_ls.setup({
-                ensure_installed = {
-                    "stylua",
-                    "prettier",
-                    "black",
-                    "gofumpt",
-                    "shfmt",
-                    "eslint_d",
-                    "flake8",
-                    "golangci_lint",
-                    "shellcheck",
-                    "phpcs",
-                },
-                automatic_installation = true,
-            })
-            mason_null_ls.setup_handlers({
-                function(source_name, methods)
-                    require("mason-null-ls.automatic_setup")(source_name, methods)
-                end,
-                stylua = function()
-                    null_ls.register(null_ls.builtins.formatting.stylua)
-                end,
-                prettier = function()
-                    null_ls.register(null_ls.builtins.formatting.prettier.with({
-                        filetypes = { "javascript", "typescript", "css", "html", "json", "yaml", "markdown" },
-                    }))
-                end,
-                black = function()
-                    null_ls.register(null_ls.builtins.formatting.black)
-                end,
-                gofumpt = function()
-                    null_ls.register(null_ls.builtins.formatting.gofumpt)
-                end,
-                shfmt = function()
-                    null_ls.register(null_ls.builtins.formatting.shfmt)
-                end,
-                eslint_d = function()
-                    null_ls.register(null_ls.builtins.diagnostics.eslint_d)
-                    null_ls.register(null_ls.builtins.code_actions.eslint_d)
-                end,
-                flake8 = function()
-                    null_ls.register(null_ls.builtins.diagnostics.flake8)
-                end,
-                golangci_lint = function()
-                    null_ls.register(null_ls.builtins.diagnostics.golangci_lint)
-                end,
-                shellcheck = function()
-                    null_ls.register(null_ls.builtins.diagnostics.shellcheck)
-                    null_ls.register(null_ls.builtins.code_actions.shellcheck)
-                end,
-                phpcs = function()
-                    null_ls.register(null_ls.builtins.diagnostics.phpcs)
-                end,
-            })
-            local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
-            null_ls.setup({
-                on_attach = function(client, bufnr)
-                    if client.supports_method("textDocument/formatting") then
-                        vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
-                        vim.api.nvim_create_autocmd("BufWritePre", {
-                            group = augroup,
-                            buffer = bufnr,
-                            callback = function()
-                                vim.lsp.buf.format({ bufnr = bufnr })
-                            end,
-                        })
-                    end
-                end,
-            })
-        end,
-    },
-
-    -- Trouble for diagnostics and quickfix
+       -- Trouble for diagnostics and quickfix
     {
         "folke/trouble.nvim",
         dependencies = { "nvim-tree/nvim-web-devicons", "folke/todo-comments.nvim" },
