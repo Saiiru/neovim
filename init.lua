@@ -2,7 +2,7 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
 -- Check to see if lazy itself has been cloned, if not clone it into the lazy.nvim directory
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
+ if not (vim.uv or vim.loop).fs_stat(lazypath) then
     vim.fn.system({
         "git",
         "clone",

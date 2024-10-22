@@ -1,119 +1,87 @@
+-- Auto-completion / Snippets
 return {
-    {
-        "hrsh7th/nvim-cmp",
-        dependencies = {
-            "hrsh7th/cmp-nvim-lsp",
-            "hrsh7th/cmp-nvim-lua",
-            "hrsh7th/cmp-path",
-            "hrsh7th/cmp-cmdline",
-            "hrsh7th/cmp-buffer",
-            "L3MON4D3/LuaSnip",
-            "saadparwaiz1/cmp_luasnip",
-            "onsails/lspkind.nvim",
-            {
-                "tzachar/cmp-tabnine",
-                build = "./install.sh",
-                dependencies = "hrsh7th/nvim-cmp",
-            },
-            "github/copilot.vim",
-        },
-        config = function()
-            local ls = require("luasnip")
-            local cmp = require("cmp")
-            local lspkind = require("lspkind")
+  -- https://github.com/hrsh7th/nvim-cmp
+  'hrsh7th/nvim-cmp',
+  event = 'InsertEnter',
+  dependencies = {
+    -- Snippet engine & associated nvim-cmp source
+    -- https://github.com/L3MON4D3/LuaSnip
+    'L3MON4D3/LuaSnip',
+    -- https://github.com/saadparwaiz1/cmp_luasnip
+    'saadparwaiz1/cmp_luasnip',
 
-            -- Mapeamento de teclas para navegar pelos snippets
-            vim.keymap.set({ "i", "s" }, "<C-L>", function()
-                ls.jump(1)
-            end, { silent = true })
-            vim.keymap.set({ "i", "s" }, "<C-J>", function()
-                ls.jump(-1)
-            end, { silent = true })
+    -- LSP completion capabilities
+    -- https://github.com/hrsh7th/cmp-nvim-lsp
+    'hrsh7th/cmp-nvim-lsp',
 
-            -- Configuração do nvim-cmp
-            cmp.setup({
-                snippet = {
-                    expand = function(args)
-                        ls.lsp_expand(args.body) -- Para usuários de `luasnip`.
-                    end,
-                },
-                window = {
-                    completion = cmp.config.window.bordered(),
-                    documentation = cmp.config.window.bordered(),
-                },
-                mapping = cmp.mapping.preset.insert({
-                    ["<C-b>"] = cmp.mapping.scroll_docs(-4),
-                    ["<C-f>"] = cmp.mapping.scroll_docs(4),
-                    ["<CR>"] = cmp.mapping.confirm({ select = true }),
-                    ["<Tab>"] = cmp.mapping.select_next_item(),
-                    ["<S-Tab>"] = cmp.mapping.select_prev_item(),
-                }),
-                sources = cmp.config.sources({
-                    { name = "nvim_lsp" },
-                    { name = "luasnip" },
-                    { name = "nvim_lua" },
-                    { name = "buffer" },
-                    { name = "tabnine" }, -- Adicionado Tabnine como fonte
-                    { name = "copilot" }, -- Adicionado Copilot como fonte
-                }),
-                enabled = function()
-                    -- Desabilitar conclusão em comentários
-                    local context = require("cmp.config.context")
+    -- Additional user-friendly snippets
+    -- https://github.com/rafamadriz/friendly-snippets
+    'rafamadriz/friendly-snippets',
+    -- https://github.com/hrsh7th/cmp-buffer
+    'hrsh7th/cmp-buffer',
+    -- https://github.com/hrsh7th/cmp-path
+    'hrsh7th/cmp-path',
+    -- https://github.com/hrsh7th/cmp-cmdline
+    'hrsh7th/cmp-cmdline',
+  },
+  config = function()
+    local cmp = require('cmp')
+    local luasnip = require('luasnip')
+    require('luasnip.loaders.from_vscode').lazy_load()
+    luasnip.config.setup({})
 
-                    -- Manter conclusão no modo de comando ativada
-                    if vim.api.nvim_get_mode().mode == "c" then
-                        return true
-                    else
-                        return not context.in_treesitter_capture("comment")
-                            and not context.in_syntax_group("Comment")
-                    end
-                end,
-                formatting = {
-                    format = lspkind.cmp_format({
-                        mode = "symbol_text",
-                        maxwidth = 50,
-                        ellipsis_char = "...",
-                        menu = {
-                            buffer = "[Buffer]",
-                            nvim_lsp = "[LSP]",
-                            nvim_lua = "[Lua]",
-                            luasnip = "[LuaSnip]",
-                            tabnine = "[TabNine]", -- Adicionado ao menu
-                            copilot = "[Copilot]", -- Adicionado ao menu
-                            latex_symbols = "[Latex]",
-                        },
-                        before = function(entry, vim_item)
-                            vim_item = require("tailwindcss-colorizer-cmp").formatter(entry, vim_item)
-
-                            -- Adicionando ícones personalizados para TabNine e Copilot
-                            if entry.source.name == "tabnine" then
-                                vim_item.kind = lspkind.symbolic("") -- Ícone do TabNine
-                            elseif entry.source.name == "copilot" then
-                                vim_item.kind = lspkind.symbolic("") -- Ícone do Copilot
-                            end
-
-                            return vim_item
-                        end,
-                    }),
-                },
-            })
-
-            -- Configuração para a linha de comando (cmdline)
-            cmp.setup.cmdline({ "/", "?" }, {
-                mapping = cmp.mapping.preset.cmdline(),
-                sources = {
-                    { name = "buffer" },
-                },
-            })
-
-            cmp.setup.cmdline(":", {
-                mapping = cmp.mapping.preset.cmdline(),
-                sources = cmp.config.sources(
-                    { { name = "path" } },
-                    { { name = "cmdline" } }
-                ),
-            })
+    cmp.setup({
+      snippet = {
+        expand = function(args)
+          luasnip.lsp_expand(args.body)
         end,
-    },
-}
+      },
+      completion = {
+        completeopt = 'menu,menuone,noinsert',
+      },
+      mapping = cmp.mapping.preset.insert {
+        ['<C-j>'] = cmp.mapping.select_next_item(), -- next suggestion
+        ['<C-k>'] = cmp.mapping.select_prev_item(), -- previous suggestion
+        ['<C-b>'] = cmp.mapping.scroll_docs(-4), -- scroll backward
+        ['<C-f>'] = cmp.mapping.scroll_docs(4), -- scroll forward
+        ['<C-Space>'] = cmp.mapping.complete {}, -- show completion suggestions
+        ['<CR>'] = cmp.mapping.confirm {
+          behavior = cmp.ConfirmBehavior.Replace,
+          select = true,
+        },
+	-- Tab through suggestions or when a snippet is active, tab to the next argument
+        ['<Tab>'] = cmp.mapping(function(fallback)
+          if cmp.visible() then
+            cmp.select_next_item()
+          elseif luasnip.expand_or_locally_jumpable() then
+            luasnip.expand_or_jump()
+          else
+            fallback()
+          end
+        end, { 'i', 's' }),
+	-- Tab backwards through suggestions or when a snippet is active, tab to the next argument
+        ['<S-Tab>'] = cmp.mapping(function(fallback)
+          if cmp.visible() then
+            cmp.select_prev_item()
+          elseif luasnip.locally_jumpable(-1) then
+            luasnip.jump(-1)
+          else
+            fallback()
+          end
+        end, { 'i', 's' }),
+      },
+      sources = cmp.config.sources({
+        { name = "nvim_lsp" }, -- lsp 
+        { name = "luasnip" }, -- snippets
+        { name = "buffer" }, -- text within current buffer
+        { name = "path" }, -- file system paths
+      }),
+      window = {
+        -- Add borders to completions popups
+        completion = cmp.config.window.bordered(),
+        documentation = cmp.config.window.bordered(),
+      },
+    })
+  end,
+ }
 
