@@ -132,29 +132,28 @@ return {
         telescope.load_extension("colors")
         telescope.load_extension("noice")
     end,
-    keys = {
-        { "<C-g><C-e>", "<cmd>Telescope git_files<CR>", desc = "[F]uzzy find git files" },
-        { "<C-g><C-s>", "<cmd>Telescope live_grep<CR>", desc = "[L]ive grep" },
-        { "<C-g><C-b>", "<cmd>Telescope buffers<CR>", desc = "[L]ist buffers" },
-        { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "[F]uzzy find files in cwd" },
-        { "<leader>fr", "<cmd>Telescope oldfiles<cr>", desc = "[F]uzzy find recent files" },
-        { "<leader>fs", "<cmd>Telescope live_grep<cr>", desc = "[F]ind string in cwd" },
-        { "<leader>fc", "<cmd>Telescope grep_string<cr>", desc = "[F]ind string under cursor in cwd" },
-        { "<leader>fb", "<cmd>Telescope file_browser<cr>", desc = "[O]pen file browser" },
-        { "<leader>fma", "<cmd>Telescope media_files<cr>", desc = "[B]rowse media files" },
-        { "<leader>fi", "<cmd>AdvancedGitSearch<cr>", desc = "[A]dvanced Git Search" },
-        { "<leader>fo", "<cmd>Telescope oldfiles<cr>", desc = "[F]ind Old Files" },
-        { "<leader>fw", "<cmd>Telescope grep_string<cr>", desc = "[F]ind Word under Cursor" },
-        { "<leader>gc", "<cmd>Telescope git_commits<cr>", desc = "[S]earch Git Commits" },
-        { "<leader>gb", "<cmd>Telescope git_bcommits<cr>", desc = "[S]earch Git Commits for Buffer" },
-        { "<leader>fk", "<cmd>Telescope keymaps<cr>", desc = "[F]ind Keymaps" },
-        { "<leader>/", function()
-            require("telescope.builtin").current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
-                winblend = 10,
-                previewer = false,
-                layout_config = { width = 0.7 },
-            }))
-        end, desc = "[/] Fuzzily search in current buffer" },
-    },
-    cmd = "Telescope",
+   keys = {
+    { "<C-g><C-e>", "<cmd>Telescope git_files<CR>", desc = "[F]uzzy find git files" },
+    { "<C-g><C-s>", "<cmd>Telescope live_grep<CR>", desc = "[L]ive grep" },
+    { "<C-g><C-b>", "<cmd>Telescope buffers<CR>", desc = "[L]ist buffers" },
+    { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "[F]uzzy find files in cwd" },
+    { "<leader>fr", "<cmd>Telescope oldfiles<cr>", desc = "[F]ind Old Files" },
+    { "<leader>fs", "<cmd>Telescope live_grep<cr>", desc = "[F]ind string in cwd" },
+    { "<leader>fc", "<cmd>Telescope grep_string<cr>", desc = "[F]ind string under cursor in cwd" },
+    { "<leader>fb", "<cmd>Telescope file_browser<cr>", desc = "[O]pen file browser" },
+    { "<leader>fma", "<cmd>Telescope media_files<cr>", desc = "[B]rowse media files" },
+    { "<leader>fi", "<cmd>AdvancedGitSearch<cr>", desc = "[A]dvanced Git Search" },
+    { "<leader>fw", "<cmd>Telescope grep_string<cr>", desc = "[F]ind Word under Cursor" },
+    { "<leader>gc", "<cmd>Telescope git_commits<cr>", desc = "[S]earch Git Commits" },
+    { "<leader>gb", "<cmd>Telescope git_bcommits<cr>", desc = "[S]earch Git Commits for Buffer" },
+    { "<leader>fk", "<cmd>Telescope keymaps<cr>", desc = "[F]ind Keymaps" },
+    { "<leader>/", function()
+        require("telescope.builtin").current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
+            winblend = 10,
+            previewer = false,
+            layout_config = { width = 0.7 },
+        }))
+    end, desc = "[/] Fuzzily search in current buffer" },
+},
+  cmd = "Telescope",
 }
