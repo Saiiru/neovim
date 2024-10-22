@@ -69,3 +69,5 @@ map("n", "<leader>ts", "<cmd>lua require('neotest').summary.toggle()<CR>", { des
 -- neotree
 map("n", "<C-e>", "<cmd>Neotree toggle<CR>", { desc = "[N]eoTree toggle" })
 
+-- ooil 
+map("n", "-", "<cmd>Oil --float<CR>", { desc = "[O]pen parent directory" })
