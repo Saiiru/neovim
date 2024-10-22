@@ -34,7 +34,7 @@ map("n", "<leader>w", "<cmd>bp|bd #<CR>", { desc = "[C]lose buffer but keep spli
 
 -- Operações de Edição e Navegação
 map("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "[R]eplace word under cursor" })
-map("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true, desc = "[M]ake file executable" })
+map("n", "<leader>xx", "<cmd>!chmod +x %<CR>", { silent = true, desc = "[M]ake file executable" })
 map("n", "Y", "y$", { desc = "[M]ake Y yank until end of line" })
 map("n", "==", "gg<S-v>G", { desc = "[S]elect all" })
 map("n", "<leader>y", '"+y', { desc = "[C]opy to system clipboard" })
@@ -55,7 +55,7 @@ map("v", "K", ":m '<-2<CR>gv=gv", { desc = "[M]ove Line Up" })
 map("v", "<leader>p", '"_dP', { desc = "[P]aste without overwriting register" })
 
 -- Gerenciamento de Quickfix e Location List
-map("n", "<leader>h", "<cmd>cnext<CR>zz", { desc = "[F]orward qfixlist" })
+map("n", "<leader>n", "<cmd>cnext<CR>zz", { desc = "[F]orward qfixlist" })
 map("n", "<leader>;", "<cmd>cprev<CR>zz", { desc = "[B]ackward qfixlist" })
 map("n", "<leader>k", "<cmd>lnext<CR>zz", { desc = "[F]orward location list" })
 map("n", "<leader>j", "<cmd>lprev<CR>zz", { desc = "[B]ackward location list" })
