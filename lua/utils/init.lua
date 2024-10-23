@@ -153,4 +153,11 @@ M.is_plugin_loaded = function(plugin_name)
 	return plugin and plugin.loaded
 end
 
+-- Function to set key mappings with descriptions
+function M.map(mode, keys, action, desc, opts)
+	opts = opts or {}
+	opts.desc = desc
+	vim.keymap.set(mode, keys, action, opts)
+end
+
 return M

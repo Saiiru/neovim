@@ -17,21 +17,6 @@ return {
 		local telescope = require("telescope")
 		local actions = require("telescope.actions")
 
-		local select_one_or_multi = function(prompt_bufnr)
-			local picker = require("telescope.actions.state").get_current_picker(prompt_bufnr)
-			local multi = picker:get_multi_selection()
-			if not vim.tbl_isempty(multi) then
-				require("telescope.actions").close(prompt_bufnr)
-				for _, j in pairs(multi) do
-					if j.path ~= nil then
-						vim.cmd(string.format("%s %s", "edit", j.path))
-					end
-				end
-			else
-				require("telescope.actions").select_default(prompt_bufnr)
-			end
-		end
-
 		telescope.setup({
 			defaults = {
 				path_display = { "smart" },
@@ -46,7 +31,7 @@ return {
 						["<C-S-d>"] = actions.delete_buffer,
 						["<C-s>"] = actions.cycle_previewers_next,
 						["<C-a>"] = actions.cycle_previewers_prev,
-						["<CR>"] = select_one_or_multi,
+						["<CR>"] = actions.select_default,
 					},
 					n = {
 						["<esc>"] = actions.close,
@@ -129,41 +114,39 @@ return {
 		telescope.load_extension("file_browser")
 		telescope.load_extension("live_grep_args")
 		telescope.load_extension("media_files")
-		telescope.load_extension("neoclip")
 		telescope.load_extension("ui-select")
 		telescope.load_extension("undo")
 		telescope.load_extension("advanced_git_search")
-		-- telescope.load_extension("colors")
-		telescope.load_extension("noice")
-	end,
-	keys = {
-		{ "<C-g><C-e>", "<cmd>Telescope git_files<CR>", desc = "[F]uzzy find git files" },
-		{ "<C-g><C-s>", "<cmd>Telescope live_grep<CR>", desc = "[L]ive grep" },
-		{ "<C-g><C-b>", "<cmd>Telescope buffers<CR>", desc = "[L]ist buffers" },
-		{ "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "[F]uzzy find files in cwd" },
-		{ "<leader>fr", "<cmd>Telescope oldfiles<cr>", desc = "[F]ind Old Files" },
-		{ "<leader>fs", "<cmd>Telescope live_grep<cr>", desc = "[F]ind string in cwd" },
-		{ "<leader>fc", "<cmd>Telescope grep_string<cr>", desc = "[F]ind string under cursor in cwd" },
-		{ "<leader>fb", "<cmd>Telescope file_browser<cr>", desc = "[O]pen file browser" },
-		{ "<leader>fma", "<cmd>Telescope media_files<cr>", desc = "[B]rowse media files" },
-		{ "<leader>fi", "<cmd>AdvancedGitSearch<cr>", desc = "[A]dvanced Git Search" },
-		{ "<leader>fw", "<cmd>Telescope grep_string<cr>", desc = "[F]ind Word under Cursor" },
-		{ "<leader>gc", "<cmd>Telescope git_commits<cr>", desc = "[S]earch Git Commits" },
-		{ "<leader>gb", "<cmd>Telescope git_bcommits<cr>", desc = "[S]earch Git Commits for Buffer" },
-		{ "<leader>lw", "<cmd>Telescope diagnostics<CR>", desc = "[D]iagnostics " },
 
-		{ "<leader>fk", "<cmd>Telescope keymaps<cr>", desc = "[F]ind Keymaps" },
-		{
-			"<leader>/",
-			function()
-				require("telescope.builtin").current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
-					winblend = 10,
-					previewer = false,
-					layout_config = { width = 0.7 },
-				}))
-			end,
-			desc = "[/] Fuzzily search in current buffer",
-		},
-	},
-	cmd = "Telescope",
+		-- Configurando as teclas no formato solicitado
+		local builtin = require("telescope.builtin")
+		vim.keymap.set("n", "<leader>sh", builtin.help_tags, { desc = "[S]earch [H]elp" })
+		vim.keymap.set("n", "<leader>sk", builtin.keymaps, { desc = "[S]earch [K]eymaps" })
+		vim.keymap.set("n", "<leader>sf", builtin.find_files, { desc = "[S]earch [F]iles" })
+		vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
+		vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
+		vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
+		vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
+		vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[S]earch [R]esume" })
+		vim.keymap.set("n", "<leader>s.", builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
+		vim.keymap.set("n", "<leader><leader>", builtin.buffers, { desc = "[ ] Find existing buffers" })
+
+		vim.keymap.set("n", "<leader>/", function()
+			builtin.current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
+				winblend = 10,
+				previewer = false,
+			}))
+		end, { desc = "[/] Fuzzily search in current buffer" })
+
+		vim.keymap.set("n", "<leader>s/", function()
+			builtin.live_grep({
+				grep_open_files = true,
+				prompt_title = "Live Grep in Open Files",
+			})
+		end, { desc = "[S]earch [/] in Open Files" })
+
+		vim.keymap.set("n", "<leader>sn", function()
+			builtin.find_files({ cwd = vim.fn.stdpath("config") })
+		end, { desc = "[S]earch [N]eovim files" })
+	end,
 }
