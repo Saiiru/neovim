@@ -4,6 +4,7 @@
 return {
   { "rcarriga/nvim-notify" },
   { "williamboman/mason.nvim" },
+
   {
     "neovim/nvim-lspconfig",
     dependencies = {
@@ -33,4 +34,27 @@ return {
   { "tpope/vim-abolish" },
   { 'djoshea/vim-autoread' },
   { "jbyuki/one-small-step-for-vimkind" },
+  {
+    -- https://github.com/mfussenegger/nvim-jdtls
+    'mfussenegger/nvim-jdtls',
+    ft = 'java', -- Enable only on .java file extensions
+  },
+  {
+    "ray-x/go.nvim",
+    dependencies = { -- optional packages
+      "ray-x/guihua.lua",
+      "neovim/nvim-lspconfig",
+      "nvim-treesitter/nvim-treesitter",
+    },
+    config = function()
+      require("go").setup()
+    end,
+    event = { "CmdlineEnter" },
+    ft = { "go", 'gomod' },
+    build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
+  },
+  {
+    'yamatsum/nvim-nonicons',
+    requires = { 'kyazdani42/nvim-web-devicons' }
+  },
 }

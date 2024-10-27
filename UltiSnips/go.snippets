@@ -1,0 +1,17 @@
+snippet IFE "if error" A
+if err != nil {
+	$1
+}
+endsnippet
+
+snippet IOK "if error" A
+if !ok {
+	$1
+}
+endsnippet
+
+snippet TGW "if test" A
+if got != want {
+	t.Errorf("Got $1 but wanted $2", got, want)
+}
+endsnippet
