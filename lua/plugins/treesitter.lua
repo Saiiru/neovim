@@ -1,104 +1,133 @@
 return {
   {
-    "nvim-treesitter/playground",
-    cmd = "TSPlaygroundToggle",
-  },
-  {
     "nvim-treesitter/nvim-treesitter",
-    dependencies = {
-      "windwp/nvim-ts-autotag",
-      "nvim-treesitter/nvim-treesitter-textobjects",
-      "andymass/vim-matchup",
-    },
+    event = "BufReadPre",
     config = function()
-      local parsers = require("nvim-treesitter.parsers")
-
-      -- Função para desabilitar certos recursos com base na linguagem e no buffer
-      local function disable_function(lang, bufnr)
-        bufnr = bufnr or 0
-        if lang == "help" or (lang == "clojure" and string.find(vim.fn.expand("%"), "conjure%-")) then
-          return true
-        end
-        return false
-      end
-
-      -- Configuração do Treesitter
-      require("nvim-treesitter.configs").setup({
+      require 'nvim-treesitter.configs'.setup {
         ensure_installed = {
-          "javascript", "typescript", "go", "vue", "clojure", "lua", "css", "bash", "json",
-          "sql", "dockerfile", "html", "python", "scss", "rust", "markdown", "hcl",
-          "astro", "tsx", "terraform", "cmake", "cpp", "fish", "gitignore", -- Adicionei os novos itens aqui
-        },
+          "tsx",
+          "typescript",
+          "javascript",
+          "html",
+          "css",
+          "vue",
+          "astro",
+          "svelte",
+          "gitcommit",
+          "graphql",
+          "json",
+          "json5",
+          "lua",
+          "markdown",
+          "prisma",
+          "vim",
+        },                              -- one of "all", or a list of languages
+        sync_install = false,           -- install languages synchronously (only applied to `ensure_installed`)
+      auto_install = true,
+        ignore_install = { "haskell" }, -- list of parsers to ignore installing
         highlight = {
           enable = true,
-          disable = disable_function,
-          additional_vim_regex_highlighting = false,
+          -- disable = { "c", "rust" },  -- list of language that will be disabled
+          -- additional_vim_regex_highlighting = false,
         },
-        indent = {
-          enable = true,
-        },
+
         incremental_selection = {
-          enable = true,
+          enable = false,
           keymaps = {
-            node_incremental = "v",
-            node_decremental = "V",
+            init_selection    = "<leader>gnn",
+            node_incremental  = "<leader>gnr",
+            scope_incremental = "<leader>gne",
+            node_decremental  = "<leader>gnt",
           },
         },
-        autotag = {
-          enable = true,
+
+        indent = {
+          enable = true
         },
-        matchup = {
-          enable = true,
-          disable = { "json", "csv" },
-        },
-        playground = {
-          enable = true,
-          updatetime = 25,
-          persist_queries = false,
-          keybindings = {
-            toggle_query_editor = "o",
-            toggle_hl_groups = "i",
-            toggle_injected_languages = "t",
-            toggle_anonymous_nodes = "a",
-            toggle_language_display = "I",
-            focus_language = "f",
-            unfocus_language = "F",
-            update = "R",
-            goto_node = "<cr>",
-            show_help = "?",
-          },
-        },
+
         textobjects = {
+          move = {
+            enable = true,
+            set_jumps = true, -- whether to set jumps in the jumplist
+            goto_next_start = {
+              ["]]"] = "@jsx.element",
+              ["]f"] = "@function.outer",
+              ["]m"] = "@class.outer",
+            },
+            goto_next_end = {
+              ["]F"] = "@function.outer",
+              ["]M"] = "@class.outer",
+            },
+            goto_previous_start = {
+              ["[["] = "@jsx.element",
+              ["[f"] = "@function.outer",
+              ["[m"] = "@class.outer",
+            },
+            goto_previous_end = {
+              ["[F"] = "@function.outer",
+              ["[M"] = "@class.outer",
+            },
+          },
           select = {
             enable = true,
+
+            -- Automatically jump forward to textobj, similar to targets.vim
             lookahead = true,
+
             keymaps = {
-              ["af"] = { query = "@function.outer", desc = "All of a function definition" },
-              ["if"] = { query = "@function.inner", desc = "Inner part of a function definition" },
-              ["ac"] = { query = "@comment.outer", desc = "All of a comment" },
+              -- You can use the capture groups defined in textobjects.scm
+              ["af"] = "@function.outer",
+              ["if"] = "@function.inner",
+              ["ac"] = "@class.outer",
+              ["ic"] = "@class.inner",
             },
-            selection_modes = {
-              ['@function.outer'] = 'V', -- linha
+          },
+          swap = {
+            enable = true,
+            swap_next = {
+              ["~"] = "@parameter.inner",
             },
-            include_surrounding_whitespace = true,
           },
         },
-        rainbow = {
+
+        textsubjects = {
           enable = true,
-          disable = vim.tbl_filter(function(p) return not (p == "clojure") end, parsers.available_parsers()),
+          prev_selection = '<BS>',
+          keymaps = {
+            ['<CR>'] = 'textsubjects-smart', -- works in visual mode
+          }
         },
-      })
 
-      -- Registrando markdown com MDX
-      vim.treesitter.language.register("markdown", "mdx")
-
-      -- Cores de delimitadores (opcional, personalize conforme necessário)
-      -- local colors = require("colorscheme")
-      -- vim.api.nvim_set_hl(0, 'RainbowDelimiterYellow', { fg = colors.carpYellow })
-      -- vim.api.nvim_set_hl(0, 'RainbowDelimiterBlue', { fg = colors.lightBlue })
-      -- vim.api.nvim_set_hl(0, 'RainbowDelimiterGreen', { fg = colors.springGreen })
-      -- vim.api.nvim_set_hl(0, 'RainbowDelimiterViolet', { fg = colors.oniViolet })
-      -- vim.api.nvim_set_hl(0, 'RainbowDelimiterCyan', { fg = colors.crystalBlue })
+      }
     end,
+    dependencies = {
+      "hiphish/rainbow-delimiters.nvim",
+      "JoosepAlviste/nvim-ts-context-commentstring",
+      "nvim-treesitter/nvim-treesitter-textobjects",
+      "RRethy/nvim-treesitter-textsubjects",
+    },
+  },
+
+  {
+    "windwp/nvim-ts-autotag",
+    event = "BufReadPre",
+    config = function()
+      require('nvim-ts-autotag').setup({
+        opts = {
+          enable_close = false,          -- Auto close tags
+          enable_rename = true,          -- Auto rename pairs of tags
+          enable_close_on_slash = true   -- Auto close on trailing </
+        },
+        -- Also override individual filetype configs, these take priority.
+        -- Empty by default, useful if one of the "opts" global settings
+        -- doesn't work well in a specific filetype
+        --[[ per_filetype = {
+            ["html"] = {
+              enable_close = false
+            }
+          } ]]
+      })
+    end
+
   },
 }

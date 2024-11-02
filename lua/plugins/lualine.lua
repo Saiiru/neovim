@@ -1,65 +1,89 @@
-return {
-  'nvim-lualine/lualine.nvim',
-  requires = {
-    'nvim-tree/nvim-web-devicons', -- Mantenha isso caso ainda não tenha.
-    'yamatsum/nvim-nonicons',
-    'nvim-lua/plenary.nvim',       -- Dependência necessária para alguns plugins.
-  },
-  config = function()
-    local lualine = require('lualine')
-    local nonicons = require('nvim-nonicons')
+-- ~/.config/nvim/lua/plugins/lualine.lua
 
-    -- Defina ícones
+return {
+  "nvim-lualine/lualine.nvim",
+  dependencies = { "nvim-tree/nvim-web-devicons", "nvim-nonicons" }, -- Dependências
+  config = function()
+    local lualine = require("lualine")
+    local nonicons = require('nvim-nonicons')
+    local lazy_status = require("lazy.status") -- Para contar atualizações pendentes
+
+    -- Definição de ícones
     local icons = {
-      sep = {
-        right = "",
-        left = ""
-      },
-      diagnostic = {
-        error = nonicons.get("x-circle-fill"),
-        warn = nonicons.get("alert"),
-        info = nonicons.get("info")
-      },
-      diff = {
-        added = nonicons.get("diff-added"),
-        modified = nonicons.get("diff-modified"),
-        removed = nonicons.get("diff-removed"),
-      },
-      git = nonicons.get("git-branch"),
-      file = {
-        modified = nonicons.get("pencil"),
-      },
       mode = {
         normal = nonicons.get("vim-normal-mode"),
         insert = nonicons.get("vim-insert-mode"),
         visual = nonicons.get("vim-visual-mode"),
         replace = nonicons.get("vim-replace-mode"),
         command = nonicons.get("vim-command-mode"),
-        terminal = nonicons.get("terminal"),
-      }
+      },
+      git = nonicons.get("git-branch"),
+      diagnostic = {
+        error = nonicons.get("x-circle-fill"),
+        warn = nonicons.get("alert"),
+        info = nonicons.get("info"),
+      },
+      diff = {
+        added = nonicons.get("diff-added"),
+        modified = nonicons.get("diff-modified"),
+        removed = nonicons.get("diff-removed"),
+      },
+      file = {
+        modified = nonicons.get("pencil"),
+      },
     }
 
-    -- Defina a tabela de cores
+    -- Tabela de cores para destaques
     local colors = {
-      bg = "#282c34",
-      fg = "#d8dee9",
-      red = "#df8890",
-      green = "#7ed491",
-      yellow = "#cccc00",
-      blue = "#61afef",
-      magenta = "#c678dd",
-      cyan = "#00FFFF",
-      white = "#d8dee9",
-      grey = "#3c4048",
+      blue = "#65D1FF",
+      green = "#3EFFDC",
+      violet = "#FF61EF",
+      yellow = "#FFDA7B",
+      red = "#FF4A4A",
+      fg = "#c3ccdc",
+      bg = "#112638",
+      inactive_bg = "#2c3043",
     }
 
     -- Configuração do Lualine
     lualine.setup {
       options = {
         icons_enabled = true,
-        theme = 'tokyodark', -- Você pode trocar por um tema de sua escolha
-        component_separators = { '▌', '▌' },
-        section_separators = { '', '' },
+        theme = {
+          normal = {
+            a = { bg = colors.blue, fg = colors.bg, gui = "bold" },
+            b = { bg = colors.bg, fg = colors.fg },
+            c = { bg = colors.bg, fg = colors.fg },
+          },
+          insert = {
+            a = { bg = colors.green, fg = colors.bg, gui = "bold" },
+            b = { bg = colors.bg, fg = colors.fg },
+            c = { bg = colors.bg, fg = colors.fg },
+          },
+          visual = {
+            a = { bg = colors.violet, fg = colors.bg, gui = "bold" },
+            b = { bg = colors.bg, fg = colors.fg },
+            c = { bg = colors.bg, fg = colors.fg },
+          },
+          command = {
+            a = { bg = colors.yellow, fg = colors.bg, gui = "bold" },
+            b = { bg = colors.bg, fg = colors.fg },
+            c = { bg = colors.bg, fg = colors.fg },
+          },
+          replace = {
+            a = { bg = colors.red, fg = colors.bg, gui = "bold" },
+            b = { bg = colors.bg, fg = colors.fg },
+            c = { bg = colors.bg, fg = colors.fg },
+          },
+          inactive = {
+            a = { bg = colors.inactive_bg, fg = colors.fg, gui = "bold" },
+            b = { bg = colors.inactive_bg, fg = colors.fg },
+            c = { bg = colors.inactive_bg, fg = colors.fg },
+          },
+        },
+        component_separators = { '│', '│' }, -- Separadores de componentes
+        section_separators = { '', '' }, -- Separadores de seções
+        globalstatus = true,
       },
       sections = {
         lualine_a = {
@@ -67,14 +91,14 @@ return {
             'mode',
             icons_enabled = true,
             fmt = function(str)
-              local mode_icon = icons.mode[string.lower(str)] or '' -- Pega o ícone correspondente ao modo
-              return mode_icon .. ' ' .. str                        -- Retorna ícone e nome do modo
+              local mode_icon = icons.mode[string.lower(str)] or ''
+              return mode_icon .. ' ' .. str
             end,
             color = { fg = colors.fg, bg = colors.bg },
           },
         },
         lualine_b = {
-          { 'branch', icon = icons.git, color = { fg = colors.blue, gui = 'bold' } },
+          { 'branch', icon = icons.git, color = { fg = colors.blue } },
           {
             'diff',
             source = { 'added', 'modified', 'removed' },
@@ -94,7 +118,7 @@ return {
             file_status = true,
             path = 1,
             icon = icons.file.modified,
-            color = { fg = colors.magenta, gui = 'bold' },
+            color = { fg = colors.violet, gui = 'bold' },
           },
           {
             'diagnostics',
@@ -110,7 +134,11 @@ return {
           },
         },
         lualine_x = {
-          -- { 'encoding',   color = { fg = colors.green } }, -- Apenas o encoding
+          {
+            lazy_status.updates,
+            cond = lazy_status.has_updates,
+            color = { fg = "#ff9e64" },
+          },
           { 'fileformat', color = { fg = colors.green } },
           { 'filetype' },
         },
@@ -133,5 +161,6 @@ return {
       tabline = {},
       extensions = {}
     }
-  end
+  end,
 }
+

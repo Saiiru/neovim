@@ -1,8 +1,6 @@
--- Any files inside the lua/plugins directory will also
--- automatically be sourced. These plugins are those that
--- do not require any configuration.
 return {
-  { "rcarriga/nvim-notify" },
+   { "nvim-neotest/nvim-nio" },
+    { "rcarriga/nvim-notify" },
   { "williamboman/mason.nvim" },
 
   {
