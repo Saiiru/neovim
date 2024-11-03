@@ -1,7 +1,6 @@
--- Keymaps Configuration
--- Verifique `:help vim.keymap.set()` para mais detalhes
-
--- Configuração silenciosa e sem mapeamento recursivo
+-- Keymaps are automatically loaded on the VeryLazy event
+-- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
+-- Add any additional keymaps here
 local opts = { silent = true, noremap = true }
 local keymap = vim.keymap.set
 
@@ -93,7 +92,7 @@ vim.cmd([[
 -- ------------------------------
 -- Abrir links no sistema
 -- ------------------------------
-local open_cmd = vim.fn.has('macunix') == 1 and 'open' or 'xdg-open'
+local open_cmd = vim.fn.has("macunix") == 1 and "open" or "xdg-open"
 keymap("n", "gx", "<cmd>silent execute '! " .. open_cmd .. " ' . shellescape('<cWORD>')<CR>", { desc = "Abrir link" })
 
 -- ------------------------------
@@ -101,7 +100,9 @@ keymap("n", "gx", "<cmd>silent execute '! " .. open_cmd .. " ' . shellescape('<c
 -- ------------------------------
 keymap("n", "<leader>vpp", ":e ~/.dotfiles/nvim/.config/nvim/init.lua<CR>", { desc = "[V]im [P]acker [P]rofile" })
 keymap("n", "<leader>mr", ":CellularAutomaton make_it_rain<CR>", { desc = "[M]ake it [R]ain" })
-keymap("n", "<leader><leader>", function() vim.cmd("so") end, { desc = "Recarregar config" })
+keymap("n", "<leader><leader>", function()
+  vim.cmd("so")
+end, { desc = "Recarregar config" })
 keymap("n", "<leader>zig", "<cmd>LspRestart<cr>", { desc = "[Z]ig: Reiniciar LSP" })
 keymap("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Abrir lista de [Q]uickfix diagnósticos" })
 
@@ -113,13 +114,12 @@ keymap("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Sair do modo terminal" })
 -- ------------------------------
 -- Funções do Sairu
 -- ------------------------------
-local discipline = require("sairu.discipline")
-discipline.cowboy()
-
+-- local discipline = require("sairu.discipline")
+-- discipline.cowboy()
+--
 -- ------------------------------
 -- Navegação e Manipulação
 -- ------------------------------
-keymap("n", "<C-m>", "<C-i>", opts) -- Jumplist
 keymap("n", "<leader>e", ":Neotree toggle<CR>", { desc = "Toggle Neo-tree" })
 keymap("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>", { desc = "Executar comando tmux" })
 
@@ -127,6 +127,7 @@ keymap("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>", { desc = "Ex
 keymap("n", "+", "<C-a>")
 keymap("n", "-", "<C-x>")
 -- Deletar uma palavra para trás
+--
 keymap("n", "dw", 'vb"_d')
 -- Selecionar tudo
 keymap("n", "<C-a>", "gg<S-v>G")
@@ -145,10 +146,25 @@ keymap("n", "<C-w><down>", "<C-w>-")
 -- ------------------------------
 -- Comandos para gerenciar e abrir
 -- ------------------------------
-keymap("n", "<leader>gg", ":lua require('telescope').extensions.git_worktree.git_worktrees()<CR>", { desc = "Gerenciar Worktrees" })
-keymap("n", "<leader>gG", ":lua require('telescope').extensions.git_worktree.create_git_worktree()<CR>", { desc = "Criar Worktree" })
+-- keymap(
+--   "n",
+--   "<leader>gg",
+--   ":lua require('telescope').extensions.git_worktree.git_worktrees()<CR>",
+--   { desc = "Gerenciar Worktrees" }
+-- )
+keymap(
+  "n",
+  "<leader>gG",
+  ":lua require('telescope').extensions.git_worktree.create_git_worktree()<CR>",
+  { desc = "Criar Worktree" }
+)
 
 -- ------------------------------
 -- Adicionar mapeamentos globais conforme necessário
 -- ------------------------------
-
+vim.keymap.set(
+  "n",
+  "<leader>sx",
+  require("telescope.builtin").resume,
+  { noremap = true, silent = true, desc = "Resume" }
+)

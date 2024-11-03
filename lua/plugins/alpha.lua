@@ -1,144 +1,174 @@
-return {
-  {
-    "goolord/alpha-nvim",
-    lazy = false,
-    config = function()
-      local present, alpha = pcall(require, "alpha")
-      if not present then
-        return
-      end
-
-      -- Define custom quotes from various sources
-      local quotes = {
-        "When you have eliminated the impossible, whatever remains, however improbable, must be the truth. – Sherlock Holmes",
-        "Time is a funny thing. It's not linear. – Doctor Who",
-        "Sometimes, the best way to get things done is to do them yourself. – John Constantine, Hellblazer",
-        "You can't just sit back and let it happen. You have to make things happen. – Doctor Who",
-        "There is no greater mystery than the human heart. – Sherlock Holmes",
-      }
-
-      -- Function to get a random quote
-      local function random_quote()
-        return quotes[math.random(#quotes)]
-      end
-
-      local dashboard = require("alpha.themes.dashboard")
-      local icons = require("utils.icons")
-      local if_nil = vim.F.if_nil
-      local fn = vim.fn
-
-      -- ╭──────────────────────────────────────────────────────────╮
-      -- │ Header                                                   │
-      -- ╰──────────────────────────────────────────────────────────╯
-
-      dashboard.section.header.val = {
-        " ██████╗██╗   ██╗██████╗ ███████╗██████╗ ███╗   ██╗██╗   ██╗██╗███╗   ███╗",
-        "██╔════╝╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗████╗  ██║██║   ██║██║████╗ ████║",
-        "██║      ╚████╔╝ ██████╔╝█████╗  ██████╔╝██╔██╗ ██║██║   ██║██║██╔████╔██║",
-        "██║       ╚██╔╝  ██╔══██╗██╔══╝  ██╔══██╗██║╚██╗██║╚██╗ ██╔╝██║██║╚██╔╝██║",
-        "╚██████╗   ██║   ██████╔╝███████╗██║  ██║██║ ╚████║ ╚████╔╝ ██║██║ ╚═╝ ██║",
-        " ╚═════╝   ╚═╝   ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝  ╚═══╝  ╚═╝╚═╝     ╚═╝",
-      }
-
-      -- ╭──────────────────────────────────────────────────────────╮
-      -- │ Buttons                                                  │
-      -- ╰──────────────────────────────────────────────────────────╯
-
-      local leader = "SPC"
-
-      --- @param sc string
-      --- @param txt string
-      --- @param keybind string optional
-      --- @param keybind_opts table optional
-      local function button(sc, txt, keybind, keybind_opts)
-        local sc_ = sc:gsub("%s", ""):gsub(leader, "<leader>")
-
-        local opts = {
-          position = "center",
-          shortcut = sc,
-          cursor = 5,
-          width = 50,
-          align_shortcut = "right",
-          hl_shortcut = "EcovimPrimary",
-        }
-        if keybind then
-          keybind_opts = if_nil(keybind_opts, { noremap = true, silent = true, nowait = true })
-          opts.keymap = { "n", sc_, keybind, keybind_opts }
-        end
-
-        local function on_press()
-          local key = vim.api.nvim_replace_termcodes(sc_ .. "<Ignore>", true, false, true)
-          vim.api.nvim_feedkeys(key, "t", false)
-        end
-
-        return {
-          type = "button",
-          val = txt,
-          on_press = on_press,
-          opts = opts,
-        }
-      end
-
-      dashboard.section.buttons.val = {
-        button("e", "  > New file", ":lua require('config.utils').create_new_file()<CR>"),
-        button("f", "  > Find file in git repo", ":Telescope git_files <CR>"),
-        button("r", "  > Recent", ":Telescope oldfiles<CR>"),
-        button("l", "🗘  > Open last session", ":SessionManager load_last_session<CR>"),
-        button("o", "  > Open session", ":SessionManager load_session<CR>"),
-        button("p", "  > Open project", ":Telescope projects<CR>"),
-      }
-
-      -- ╭──────────────────────────────────────────────────────────╮
-      -- │ Footer                                                   │
-      -- ╰──────────────────────────────────────────────────────────╯
-
-      dashboard.section.footer.val = {
-        random_quote()
-      }
-      dashboard.section.footer.opts = {
-        position = "center",
-        hl = "EcovimFooter",
-      }
-
-      local opts = {
-        layout = {
-          { type = "padding", val = 3 },
-          dashboard.section.header,
-          { type = "padding", val = 2 },
-          dashboard.section.buttons,
-          { type = "padding", val = 3 },
-          dashboard.section.footer,
-        },
-        opts = {
-          margin = 5
-        },
-      }
-
-      alpha.setup(opts)
-
-      -- ╭──────────────────────────────────────────────────────────╮
-      -- │ Hide tabline and statusline on startup screen            │
-      -- ╰──────────────────────────────────────────────────────────╯
-      -- vim.api.nvim_create_augroup("alpha_tabline", { clear = true })
-
-  --     vim.api.nvim_create_autocmd("FileType", {
-  --       group = "alpha_tabline",
-  --       pattern = "alpha",
-  --       command = "set showtabline=0 laststatus=0 noruler",
-  --     })
-  --
-  --     vim.api.nvim_create_autocmd("FileType", {
-  --       group = "alpha_tabline",
-  --       pattern = "alpha",
-  --       callback = function()
-  --         vim.api.nvim_create_autocmd("BufUnload", {
-  --           group = "alpha_tabline",
-  --           buffer = 0,
-  --           command = "set showtabline=2 ruler laststatus=3",
-  --         })
-  --       end,
-  --     })
-     end,
-   }
+local coolLines = {
+  [[    ███╗   ███╗ █████╗ ██╗  ██╗███████╗   ]],
+  [[    ████╗ ████║██╔══██╗██║ ██╔╝██╔════╝   ]],
+  [[    ██╔████╔██║███████║█████╔╝ █████╗     ]],
+  [[    ██║╚██╔╝██║██╔══██║██╔═██╗ ██╔══╝     ]],
+  [[    ██║ ╚═╝ ██║██║  ██║██║  ██╗███████╗   ]],
+  [[    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝   ]],
+  [[      ██████╗ ██████╗  ██████╗ ██╗        ]],
+  [[     ██╔════╝██╔═══██╗██╔═══██╗██║        ]],
+  [[     ██║     ██║   ██║██║   ██║██║        ]],
+  [[     ██║     ██║   ██║██║   ██║██║        ]],
+  [[     ╚██████╗╚██████╔╝╚██████╔╝███████╗   ]],
+  [[      ╚═════╝ ╚═════╝  ╚═════╝ ╚══════╝   ]],
+  [[███████╗████████╗██╗   ██╗███████╗███████╗]],
+  [[██╔════╝╚══██╔══╝██║   ██║██╔════╝██╔════╝]],
+  [[███████╗   ██║   ██║   ██║█████╗  █████╗  ]],
+  [[╚════██║   ██║   ██║   ██║██╔══╝  ██╔══╝  ]],
+  [[███████║   ██║   ╚██████╔╝██║     ██║     ]],
+  [[╚══════╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝     ]],
 }
 
+local solveLines = {
+  [[╔═╗┬┬─┐┌─┐┌┬┐  ┌─┐┌─┐┬ ┬  ┬┌─┐  ┌┬┐┬ ┬┌─┐  ┌─┐┬─┐┌─┐┌┐ ┬  ┌─┐┌┬┐   ]],
+  [[╠╣ │├┬┘└─┐ │   └─┐│ ││ └┐┌┘├┤    │ ├─┤├┤   ├─┘├┬┘│ │├┴┐│  ├┤ │││   ]],
+  [[╚  ┴┴└─└─┘ ┴┘  └─┘└─┘┴─┘└┘ └─┘   ┴ ┴ ┴└─┘  ┴  ┴└─└─┘└─┘┴─┘└─┘┴ ┴ o ]],
+  [[      ╔╦╗┬ ┬┌─┐┌┐┌  ┬ ┬┬─┐┬┌┬┐┌─┐  ┌┬┐┬ ┬┌─┐  ┌─┐┌─┐┌┬┐┌─┐         ]],
+  [[       ║ ├─┤├┤ │││  │││├┬┘│ │ ├┤    │ ├─┤├┤   │  │ │ ││├┤          ]],
+  [[       ╩ ┴ ┴└─┘┘└┘  └┴┘┴└─┴ ┴ └─┘   ┴ ┴ ┴└─┘  └─┘└─┘─┴┘└─┘         ]],
+  [[                                                     - John Johnson]],
+}
+
+local humourLines = {
+  [[╔═╗┌─┐┌┬┐┌─┐  ┬┌─┐  ┬  ┬┬┌─┌─┐  ┬ ┬┬ ┬┌┬┐┌─┐┬─┐                           ]],
+  [[║  │ │ ││├┤   │└─┐  │  │├┴┐├┤   ├─┤│ │││││ │├┬┘                           ]],
+  [[╚═╝└─┘─┴┘└─┘  ┴└─┘  ┴─┘┴┴ ┴└─┘  ┴ ┴└─┘┴ ┴└─┘┴└─o                          ]],
+  [[╦ ╦┬ ┬┌─┐┌┐┌  ┬ ┬┌─┐┬ ┬  ┬ ┬┌─┐┬  ┬┌─┐  ┌┬┐┌─┐  ┌─┐─┐ ┬┌─┐┬  ┌─┐┬┌┐┌  ┬┌┬┐]],
+  [[║║║├─┤├┤ │││  └┬┘│ ││ │  ├─┤├─┤└┐┌┘├┤    │ │ │  ├┤ ┌┴┬┘├─┘│  ├─┤││││  │ │ ]],
+  [[╚╩╝┴ ┴└─┘┘└┘   ┴ └─┘└─┘  ┴ ┴┴ ┴ └┘ └─┘   ┴ └─┘  └─┘┴ └─┴  ┴─┘┴ ┴┴┘└┘  ┴ ┴┘]],
+  [[                                                        ┬┌┬┐┌─┐  ┌┐ ┌─┐┌┬┐]],
+  [[                                                        │ │ └─┐  ├┴┐├─┤ ││]],
+  [[                                                        ┴ ┴ └─┘  └─┘┴ ┴─┴┘]],
+  [[                                                              - Cory House]],
+}
+
+local bugLines = {
+  [[  _____   _                          _                 _                             ]],
+  [[ |_   _| | |_    ___   _ _   ___    (_)  ___    __ _  | | __ __ __  __ _   _  _   ___]],
+  [[   | |   | ' \  / -_) | '_| / -_)   | | (_-<   / _` | | | \ V  V / / _` | | || | (_-<]],
+  [[   |_|   |_||_| \___| |_|   \___|   |_| /__/   \__,_| |_|  \_/\_/  \__,_|  \_, | /__/]],
+  [[                                                                           |__/      ]],
+  [[                                                   _                                 ]],
+  [[  ___   _ _    ___     _ __    ___   _ _   ___    | |__   _  _   __ _                ]],
+  [[ / _ \ | ' \  / -_)   | '  \  / _ \ | '_| / -_)   | '_ \ | || | / _` |               ]],
+  [[ \___/ |_||_| \___|   |_|_|_| \___/ |_|   \___|   |_.__/  \_,_| \__, |               ]],
+  [[                                                                |___/                ]],
+  [[  _              __   _                                                              ]],
+  [[ | |_   ___     / _| (_) __ __                                                       ]],
+  [[ |  _| / _ \   |  _| | | \ \ /  _                                                    ]],
+  [[  \__| \___/   |_|   |_| /_\_\ (_)                                     - Ellen Ullman]],
+}
+
+local fixLines = {
+  [[    ┌─┐┬─┐ ┬  ┌┬┐┬ ┬┌─┐  ┌─┐┌─┐┬ ┬┌─┐┌─┐      ]],
+  [[    ├┤ │┌┴┬┘   │ ├─┤├┤   │  ├─┤│ │└─┐├┤       ]],
+  [[    └  ┴┴ └─   ┴ ┴ ┴└─┘  └─┘┴ ┴└─┘└─┘└─┘┘     ]],
+  [[╔╗╔╔═╗╔╦╗  ╔╦╗╦ ╦╔═╗  ╔═╗╦ ╦╔╦╗╔═╗╔╦╗╔═╗╔╦╗╔═╗]],
+  [[║║║║ ║ ║    ║ ╠═╣║╣   ╚═╗╚╦╝║║║╠═╝ ║ ║ ║║║║╚═╗]],
+  [[╝╚╝╚═╝ ╩    ╩ ╩ ╩╚═╝  ╚═╝ ╩ ╩ ╩╩   ╩ ╚═╝╩ ╩╚═╝]],
+  [[                              - Steve Maguire ]],
+}
+
+local processLines = {
+  [[╔╦╗╦ ╦╔═╗  ╔═╗╦═╗╔═╗╔═╗╔╦╗╦╦  ╦╔═╗  ╔═╗╦═╗╔═╗╔═╗╔═╗╔═╗╔═╗]],
+  [[ ║ ╠═╣║╣   ║  ╠╦╝║╣ ╠═╣ ║ ║╚╗╔╝║╣   ╠═╝╠╦╝║ ║║  ║╣ ╚═╗╚═╗]],
+  [[ ╩ ╩ ╩╚═╝  ╚═╝╩╚═╚═╝╩ ╩ ╩ ╩ ╚╝ ╚═╝  ╩  ╩╚═╚═╝╚═╝╚═╝╚═╝╚═╝]],
+  [[This is Amazing!]],
+  [[This is difficult]],
+  [[This is shit]],
+  [[I am shit]],
+  [[This might be OK]],
+  [[This is Amazing!]],
+}
+
+local function lineColor(lines, popStart, popEnd)
+  local out = {}
+  for i, line in ipairs(lines) do
+    local hi = "StartLogo" .. i
+    if i > popStart and i <= popEnd then
+      hi = "StartLogoPop" .. i - popStart
+    elseif i > popStart then
+      hi = "StartLogo" .. i - popStart
+    else
+      hi = "StartLogo" .. i
+    end
+    table.insert(out, { hi = hi, line = line })
+  end
+  return out
+end
+
+local headers = {
+  lineColor(coolLines, 6, 12),
+  lineColor(solveLines, 0, 0),
+  lineColor(humourLines, 6, 9),
+  lineColor(bugLines, 5, 10),
+  lineColor(processLines, 0, 3),
+  lineColor(fixLines, 0, 0),
+}
+
+local function header_chars()
+  math.randomseed(os.time())
+  return headers[math.random(#headers)]
+end
+
+-- Map over the headers, setting a different color for each line.
+-- This is done by setting the Highligh to StartLogoN, where N is the row index.
+-- Define StartLogo1..StartLogoN to get a nice gradient.
+local function header_color()
+  local lines = {}
+  for _, lineConfig in pairs(header_chars()) do
+    local hi = lineConfig.hi
+    local line_chars = lineConfig.line
+    local line = {
+      type = "text",
+      val = line_chars,
+      opts = {
+        hl = hi,
+        shrink_margin = false,
+        position = "center",
+      },
+    }
+    table.insert(lines, line)
+  end
+
+  local output = {
+    type = "group",
+    val = lines,
+    opts = { position = "center" },
+  }
+
+  return output
+end
+
+local function configure()
+  local theme = require("alpha.themes.theta")
+  local themeconfig = theme.config
+  local dashboard = require("alpha.themes.dashboard")
+  local buttons = {
+    type = "group",
+    val = {
+      { type = "text", val = "Quick links", opts = { hl = "SpecialComment", position = "center" } },
+      { type = "padding", val = 1 },
+      dashboard.button("e", "  New file", "<cmd>ene<CR>"),
+      dashboard.button("SPC f", "  Find file"),
+      dashboard.button("SPC F", "  Find text"),
+      dashboard.button("u", "󱐥  Update plugins", "<cmd>Lazy sync<CR>"),
+      dashboard.button("t", "  Install language tools", "<cmd>Mason<CR>"),
+      dashboard.button("q", "󰩈  Quit", "<cmd>qa<CR>"),
+    },
+    position = "center",
+  }
+
+  themeconfig.layout[2] = header_color()
+  themeconfig.layout[6] = buttons
+
+  return themeconfig
+end
+
+return {
+  "goolord/alpha-nvim",
+  dependencies = { "nvim-tree/nvim-web-devicons" },
+  config = function()
+    require("alpha").setup(configure())
+  end,
+}
