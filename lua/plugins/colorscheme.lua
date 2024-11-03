@@ -1,75 +1,50 @@
-local function applyColorScheme(colorScheme)
+-- Função para aplicar o esquema de cores com transparência
+local function ColorMyPencils(colorScheme)
   colorScheme = colorScheme or "carbonfox"
   vim.cmd.colorscheme(colorScheme)
 
-  -- Transparency for background
-  vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-  vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-
-  -- Custom colors for NeoTree
-  vim.cmd("highlight NeoTreeFolderIcon guifg=#FF8F1F") -- Bright orange
-  vim.cmd("highlight NeoTreeFolderName guifg=#50fa7b") -- Neon green
-  vim.cmd("highlight NeoTreeFileIcon guifg=#8be9fd") -- Neon blue
-  vim.cmd("highlight NeoTreeFileName guifg=#FF61FF") -- Shocking pink
+  -- Definindo a transparência para o fundo
+  local set_hl = vim.api.nvim_set_hl
+  set_hl(0, "Normal", { bg = "none" })
+  set_hl(0, "NormalFloat", { bg = "none" })
 end
 
 local function adjust_color(color, fallback)
   return type(color) == "string" and color or fallback
 end
 
-local function overrides(c, color)
-  local darken = color.darken
-  return {
-    TelescopeResultsBorder = { fg = c.bg, bg = c.bg },
-    TelescopeResultsNormal = { bg = darken(c.bg, 20) },
-    TelescopePromptBorder = { fg = darken(c.pink, 5), bg = c.bg },
-    TelescopeTitle = { fg = c.yellow, bg = darken(c.yellow, 10) },
-    TelescopePromptPrefix = { fg = c.cyan },
-  }
-end
-
 return {
-  -- Brightburn theme configuration
+  -- Configuração do tema Brightburn
   {
     "erikbackman/brightburn.vim",
-    lazy = true, -- Loads on demand
+    lazy = true,
   },
 
-  -- TokyoNight theme configuration
+  -- Configuração do tema TokyoNight
   {
     "folke/tokyonight.nvim",
-    lazy = false, -- Loads immediately
-    opts = {
-      style = "night", -- Valid styles: 'storm', 'night', 'day'
-      transparent = vim.g.neovide and true or false,
-      terminal_colors = true,
-      styles = {
-        comments = { italic = false },
-        keywords = { italic = true },
-        functions = "NONE",
-        variables = "NONE",
-      },
-      sidebars = { "qf", "help" },
-      hide_inactive_statusline = false,
-      dim_inactive = false,
-      lualine_bold = false,
-    },
-    config = function(_, opts)
-      require("tokyonight").setup(opts)
-      vim.api.nvim_set_hl(0, "TelescopeTitle", { fg = "#FFA630", bg = "None" })
-      vim.api.nvim_set_hl(0, "TelescopeNormal", { bg = "None", fg = "None" })
-      vim.api.nvim_set_hl(0, "TelescopeBorder", { bg = "None", fg = "None" })
-      vim.api.nvim_set_hl(0, "MsgArea", { fg = require("tokyonight.colors").setup().fg_dark })
+    config = function()
+      require("tokyonight").setup({
+        style = "storm",
+        transparent = true,
+        terminal_colors = true,
+        styles = {
+          comments = { italic = false },
+          keywords = { italic = false },
+          sidebars = "dark",
+          floats = "dark",
+        },
+      })
     end,
   },
 
-  -- TokyoDark theme configuration
+  -- Configuração do tema TokyoDark
   {
     "tiagovla/tokyodark.nvim",
-    lazy = false, -- Loads immediately
+    lazy = false,
     opts = {
       transparent_background = true,
-      gamma = 1.0, -- Adjusted saturation
+      gamma = 2.0,
       styles = {
         comments = { italic = true },
         keywords = { italic = true, bold = true },
@@ -79,85 +54,71 @@ return {
       },
       terminal_colors = true,
       custom_highlights = function(highlights, palette)
-        highlights.Normal = { bg = "none", fg = adjust_color(palette.fg, "#D800FF") }
-        highlights.Comment = { fg = adjust_color(palette.magenta, "#FF61FF"), italic = true }
-        highlights.Keyword = { fg = adjust_color(palette.red, "#FF007F"), bold = true, italic = true }
-        highlights.Function = { fg = adjust_color(palette.cyan, "#00F9FF"), bold = true }
-        highlights.String = { fg = adjust_color(palette.green, "#50fa7b") }
-        highlights.Error = { fg = adjust_color(palette.red, "#FF073A"), bold = true }
-        highlights.Number = { fg = adjust_color(palette.yellow, "#FFFA65"), bold = true }
-        highlights.Boolean = { fg = adjust_color(palette.orange, "#FF8F1F"), bold = true }
+        highlights.Normal = { bg = "none", fg = adjust_color(palette.fg, "#D801FF") }
+        highlights.Comment = { fg = adjust_color(palette.magenta, "#FF62FF"), italic = true }
+        highlights.Keyword = { fg = adjust_color(palette.red, "#FF008F"), bold = true, italic = true }
+        highlights.Function = { fg = adjust_color(palette.cyan, "#01F9FF"), bold = true }
+        highlights.String = { fg = adjust_color(palette.green, "#51fa7b") }
+        highlights.Error = { fg = adjust_color(palette.red, "#FF074A"), bold = true }
+        highlights.Number = { fg = adjust_color(palette.yellow, "#FFFA66"), bold = true }
+        highlights.Boolean = { fg = adjust_color(palette.orange, "#FF9F1F"), bold = true }
         return highlights
       end,
     },
     config = function(_, opts)
       require("tokyodark").setup(opts)
-      -- Apply the tokyodark theme with adjusted settings
-      applyColorScheme("tokyodark")
+      -- ColorMyPencils("tokyodark") -- Descomente para usar TokyoDark
     end,
   },
 
-  -- Nightfox theme with Carbonfox customization
   {
     "EdenEast/nightfox.nvim",
-    lazy = false,
     config = function()
       require("nightfox").setup({
         options = {
-          transparent = true,
-          terminal_colors = true,
+          transparent = false, -- sem transparência
+          terminal_colors = true, -- cores de terminal habilitadas
           styles = {
-            comments = "italic",
-            keywords = "bold,italic",
-            functions = "bold",
-            variables = "NONE",
+            comments = "italic", -- comentários em itálico
+            keywords = "bold", -- palavras-chave em negrito para destaque
+            functions = "italic,bold", -- funções em itálico e negrito
+          },
+          inverse = {
+            match_paren = true, -- realce de parênteses correspondentes
+            visual = true, -- realce de seleção visual
           },
         },
         palettes = {
-          carbonfox = {
-            bg = "#0D0221",
-            fg = "#00F9FF",
-            cyan = "#00F9FF",
-            red = "#FF073A",
-            yellow = "#FFFA65",
-            orange = "#FF8F1F",
-            pink = "#FF61FF",
-            green = "#50fa7b",
-            purple = "#D800FF",
+          carbonfox = { -- Ajustes específicos de cores do Carbonfox
+            bg1 = "#0d0d0d", -- fundo principal, quase preto
+            fg1 = "#e5e5e5", -- texto primário, quase branco
+            blue = "#0abdc6", -- azul vibrante
+            green = "#51fa7b", -- verde vibrante
+            red = "#ff5555", -- vermelho intenso para erros
+            yellow = "#f57800", -- amarelo suave para alertas
+            magenta = "#ff79c6", -- rosa para detalhes
+            cyan = "#8be9fd", -- ciano para acentos
           },
         },
         groups = {
           carbonfox = {
-            Normal = { bg = "none", fg = "#00F9FF" },
-            Comment = { fg = "#FF61FF", italic = true },
-            Keyword = { fg = "#FF007F", bold = true, italic = true },
-            Function = { fg = "#00F9FF", bold = true },
-            String = { fg = "#50fa7b" },
-            Error = { fg = "#FF073A", bold = true },
-            Number = { fg = "#FFFA65", bold = true },
-            Boolean = { fg = "#FFFA65", bold = true },
-            NeoTreeFolderIcon = { fg = "#FF8F1F" },
-            NeoTreeFolderName = { fg = "#50fa7b" },
-            NeoTreeFileIcon = { fg = "#8be9fd" },
-            NeoTreeFileName = { fg = "#FF61FF" },
-            TelescopeResultsBorder = { fg = "#0D0221", bg = "#0D0221" },
-            TelescopeTitle = { fg = "#FFFA65", bg = "#0D0221" },
-            TelescopePromptPrefix = { fg = "#00F9FF" },
+            CursorLine = { bg = "#282a36" }, -- Linha do cursor mais escura para foco
+            Normal = { bg = "#0d0d0d", fg = "#e5e5e5" }, -- fundo e texto principais
+            Comment = { fg = "#b8b8b8", style = "italic" }, -- Comentários mais claros para contraste
+            Function = { fg = "#0abdc6", style = "italic,bold" }, -- Funções em destaque
           },
         },
-        overrides = overrides,
       })
 
-      -- Apply the carbonfox theme
-      applyColorScheme("carbonfox")
+      -- Aplicando o esquema Carbonfox
+      ColorMyPencils("carbonfox")
     end,
   },
-
-  -- Gruvbox theme configuration
+  -- Configuração do tema Gruvbox
   {
     "ellisonleao/gruvbox.nvim",
     name = "gruvbox",
-    lazy = true, -- Loads on demand
+    lazy = true,
     opts = {
       terminal_colors = true,
       undercurl = true,
@@ -172,12 +133,11 @@ return {
       },
       strikethrough = true,
       inverse = true,
-      transparent_mode = false,
+      transparent_mode = true, -- Gruvbox com transparência
     },
     config = function(_, opts)
       require("gruvbox").setup(opts)
-      -- Uncomment to switch to Gruvbox if preferred
-      -- applyColorScheme("gruvbox")
+      -- ColorMyPencils("gruvbox") -- Descomente para usar Gruvbox
     end,
   },
 }
