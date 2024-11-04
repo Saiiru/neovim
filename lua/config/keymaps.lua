@@ -131,3 +131,9 @@ function! s:VSetSearch()
 endfunction
 vnoremap * :<C-u>call <SID>VSetSearch()<CR>/<CR>
 ]])
+
+-- CMake
+keymap("", "<leader>cg", ":CMakeGenerate<cr>", {})
+keymap("", "<leader>cb", ":CMakeBuild<cr>", {})
+keymap("", "<leader>cq", ":CMakeClose<cr>", {})
+keymap("", "<leader>cL", ":CMakeClean<cr>", {})

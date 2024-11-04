@@ -48,7 +48,10 @@ opt.gdefault = true -- Use `g` flag by default for :substitute
 -- File Handling
 opt.swapfile = false -- Disable swap files
 opt.undofile = true -- Enable persistent undo
+local undo_dir = os.getenv("HOME") .. "/.local/share/nvim/undo"
+os.execute("mkdir -p " .. undo_dir)
 opt.undodir = fn.stdpath("config") .. "/.undo"
+vim.opt.undodir = undo_dir
 
 -- Whitespace and lists
 opt.list = true -- Show whitespace characters

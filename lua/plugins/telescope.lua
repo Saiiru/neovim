@@ -9,5 +9,17 @@ return {
   },
   config = function()
     require("telescope").load_extension("file_browser")
+    require("telescope").setup({
+      defaults = {
+        file_ignore_patterns = {
+          "%.undo$", -- Ignora arquivos de undo
+          "%.swp$", -- Ignora arquivos temporários
+          "%.bak$", -- Ignora arquivos de backup
+          "%.tmp$", -- Ignora arquivos temporários adicionais
+          "^/home/sairu/.config/nvim/.undo",
+        },
+        -- Outras configurações
+      },
+    })
   end,
 }
