@@ -1,24 +1,22 @@
--- Keymaps are automatically loaded on the VeryLazy event
--- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
--- Add any additional keymaps here
 local map = vim.keymap.set
 local o = vim.opt
 local lazy = require("lazy")
 
--- Search current word
-local search_current_word_on_firefox = function()
+-- Search current word on Firefox Developer Edition
+local function search_current_word_on_firefox()
   local query = vim.fn.expand("<cword>")
   if query ~= "" then
-    vim.fn.system({ "xdg-open", "firefox-developer-edition", "https://search.firefox.com/search?q=" .. query })
+    vim.fn.system({ "xdg-open", "firefox-developer-edition", "https://search.mozilla.org/search?q=" .. query })
   else
     print("No word under cursor.")
   end
 end
+
 map(
   "n",
   "<leader>?",
   search_current_word_on_firefox,
-  { noremap = true, silent = true, desc = "Search Current Word on Firefox" }
+  { noremap = true, silent = true, desc = "Search Current Word on Firefox Developer Edition" }
 )
 
 -- Lazy options
@@ -34,7 +32,6 @@ map("n", "<leader>lx", "<cmd>LazyExtras<cr>", { desc = "Extras" })
 map("n", "<leader>lc", function()
   LazyVim.news.changelog()
 end, { desc = "LazyVim Changelog" })
-
 map("n", "<leader>lu", function()
   lazy.update()
 end, { desc = "Lazy Update" })
@@ -74,9 +71,11 @@ map("n", "]<tab>", "<cmd>tabnext<cr>", { desc = "Next Tab" })
 map("n", "[<tab>", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
 map("n", "<tab>", "<cmd>tabnext<cr>", { desc = "Next Tab" })
 map("n", "<s-tab>", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
+
 for i = 1, 9 do
   map("n", "<leader><tab>" .. i, "<cmd>tabn " .. i .. "<cr>", { desc = "Tab " .. i })
 end
+
 map("n", "<leader>f<tab>", function()
   vim.ui.select(vim.api.nvim_list_tabpages(), {
     prompt = "Select Tab:",
@@ -129,7 +128,7 @@ map("n", "<leader>cif", "<cmd>LazyFormatInfo<cr>", { desc = "Formatting" })
 map("n", "<leader>cic", "<cmd>ConformInfo<cr>", { desc = "Conform" })
 
 -- Linter information
-local linters = function()
+local function linters()
   local linters_attached = require("lint").linters_by_ft[vim.bo.filetype]
   if not linters_attached then
     LazyVim.warn("No linters attached", { title = "Linter" })
@@ -138,6 +137,7 @@ local linters = function()
   local unique_client_names = table.concat(linters_attached, ", ")
   LazyVim.notify(unique_client_names, { title = "Linter" })
 end
+
 map("n", "<leader>ciL", linters, { desc = "Lint" })
 map("n", "<leader>cir", "<cmd>LazyRoot<cr>", { desc = "Root" })
 
@@ -156,7 +156,7 @@ map("i", "<C-e>", "<End>", { desc = "End Of Line" })
 map("n", "<C-e>", "gg<S-V>G", { desc = "Select All Text", silent = true, noremap = true })
 
 -- Paste options
-map("i", "<C-v>", '<C-r>"', { desc = "Paste on Insert Mode" })
+map("i", "<C-v>", '<C-r>"', { desc = "Paste in Insert Mode" })
 map("v", "p", '"_dP', { desc = "Paste Without Overwriting" })
 
 -- Delete and change without yanking
@@ -164,7 +164,6 @@ map({ "n", "x" }, "<A-d>", '"_d', { desc = "Delete Without Yanking" })
 map({ "n", "x" }, "<A-c>", '"_c', { desc = "Change Without Yanking" })
 
 -- Undo and Redo
-map("n", "U", "<C-r>", { desc = "Redo" })
 map("n", "<C-u>", "<C-r>", { desc = "Undo" })
 
 -- Close current buffer
@@ -184,3 +183,9 @@ end, { desc = "Close All But Current Buffer" })
 for i = 1, 9 do
   map("n", "<leader>0" .. i, "<cmd>buffer " .. i .. "<cr>", { desc = "Buffer " .. i })
 end
+
+-- Switch to last buffer
+map("n", "<leader>l", "<cmd>b#<cr>", { desc = "Last Buffer" })
+
+-- Plugin shortcuts
+map("n", "<leader>m", "<cmd>MarkdownPreview<cr>", { desc = "Markdown Preview" })
