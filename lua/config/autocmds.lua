@@ -1,82 +1,118 @@
 -- Autocmds are automatically loaded on the VeryLazy event
 -- Default autocmds that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua
 -- Add any additional autocmds here
--- Criação de um namespace para a ocultação de classes no HTML
-local namespace = vim.api.nvim_create_namespace("class_conceal")
+local ac = vim.api.nvim_create_autocmd
+local ag = vim.api.nvim_create_augroup
 
--- Criação de um grupo de autocmds para gerenciar os eventos de ocultação
-local group = vim.api.nvim_create_augroup("class_conceal", { clear = true })
-
--- Função para ocultar valores da classe em arquivos HTML
-local function conceal_html_class(bufnr)
-  -- Obtém a árvore de sintaxe do parser Treesitter para o buffer atual
-  local language_tree = vim.treesitter.get_parser(bufnr, "html")
-  local syntax_tree = language_tree:parse()
-  local root = syntax_tree[1]:root()
-
-  -- Define a consulta Treesitter para capturar atributos "class"
-  local query = vim.treesitter.parse_query(
-    "html",
-    [[
-    ((attribute
-        (attribute_name) @att_name (#eq? @att_name "class")
-        (quoted_attribute_value (attribute_value) @class_value) (#set! @class_value conceal "…")))
-    ]]
-  )
-
-  -- Itera sobre os matches encontrados na árvore de sintaxe
-  for _, captures, metadata in query:iter_matches(root, bufnr, root:start(), root:end_()) do
-    local start_row, start_col, end_row, end_col = captures[2]:range()
-    -- Define um extmark no buffer para ocultar o valor da classe
-    vim.api.nvim_buf_set_extmark(bufnr, namespace, start_row, start_col, {
-      end_line = end_row,
-      end_col = end_col,
-      conceal = metadata[2].conceal,
-    })
-  end
-end
-
--- Cria um autocmd que chama a função conceal_html_class em eventos específicos
-vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "TextChanged", "InsertLeave" }, {
-  group = group,
-  pattern = { "*.html" }, -- O autocmd é acionado para arquivos HTML
-  callback = function(match)
-    -- Chama a função para ocultar classes no buffer atual
-    conceal_html_class(vim.api.nvim_get_current_buf())
+-- Disable diagnostics in a .env file
+ac("BufRead", {
+  pattern = ".env",
+  callback = function()
+    vim.diagnostic.disable(false)
   end,
 })
 
--- Criação de um grupo de autocmds para alternar a exibição de números relativos e listas
-local set_toggle = vim.api.nvim_create_augroup("set_toggle", { clear = true })
+local auto_close_filetype = {
+  "lazy",
+  "mason",
+  "lspinfo",
+  "toggleterm",
+  "null-ls-info",
+  "TelescopePrompt",
+  "notify",
+}
 
--- Autocmd para desativar números relativos e ativar listas ao entrar no modo de inserção
-vim.api.nvim_create_autocmd("InsertEnter", {
-  callback = function()
-    if vim.bo.filetype ~= "alpha" and vim.bo.filetype ~= "NvimTree" and vim.bo.filetype ~= "SidebarNvim" then
-      vim.opt.relativenumber = false -- Desativa números relativos
-      vim.opt.list = true -- Ativa a exibição de caracteres especiais
+-- Auto close window when leaving
+ac("BufLeave", {
+  group = ag("lazyvim_auto_close_win", { clear = true }),
+  callback = function(event)
+    local ft = vim.api.nvim_buf_get_option(event.buf, "filetype")
+
+    if vim.fn.index(auto_close_filetype, ft) ~= -1 then
+      local winids = vim.fn.win_findbuf(event.buf)
+      for _, win in pairs(winids) do
+        vim.api.nvim_win_close(win, true)
+      end
     end
   end,
-  group = set_toggle,
 })
 
--- Autocmd para ativar números relativos e desativar listas ao sair do modo de inserção
-vim.api.nvim_create_autocmd({ "VimEnter", "BufEnter", "InsertLeave" }, {
+-- Disable leader and localleader for some filetypes
+ac("FileType", {
+  group = ag("lazyvim_unbind_leader_key", { clear = true }),
+  pattern = {
+    "lazy",
+    "mason",
+    "lspinfo",
+    "toggleterm",
+    "null-ls-info",
+    "neo-tree-popup",
+    "TelescopePrompt",
+    "notify",
+    "floaterm",
+  },
+  callback = function(event)
+    vim.keymap.set("n", "<leader>", "<nop>", { buffer = event.buf, desc = "" })
+    vim.keymap.set("n", "<localleader>", "<nop>", { buffer = event.buf, desc = "" })
+  end,
+})
+
+-- Delete number column on terminals
+ac("TermOpen", {
   callback = function()
-    if vim.bo.filetype ~= "alpha" and vim.bo.filetype ~= "NvimTree" and vim.bo.filetype ~= "SidebarNvim" then
-      vim.opt.relativenumber = true -- Ativa números relativos
-      vim.opt.list = false -- Desativa a exibição de caracteres especiais
+    vim.cmd("setlocal listchars= nonumber norelativenumber")
+    vim.cmd("setlocal nospell")
+  end,
+})
+
+-- Disable next line comments
+ac("BufEnter", {
+  callback = function()
+    vim.cmd("set formatoptions-=cro")
+    vim.cmd("setlocal formatoptions-=cro")
+  end,
+})
+
+-- Disable eslint on node_modules
+ac({ "BufNewFile", "BufRead" }, {
+  group = ag("DisableEslintOnNodeModules", { clear = true }),
+  pattern = { "**/node_modules/**", "node_modules", "/node_modules/*" },
+  callback = function()
+    vim.diagnostic.disable(false)
+  end,
+})
+
+-- Toggle between relative/absolute line numbers
+local numbertoggle = ag("numbertoggle", { clear = true })
+ac({ "BufEnter", "FocusGained", "InsertLeave", "CmdlineLeave", "WinEnter" }, {
+  pattern = "*",
+  group = numbertoggle,
+  callback = function()
+    if vim.o.nu and vim.api.nvim_get_mode().mode ~= "i" then
+      vim.opt.relativenumber = true
     end
   end,
-  group = set_toggle,
 })
 
--- Autocmd para ajustar a altura do comando durante a gravação
-vim.api.nvim_create_autocmd({ "RecordingEnter", "RecordingLeave" }, {
-  callback = function(match)
-    -- Define a altura do comando com base no estado de gravação
-    vim.o.cmdheight = match.event == "RecordingEnter" and 1 or 0
+ac({ "BufLeave", "FocusLost", "InsertEnter", "CmdlineEnter", "WinLeave" }, {
+  pattern = "*",
+  group = numbertoggle,
+  callback = function()
+    if vim.o.nu then
+      vim.opt.relativenumber = false
+      vim.cmd.redraw()
+    end
   end,
 })
 
-
+-- Create a dir when saving a file if it doesnt exist
+ac("BufWritePre", {
+  group = ag("auto_create_dir", { clear = true }),
+  callback = function(args)
+    if args.match:match("^%w%w+://") then
+      return
+    end
+    local file = vim.uv.fs_realpath(args.match) or args.match
+    vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
+  end,
+})
