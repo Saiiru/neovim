@@ -5,8 +5,26 @@ local function ColorMyPencils(colorScheme)
 
   -- Definindo a transparência para o fundo
   local set_hl = vim.api.nvim_set_hl
-  set_hl(0, "Normal", { bg = "none" })
-  set_hl(0, "NormalFloat", { bg = "none" })
+  local transparent_groups = {
+    "Normal",
+    "NormalNC",
+    "NormalFloat",
+    "EndOfBuffer",
+    "SignColumn",
+    "StatusLine",
+    "StatusLineNC",
+    "NeoTreeNormal",
+    "NeoTreeNormalNC",
+    "NeoTreeCursorLine",
+    "NeoTreeEndOfBuffer",
+  }
+  for _, group in ipairs(transparent_groups) do
+    set_hl(0, group, { bg = "none" })
+  end
+  vim.cmd([[
+  highlight CmpTransparent guibg=NONE ctermbg=NONE
+  highlight CmpBorderVibrant guifg=#00FFFF gui=bold
+  ]])
 end
 
 local function adjust_color(color, fallback)
@@ -62,6 +80,7 @@ return {
         highlights.Error = { fg = adjust_color(palette.red, "#FF074A"), bold = true }
         highlights.Number = { fg = adjust_color(palette.yellow, "#FFFA66"), bold = true }
         highlights.Boolean = { fg = adjust_color(palette.orange, "#FF9F1F"), bold = true }
+        highlights.NeoTreeNormal = { bg = "none" } -- Ensure Neo-tree transparency
         return highlights
       end,
     },
@@ -106,6 +125,7 @@ return {
             Normal = { bg = "#0d0d0d", fg = "#e5e5e5" }, -- fundo e texto principais
             Comment = { fg = "#b8b8b8", style = "italic" }, -- Comentários mais claros para contraste
             Function = { fg = "#0abdc6", style = "italic,bold" }, -- Funções em destaque
+            NeoTreeNormal = { bg = "none" }, -- Ensure Neo-tree transparency
           },
         },
       })
