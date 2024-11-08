@@ -33,21 +33,17 @@ return {
       workspaces = {
         {
           name = "personal",
-          path = "~/documents/obsidian-vaults/personal/",
-        },
-        {
-          name = "personal-brain",
-          path = "~/documents/obsidian-vaults/personal-brain/",
+          path = "~/documents/obsidian-vaults/",
         },
       },
 
-      notes_subdir = "Notes",
+      notes_subdir = "6 - Main Notes",
 
       daily_notes = {
-        folder = "Journal/Entries/Daily",
+        folder = "6 - Main Notes",
         date_format = "%Y-%m-%d",
         alias_format = "%B %-d, %Y",
-        template = "_data_/templates/journal/daily_entry.md",
+        template = "5 - Templates/Full Note.md",
       },
 
       mappings = {
@@ -72,7 +68,7 @@ return {
       },
 
       templates = {
-        subdir = "_data_/templates",
+        subdir = "5 - Templates",
         date_format = "%Y-%m-%d-%a",
         time_format = "%H:%M",
       },
@@ -82,7 +78,7 @@ return {
       end,
 
       attachments = {
-        img_folder = "_data_/media",
+        img_folder = "7 - assets",
       },
     },
   },

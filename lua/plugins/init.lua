@@ -1,21 +1,6 @@
 return {
   -- Add subdirectories here
-  {
-    import = "plugins.coding.ai",
-  },
-  {
-    import = "plugins.coding.cmp",
-  },
-  {
-    import = "plugins.coding",
-  },
-  {
-    import = "plugins.util",
-  },
-  { import = "plugins.coding.treesitter" },
 
-  { import = "plugins.dap" },
-  { import = "plugins.editor" },
   -- {
   --   import = "plugins.languages",
   -- },
