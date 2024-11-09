@@ -1,146 +1,102 @@
--- Options are automatically loaded before lazy.nvim startup
--- Default options that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
--- Add any additional options here
-local go = vim.g
-local o = vim.opt
+-- Borrow those settings from LazyVim
+vim.g.mapleader = " "
+vim.g.maplocalleader = "\\"
 
--- Optimizations on startup
-vim.loader.enable()
+-- Hide deprecation warnings
+vim.g.deprecation_warnings = false
 
--- Personal Config and LazyVim global options
-go.lualine_info_extras = false
-go.codeium_cmp_hide = false
-go.lazyvim_statuscolumn.folds_open = true
-go.lazyvim_statuscolumn.folds_githl = true
-go.lazygit_config = false
+local opt = vim.opt
 
--- Define leader key
-go.mapleader = " "
-go.maplocalleader = "\\"
+opt.autowrite = true -- Enable auto write
+-- only set clipboard if not in ssh, to make sure the OSC 52
+-- integration works automatically. Requires Neovim >= 0.10.0
+opt.clipboard = vim.env.SSH_TTY and "" or "unnamedplus" -- Sync with system clipboard
+opt.completeopt = "menu,menuone,noselect"
+opt.conceallevel = 0
+opt.confirm = true -- Confirm to save changes before exiting modified buffer
+opt.cursorline = true -- Enable highlighting of the current line
+opt.expandtab = true -- Use spaces instead of tabs
+opt.formatoptions = "jcroqlnt" -- tcqj
+opt.grepformat = "%f:%l:%c:%m"
+opt.grepprg = "rg --vimgrep"
+opt.ignorecase = true -- Ignore case
+opt.inccommand = "nosplit" -- preview incremental substitute
+opt.laststatus = 3 -- global statusline
+opt.linebreak = true -- Wrap lines at convenient points
+opt.list = false -- Show some invisible characters (tabs...
+opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
+opt.mouse = "a" -- Enable mouse mode
+opt.number = true -- Print line number
+opt.pumblend = 10 -- Popup blend
+opt.pumheight = 10 -- Maximum number of entries in a popup
+opt.relativenumber = true -- Relative line numbers
+opt.ruler = false -- Disable the default ruler
+opt.scrolloff = 4 -- Lines of context
+opt.sessionoptions = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp", "folds" }
+opt.shiftround = true -- Round indent
+opt.shiftwidth = 2 -- Size of an indent
+opt.shortmess:append({ W = true, I = true, c = true, C = true })
+opt.showmode = false -- Dont show mode since we have a statusline
+opt.sidescrolloff = 8 -- Columns of context
+opt.signcolumn = "yes" -- Always show the signcolumn, otherwise it would shift the text each time
+opt.smartcase = true -- Don't ignore case with capitals
+opt.smartindent = true -- Insert indents automatically
+opt.spelllang = { "en" }
+opt.spelloptions:append("noplainbuffer")
+opt.splitbelow = true -- Put new windows below current
+opt.splitkeep = "screen"
+opt.splitright = true -- Put new windows right of current
+opt.tabstop = 2 -- Number of spaces tabs count for
+opt.termguicolors = true -- True color support
+opt.timeoutlen = vim.g.vscode and 1000 or 300 -- Lower than default (1000) to quickly trigger which-key
+opt.undofile = true
+opt.undolevels = 10000
+opt.updatetime = 200 -- Save swap file and trigger CursorHold
+opt.virtualedit = "block" -- Allow cursor to move where there is no text in visual block mode
+opt.wildmode = "longest:full,full" -- Command-line completion mode
+opt.winminwidth = 5 -- Minimum window width
+opt.wrap = false -- Disable line wrap
 
--- Autoformat on save (Global)
-go.autoformat = true
+-- Fix markdown indentation settings
+vim.g.markdown_recommended_style = 0
 
--- Font
-go.gui_font_default_size = 10
-go.gui_font_size = go.gui_font_default_size
-
--- Enable EditorConfig integration
-go.editorconfig = true
-
--- Root dir detection
-go.root_spec = {
-  "lsp",
-  { ".git", "lua", ".obsidian", "package.json", "Makefile", "go.mod", "cargo.toml", "pyproject.toml", "src" },
-  "cwd",
+-- Folding
+opt.fillchars = {
+  foldopen = "",
+  foldclose = "",
+  fold = " ",
+  foldsep = " ",
+  diff = "╱",
+  eob = " ",
 }
-
--- Disable annoying cmd line stuff
-o.showcmd = false
-o.laststatus = 3
-o.cmdheight = 0
-
--- Enable spell checking
-o.spell = true
-o.spelllang:append("es", "pt_br") -- Adicionando suporte ao português brasileiro
-
--- Backspacing and indentation when wrapping
-o.backspace = { "start", "eol", "indent" }
-o.breakindent = true
-
--- Smoothscroll
-if vim.fn.has("nvim-0.10") == 1 then
-  o.smoothscroll = true
+opt.foldlevel = 99
+if vim.fn.has("nvim-0.10") == 1 or vim.fn.has("nvim-0.11") then
+  opt.smoothscroll = true
+  opt.foldexpr = "v:lua.require'utils.ui'.foldexpr()"
+  opt.foldmethod = "expr"
+  opt.foldtext = ""
+else
+  opt.foldmethod = "indent"
+  opt.foldtext = "v:lua.require'utils.ui'.foldtext()"
 end
 
-o.conceallevel = 2
+-- Enable spell check by default unless in vscode
+if not vim.g.vscode then
+  vim.o.spell = true
+end
 
--- ========================
--- Basic Neovim Configuration
--- ========================
-local opt = vim.opt
-local g = vim.g
-local fn = vim.fn
+-- Disable providers
+vim.g.loaded_ruby_provider = 0
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_node_provider = 0
+vim.g.loaded_python3_provider = 0
 
--- General Neovim options
-opt.number = true -- Show absolute line numbers
-opt.relativenumber = true -- Show relative line numbers
-opt.scrolloff = 10 -- Vertical scroll offset
-opt.sidescrolloff = 8 -- Horizontal scroll offset
-opt.splitright = true -- Open new vertical split to the right
-opt.splitbelow = true -- Open new horizontal split below
-opt.signcolumn = "yes" -- Always show sign column
-opt.termguicolors = true -- Enable 24-bit colors
-opt.laststatus = 0 -- Hide status line globally
-opt.cmdheight = 0 -- Hide command line unless used
-opt.updatetime = 250 -- Faster completion response
-opt.timeoutlen = 1000 -- Set leader key delay to 1 second
-opt.cursorline = true -- Highlight current cursor line
-opt.cursorlineopt = "number" -- Highlight line number for cursor
-opt.mouse = "a" -- Enable mouse support
-opt.mousemoveevent = true -- Track mouse movement events
-opt.wrap = false -- Disable line wrapping
-opt.hidden = true -- Allow unsaved buffers in background
-opt.clipboard = "unnamedplus" -- System clipboard integration
-opt.fillchars = { eob = " " } -- Remove ~ from empty lines
-opt.pumheight = 10 -- Limit popup menu height
-
--- Indentation settings
-opt.shiftwidth = 2 -- Indentation for >, < commands
-opt.tabstop = 2 -- Tab size of 2 spaces
-opt.softtabstop = 2 -- Tab key behaves as 2 spaces
-opt.expandtab = true -- Convert tabs to spaces
-
--- Search settings
-opt.ignorecase = true -- Case-insensitive search
-opt.smartcase = true -- Case-sensitive if uppercase is present
-opt.hlsearch = false -- Disable search highlighting
-opt.incsearch = true -- Enable incremental search
-opt.gdefault = true -- Use `g` flag by default for :substitute
-
--- File Handling
-opt.swapfile = false -- Disable swap files
-opt.undofile = true -- Enable persistent undo
-local undo_dir = os.getenv("HOME") .. "/.local/share/nvim/undo"
-os.execute("mkdir -p " .. undo_dir)
-opt.undodir = undo_dir
-
--- Whitespace and lists
-opt.list = true -- Show whitespace characters
-opt.listchars = {
-  space = ".",
-  eol = "↲",
-  nbsp = "␣",
-  trail = "·",
-  precedes = "←",
-  extends = "→",
-  tab = "¬ ",
-  conceal = "※",
-}
-
--- Folding settings
-opt.foldmethod = "expr" -- Define folding method as expr
-opt.foldexpr = "nvim_treesitter#foldexpr()" -- Treesitter fold expression
-opt.foldlevel = 20 -- Initial fold level
-opt.foldenable = false -- Disable automatic folding on file open
-
--- Enhanced display and command line options
-opt.completeopt = { "menu", "menuone", "noselect" }
-opt.inccommand = "split" -- Live substitution preview
-
--- Leader keys
-g.mapleader = " " -- Global leader key
-g.maplocalleader = "," -- Local leader key
-
--- Nerd Font settings
-g.have_nerd_font = true -- Global Nerd Font usage flag
-opt.guifont = "FiraCode Nerd Font:h12,Maple Mono NF:h12" -- GUI font combination
-
--- Diff settings
-opt.diffopt = "vertical,iwhite" -- Vertical diff with no whitespace
-
--- Filetype-specific indentation settings
-vim.cmd([[
-  autocmd FileType java,go,c setlocal tabstop=4 shiftwidth=4 expandtab
-  autocmd FileType lua,javascript setlocal tabstop=2 shiftwidth=2 expandtab
-]])
+-- Setup options for Neovide
+-- Install neovide: ❯ brew install --ignore-dependencies  neovide
+if vim.g.neovide then
+  vim.o.guifont = "OperatorMonoLig Nerd Font:h20"
+  vim.g.neovide_hide_mouse_when_typing = true
+  vim.g.neovide_cursor_antialiasing = false
+  vim.g.neovide_input_macos_option_key_is_meta = "only_left"
+  vim.g.neovide_input_ime = true
+end
