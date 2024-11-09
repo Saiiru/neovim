@@ -53,7 +53,7 @@ local enable_extra_plugins = vim.g.enable_plugins
 local enable_extra_langs = vim.g.enable_langs or {
   go = "yes",
   rust = "yes",
-  python = "yes",
+  python = "no",
   ruby = "no",
 }
 
@@ -98,4 +98,3 @@ require("lazy").setup({
 })
 
 -- Do not set colorscheme if using vscode
--- require("config.lazy").setup(not vim.g.vscode and require("themer").selectColorSchemeByTime() or "")
