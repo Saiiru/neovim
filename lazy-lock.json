@@ -67,6 +67,7 @@
   "overseer.nvim": { "branch": "master", "commit": "c416be50c2715a7f631d67e21154b8e6cd873ca3" },
   "persistence.nvim": { "branch": "main", "commit": "f6aad7dde7fcf54148ccfc5f622c6d5badd0cc3d" },
   "plenary.nvim": { "branch": "master", "commit": "2d9b06177a975543726ce5c73fca176cedbffe9d" },
+  "precognition.nvim": { "branch": "main", "commit": "0189e8d6f96275a079b2805d68d49414871885cd" },
   "pretty-fold.nvim": { "branch": "master", "commit": "1eb18f228972e86b7b8f5ef33ca8091e53fb1e49" },
   "previm": { "branch": "master", "commit": "55be27f117654083c2c1b77cb274c76698c25ccc" },
   "project.nvim": { "branch": "main", "commit": "8c6bad7d22eef1b71144b401c9f74ed01526a4fb" },
