@@ -1,207 +1,206 @@
--- This file is automatically loaded by lazyvim.config.init.
+-- Função para aplicar o esquema de cores com transparência total
+local function ColorMyPencils(colorScheme)
+  colorScheme = colorScheme or "carbonfox"
+  vim.cmd.colorscheme(colorScheme)
 
-local function augroup(name)
-  return vim.api.nvim_create_augroup("nvim_ide_" .. name, { clear = true })
+  -- Definindo a transparência para o fundo
+  local set_hl = vim.api.nvim_set_hl
+  local transparent_groups = {
+    "Normal",
+    "NormalNC",
+    "NormalFloat",
+    "EndOfBuffer",
+    "SignColumn",
+    "StatusLine",
+    "StatusLineNC",
+    "NeoTreeNormal",
+    "NeoTreeNormalNC",
+    "NeoTreeCursorLine",
+    "NeoTreeEndOfBuffer",
+  }
+  for _, group in ipairs(transparent_groups) do
+    set_hl(0, group, { bg = "none" })
+  end
+
+  -- Definições de destaque adicionais
+  vim.cmd([[
+  highlight CmpTransparent guibg=NONE ctermbg=NONE
+  highlight CmpBorderVibrant guifg=#00FFFF gui=bold
+  ]])
 end
 
--- Check if we need to reload the file when it changed
-vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
-  group = augroup("checktime"),
-  callback = function()
-    if vim.o.buftype ~= "nofile" then
-      vim.cmd("checktime")
-    end
-  end,
-})
+-- Função auxiliar para ajuste de cor
+local function adjust_color(color, fallback)
+  return type(color) == "string" and color or fallback
+end
 
--- Highlight on yank
-vim.api.nvim_create_autocmd("TextYankPost", {
-  group = augroup("highlight_yank"),
-  callback = function()
-    (vim.hl or vim.highlight).on_yank()
-  end,
-})
-
--- resize splits if window got resized
-vim.api.nvim_create_autocmd({ "VimResized" }, {
-  group = augroup("resize_splits"),
-  callback = function()
-    local current_tab = vim.fn.tabpagenr()
-    vim.cmd("tabdo wincmd =")
-    vim.cmd("tabnext " .. current_tab)
-  end,
-})
-
--- go to last loc when opening a buffer
-vim.api.nvim_create_autocmd("BufReadPost", {
-  group = augroup("last_loc"),
-  callback = function(event)
-    local exclude = { "gitcommit" }
-    local buf = event.buf
-    if vim.tbl_contains(exclude, vim.bo[buf].filetype) or vim.b[buf].lazyvim_last_loc then
-      return
-    end
-    vim.b[buf].lazyvim_last_loc = true
-    local mark = vim.api.nvim_buf_get_mark(buf, '"')
-    local lcount = vim.api.nvim_buf_line_count(buf)
-    if mark[1] > 0 and mark[1] <= lcount then
-      pcall(vim.api.nvim_win_set_cursor, 0, mark)
-    end
-  end,
-})
-
--- close some filetypes with <q>
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("close_with_q"),
-  pattern = {
-    "PlenaryTestPopup",
-    "help",
-    "lspinfo",
-    "notify",
-    "qf",
-    "grug-far",
-    "spectre_panel",
-    "startuptime",
-    "tsplayground",
-    "neotest-output",
-    "checkhealth",
-    "neotest-summary",
-    "neotest-output-panel",
-    "dbout",
-    "gitsigns-blame",
+-- Configuração dos temas com transparência e estilo "Dark Knight"
+return {
+  -- Kanagawa Theme Config
+  {
+    "rebelot/kanagawa.nvim",
+    lazy = true,
+    opts = {
+      dimInactive = true,
+      colors = {
+        theme = {
+          all = {
+            ui = {
+              bg_gutter = "none", -- sem fundo na margem
+            },
+          },
+        },
+      },
+      overrides = function(colors)
+        local theme = colors.theme
+        return {
+          NormalFloat = { bg = "none" },
+          FloatBorder = { bg = "none" },
+          FloatTitle = { bg = "none" },
+          NormalDark = { fg = theme.ui.fg_dim, bg = theme.ui.bg_m3 },
+          LazyNormal = { bg = theme.ui.bg_m3, fg = theme.ui.fg_dim },
+          MasonNormal = { bg = theme.ui.bg_m3, fg = theme.ui.fg_dim },
+        }
+      end,
+    },
   },
-  callback = function(event)
-    vim.bo[event.buf].buflisted = false
-    vim.schedule(function()
-      vim.keymap.set("n", "q", function()
-        vim.cmd("close")
-        pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
-      end, {
-        buffer = event.buf,
-        silent = true,
-        desc = "Quit buffer",
-      })
-    end)
-  end,
-})
 
--- make it easier to close man-files when opened inline
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("man_unlisted"),
-  pattern = { "man" },
-  callback = function(event)
-    vim.bo[event.buf].buflisted = false
-  end,
-})
+  -- Carbonfox Theme Config
+  {
+    "EdenEast/nightfox.nvim",
+    opts = {
+      options = {
+        transparent = true, -- sempre transparente
+        terminal_colors = true,
+        styles = {
+          comments = "italic",
+          keywords = "bold",
+          types = "italic,bold",
+        },
+      },
+      palettes = {
+        carbonfox = {
+          bg1 = "#0d0d0d", -- fundo principal, preto
+          fg1 = "#e5e5e5", -- texto quase branco
+          blue = "#0abdc6", -- azul neon
+          green = "#51fa7b", -- verde neon
+          red = "#ff5555", -- vermelho intenso
+          yellow = "#f57800", -- amarelo suave
+          magenta = "#ff79c6", -- rosa neon
+          cyan = "#8be9fd", -- ciano
+        },
+      },
+      groups = {
+        carbonfox = {
+          CursorLine = { bg = "#282a36" },
+          Normal = { bg = "none", fg = "#e5e5e5" },
+          Comment = { fg = "#b8b8b8", style = "italic" },
+          Function = { fg = "#0abdc6", style = "italic,bold" },
+          NeoTreeNormal = { bg = "none" },
+        },
+      },
+    },
+    config = function()
+      ColorMyPencils("carbonfox")
+    end,
+  },
 
--- wrap and check for spell in text filetypes
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("wrap_spell"),
-  pattern = { "*.txt", "*.tex", "*.typ", "gitcommit", "markdown" },
-  callback = function()
-    vim.opt_local.wrap = true
-    vim.opt_local.spell = true
-  end,
-})
-
--- Fix conceallevel for json files
-vim.api.nvim_create_autocmd({ "FileType" }, {
-  group = augroup("json_conceal"),
-  pattern = { "json", "jsonc", "json5" },
-  callback = function()
-    vim.opt_local.conceallevel = 0
-  end,
-})
-
--- Auto create dir when saving a file, in case some intermediate directory does not exist
-vim.api.nvim_create_autocmd({ "BufWritePre" }, {
-  group = augroup("auto_create_dir"),
-  callback = function(event)
-    if event.match:match("^%w%w+:[\\/][\\/]") then
-      return
-    end
-    local file = vim.uv.fs_realpath(event.match) or event.match
-    vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
-  end,
-})
-
--- Set filetype for .env and .env.* files
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-  group = augroup("env_filetype"),
-  pattern = { "*.env", ".env.*" },
-  callback = function()
-    vim.opt_local.filetype = "sh"
-  end,
-})
-
--- Set filetype for .hurl files
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-  group = augroup("hurl_filetype"),
-  pattern = { "*.hurl" },
-  callback = function()
-    vim.opt_local.filetype = "hurl"
-  end,
-})
-
--- Set filetype for .toml files
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-  group = augroup("toml_filetype"),
-  pattern = { "*.tomg-config*" },
-  callback = function()
-    vim.opt_local.filetype = "toml"
-  end,
-})
-
--- Set filetype for .ejs files
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-  group = augroup("ejs_filetype"),
-  pattern = { "*.ejs", "*.ejs.t" },
-  callback = function()
-    vim.opt_local.filetype = "embedded_template"
-  end,
-})
-
--- Set filetype for .code-snippets files
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-  group = augroup("code_snippets_filetype"),
-  pattern = { "*.code-snippets" },
-  callback = function()
-    vim.opt_local.filetype = "json"
-  end,
-})
-
--- Additional Autocmds
-vim.api.nvim_create_autocmd("BufWinEnter", {
-  pattern = "*",
-  callback = function()
-    -- skip if a pop up window
-    if vim.fn.win_gettype() == "popup" then
-      return
-    end
-
-    -- skip if new buffer
-    if vim.bo.filetype == "" then
-      return
-    end
-
-    vim.wo.winbar = "%{%v:lua.require'utils.nvim.winbar'.eval()%}"
-  end,
-  group = vim.api.nvim_create_augroup("WinBar", {}),
-})
-
--- Fixes the border issue in terminals
-vim.api.nvim_create_autocmd({ "UIEnter", "ColorScheme" }, {
-  callback = function()
-    local normal = vim.api.nvim_get_hl(0, { name = "Normal" })
-    if not normal.bg then
-      return
-    end
-    io.write(string.format("\027]11;#%06x\027\\", normal.bg))
-  end,
-})
-
-vim.api.nvim_create_autocmd("UILeave", {
-  callback = function()
-    io.write("\027]111\027\\")
-  end,
-})
+  -- Outros Temas com Transparência Ativada
+  {
+    "rose-pine/neovim",
+    name = "rose-pine",
+    opts = {
+      variant = "moon",
+      disable_background = true,
+      disable_float_background = true,
+      styles = {
+        bold = true,
+        italic = true,
+      },
+    },
+    lazy = true,
+  },
+  {
+    "catppuccin/nvim",
+    lazy = true,
+    name = "catppuccin",
+    opts = {
+      transparent_background = true,
+      integrations = {
+        cmp = true,
+        dashboard = true,
+        flash = true,
+        gitsigns = true,
+        headlines = true,
+        indent_blankline = { enabled = true },
+        lsp_trouble = true,
+        mason = true,
+        markdown = true,
+        mini = true,
+        native_lsp = {
+          enabled = true,
+          underlines = {
+            errors = { "undercurl" },
+            hints = { "undercurl" },
+            warnings = { "undercurl" },
+            information = { "undercurl" },
+          },
+        },
+        neotest = true,
+        noice = true,
+        notify = true,
+        semantic_tokens = true,
+        treesitter = true,
+        treesitter_context = true,
+        which_key = true,
+        fzf = true,
+      },
+    },
+  },
+  {
+    "Mofiqul/dracula.nvim",
+    lazy = true,
+    opts = {
+      transparent_bg = true,
+      show_end_of_buffer = true,
+      italic_comment = true,
+    },
+    config = function(_, opts)
+      local dracula = require("dracula")
+      dracula.setup(opts)
+      vim.o.spell = false
+    end,
+  },
+  {
+    "lalitmee/cobalt2.nvim",
+    lazy = true,
+    dependencies = { "tjdevries/colorbuddy.nvim", tag = "v1.0.0" },
+    init = function()
+      require("colorbuddy").colorscheme("cobalt2")
+      vim.o.spell = false
+    end,
+  },
+  {
+    "oxfist/night-owl.nvim",
+    lazy = true,
+    opts = {
+      bold = true,
+      italics = true,
+      underline = true,
+      undercurl = true,
+      transparent_background = true,
+    },
+  },
+  {
+    "folke/tokyonight.nvim",
+    lazy = true,
+    opts = {
+      style = "moon",
+      transparent = true,
+      styles = {
+        sidebars = "transparent",
+        floats = "transparent",
+      },
+    },
+  },
+}
