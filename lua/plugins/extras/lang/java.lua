@@ -21,6 +21,47 @@ local function get_workspace()
   return workspace_path .. project_name
 end
 
+-- Define the on_attach function
+local function on_attach(client, buffer)
+  vim.keymap.set(
+    "n",
+    "<leader>di",
+    "<Cmd>lua require'jdtls'.organize_imports()<CR>",
+    { buffer = buffer, desc = "Organize Imports" }
+  )
+  vim.keymap.set(
+    "n",
+    "<leader>dt",
+    "<Cmd>lua require'jdtls'.test_class()<CR>",
+    { buffer = buffer, desc = "Test Class" }
+  )
+  vim.keymap.set(
+    "n",
+    "<leader>dn",
+    "<Cmd>lua require'jdtls'.test_nearest_method()<CR>",
+    { buffer = buffer, desc = "Test Nearest Method" }
+  )
+  vim.keymap.set(
+    "v",
+    "<leader>de",
+    "<Esc><Cmd>lua require('jdtls').extract_variable(true)<CR>",
+    { buffer = buffer, desc = "Extract Variable" }
+  )
+  vim.keymap.set(
+    "n",
+    "<leader>de",
+    "<Cmd>lua require('jdtls').extract_variable()<CR>",
+    { buffer = buffer, desc = "Extract Variable" }
+  )
+  vim.keymap.set(
+    "v",
+    "<leader>dm",
+    "<Esc><Cmd>lua require('jdtls').extract_method(true)<CR>",
+    { buffer = buffer, desc = "Extract Method" }
+  )
+  vim.keymap.set("n", "<leader>cf", "<cmd>lua vim.lsp.buf.format()<CR>", { buffer = buffer, desc = "Format" })
+end
+
 return {
   { import = "lazyvim.plugins.extras.lang.java" },
   {
@@ -56,50 +97,7 @@ return {
           vim.api.nvim_create_autocmd("FileType", {
             pattern = "java",
             callback = function()
-              require("lazyvim.util").on_attach(function(_, buffer)
-                vim.keymap.set(
-                  "n",
-                  "<leader>di",
-                  "<Cmd>lua require'jdtls'.organize_imports()<CR>",
-                  { buffer = buffer, desc = "Organize Imports" }
-                )
-                vim.keymap.set(
-                  "n",
-                  "<leader>dt",
-                  "<Cmd>lua require'jdtls'.test_class()<CR>",
-                  { buffer = buffer, desc = "Test Class" }
-                )
-                vim.keymap.set(
-                  "n",
-                  "<leader>dn",
-                  "<Cmd>lua require'jdtls'.test_nearest_method()<CR>",
-                  { buffer = buffer, desc = "Test Nearest Method" }
-                )
-                vim.keymap.set(
-                  "v",
-                  "<leader>de",
-                  "<Esc><Cmd>lua require('jdtls').extract_variable(true)<CR>",
-                  { buffer = buffer, desc = "Extract Variable" }
-                )
-                vim.keymap.set(
-                  "n",
-                  "<leader>de",
-                  "<Cmd>lua require('jdtls').extract_variable()<CR>",
-                  { buffer = buffer, desc = "Extract Variable" }
-                )
-                vim.keymap.set(
-                  "v",
-                  "<leader>dm",
-                  "<Esc><Cmd>lua require('jdtls').extract_method(true)<CR>",
-                  { buffer = buffer, desc = "Extract Method" }
-                )
-                vim.keymap.set(
-                  "n",
-                  "<leader>cf",
-                  "<cmd>lua vim.lsp.buf.format()<CR>",
-                  { buffer = buffer, desc = "Format" }
-                )
-              end)
+              on_attach(_, opts.bufnr)
 
               local launcher, config, lombok = get_jdtls()
               local workspace_dir = get_workspace()
@@ -150,6 +148,40 @@ return {
           require("lint").try_lint()
         end,
       })
+    end,
+  },
+  -- Configurações DAP para java-debug-adapter e java-test
+  {
+    "mfussenegger/nvim-dap",
+    config = function()
+      local dap = require("dap")
+      dap.adapters.java = function(callback, config)
+        callback({
+          type = "server",
+          host = "127.0.0.1",
+          port = 5005,
+        })
+      end
+      dap.configurations.java = {
+        {
+          type = "java",
+          request = "attach",
+          name = "Attach to the process",
+          hostName = "127.0.0.1",
+          port = 5005,
+        },
+        {
+          type = "java",
+          request = "launch",
+          name = "Launch Java Program",
+          mainClass = function()
+            return vim.fn.input("Main class name: ", "", "file")
+          end,
+          projectName = function()
+            return vim.fn.input("Project name: ", "", "file")
+          end,
+        },
+      }
     end,
   },
 }

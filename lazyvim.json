@@ -39,8 +39,9 @@
     "plugins.extras.formatting.prettier-extended",
     "plugins.extras.formatting.trim_newlines",
     "plugins.extras.formatting.trim_whitespace",
-    "plugins.extras.formatting.java-format",
+    "plugins.extras.formatting.google-java-format",
     "plugins.extras.lang.bash",
+    "plugins.extras.lang.clangd",
     "plugins.extras.lang.java",
     "plugins.extras.lang.markdown-extended",
     "plugins.extras.lang.python-extended",
@@ -81,5 +82,5 @@
   "news": {
     "NEWS.md": "7107"
   },
-  "version": 6
+  "version": 7
 }
