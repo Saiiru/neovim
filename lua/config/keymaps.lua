@@ -1,311 +1,236 @@
 local map = vim.keymap.set
+local o = vim.opt
 
--- better up/down
-map({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
-map({ "n", "x" }, "<Down>", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
-map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
-map({ "n", "x" }, "<Up>", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
+local lazy = require("lazy")
 
--- -- Move to window using the <ctrl> hjkl keys with tmux-navigator
-if vim.g.vscode then
-  -- Only map if that is inside vscode
-  map("n", "<C-h>", "<C-w>h", { desc = "Go to Left Window", remap = true })
-  map("n", "<C-j>", "<C-w>j", { desc = "Go to Lower Window", remap = true })
-  map("n", "<C-k>", "<C-w>k", { desc = "Go to Upper Window", remap = true })
-  map("n", "<C-l>", "<C-w>l", { desc = "Go to Right Window", remap = true })
+-- Search current word
+local searching_brave = function()
+  vim.fn.system({ "xdg-open", "https://search.brave.com/search?q=" .. vim.fn.expand("<cword>") })
 end
+map("n", "<leader>?", searching_brave, { noremap = true, silent = true, desc = "Search Current Word on Brave Search" })
 
--- Resize window using <ctrl> arrow keys
-map("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Increase Window Height" })
-map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease Window Height" })
-map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease Window Width" })
-map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase Window Width" })
+-- Lazy options
+map("n", "<leader>l", "<Nop>")
+map("n", "<leader>ll", "<cmd>Lazy<cr>", { desc = "Lazy" })
+-- stylua: ignore start
+map("n", "<leader>ld", function() vim.fn.system({ "xdg-open", "https://lazyvim.org" }) end, { desc = "LazyVim Docs" })
+map("n", "<leader>lr", function() vim.fn.system({ "xdg-open", "https://github.com/LazyVim/LazyVim" }) end, { desc = "LazyVim Repo" })
+map("n", "<leader>lx", "<cmd>LazyExtras<cr>", { desc = "Extras" })
+map("n", "<leader>lc", function() LazyVim.news.changelog() end, { desc = "LazyVim Changelog" })
 
--- Move Lines
-map("n", "<A-j>", "<cmd>execute 'move .+' . v:count1<cr>==", { desc = "Move Down" })
-map("n", "<A-k>", "<cmd>execute 'move .-' . (v:count1 + 1)<cr>==", { desc = "Move Up" })
-map("i", "<A-j>", "<esc><cmd>m .+1<cr>==gi", { desc = "Move Down" })
-map("i", "<A-k>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move Up" })
-map("v", "<A-j>", ":<C-u>execute \"'<,'>move '>+\" . v:count1<cr>gv=gv", { desc = "Move Down" })
-map("v", "<A-k>", ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv", { desc = "Move Up" })
+map("n", "<leader>lu", function() lazy.update() end, { desc = "Lazy Update" })
+map("n", "<leader>lC", function() lazy.check() end, { desc = "Lazy Check" })
+map("n", "<leader>ls", function() lazy.sync() end, { desc = "Lazy Sync" })
+-- stylua: ignore end
 
--- Goto
-map("n", "gl", "$", { desc = "Go to end of line" })
-map("n", "gh", "^", { desc = "Go to start of line" })
+-- Disable LazyVim bindings
+map("n", "<leader>L", "<Nop>")
+map("n", "<leader>fT", "<Nop>")
 
--- buffers
-map("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
-map("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer" })
-map("n", "[b", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
-map("n", "]b", "<cmd>bnext<cr>", { desc = "Next Buffer" })
-map("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
-map("n", "<leader>`", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
+-- Identation
+map("n", "<", "<<", { desc = "Deindent" })
+map("n", ">", ">>", { desc = "Indent" })
 
--- Clear search with <esc>
-map({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Escape and Clear hlsearch" })
+-- Save without formatting
+map("n", "<A-s>", "<cmd>noautocmd w<CR>", { desc = "Save Without Formatting" })
 
--- Clear search, diff update and redraw
--- taken from runtime/lua/_editor.lua
-map(
-  "n",
-  "<leader>ur",
-  "<Cmd>nohlsearch<Bar>diffupdate<Bar>normal! <C-L><CR>",
-  { desc = "Redraw / Clear hlsearch / Diff Update" }
-)
+-- Cursor navigation on insert mode
+map("i", "<M-h>", "<left>", { desc = "Move Cursor Left" })
+map("i", "<M-l>", "<right>", { desc = "Move Cursor Left" })
+map("i", "<M-j>", "<down>", { desc = "Move Cursor Left" })
+map("i", "<M-k>", "<up>", { desc = "Move Cursor Left" })
 
--- https://github.com/mhinz/vim-galore#saner-behavior-of-n-and-n
-map("n", "n", "'Nn'[v:searchforward].'zv'", { expr = true, desc = "Next Search Result" })
-map("x", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next Search Result" })
-map("o", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next Search Result" })
-map("n", "N", "'nN'[v:searchforward].'zv'", { expr = true, desc = "Prev Search Result" })
-map("x", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev Search Result" })
-map("o", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev Search Result" })
+-- End of the word backwards
+map("n", "E", "ge")
 
--- Add undo break-points
-map("i", ",", ",<c-g>u")
-map("i", ".", ".<c-g>u")
-map("i", ";", ";<c-g>u")
+-- Increment/decrement
+map("n", "+", "<C-a>")
+map("n", "-", "<C-x>")
 
--- save file
-map({ "i", "x", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save File" })
-
---keywordprg
-map("n", "<leader>K", "<cmd>norm! K<cr>", { desc = "Keywordprg" })
-
--- better indenting
-map("v", "<", "<gv")
-map("v", ">", ">gv")
-
--- commenting
-map("n", "gco", "o<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>", { desc = "Add Comment Below" })
-map("n", "gcO", "O<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>", { desc = "Add Comment Above" })
-
--- lazy
-map("n", "<leader>zz", "<cmd>Lazy<cr>", { desc = "Lazy" })
-
--- new file
-map("n", "<leader>fn", "<cmd>enew<cr>", { desc = "New File" })
-
-map("n", "<leader>xl", "<cmd>lopen<cr>", { desc = "Location List" })
-map("n", "<leader>xq", "<cmd>copen<cr>", { desc = "Quickfix List" })
-
-map("n", "[q", vim.cmd.cprev, { desc = "Previous Quickfix" })
-map("n", "]q", vim.cmd.cnext, { desc = "Next Quickfix" })
-
--- diagnostic
-local diagnostic_goto = function(next, severity)
-  local go = next and vim.diagnostic.goto_next or vim.diagnostic.goto_prev
-  severity = severity and vim.diagnostic.severity[severity] or nil
-  return function()
-    go({ severity = severity })
-  end
+-- Tabs
+map("n", "]<tab>", "<cmd>tabnext<cr>", { desc = "Next Tab" })
+map("n", "[<tab>", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
+map("n", "<tab>", "<cmd>tabnext<cr>", { desc = "Next Tab" })
+map("n", "<s-tab>", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
+for i = 1, 9 do
+  map("n", "<leader><tab>" .. i, "<cmd>tabn " .. i .. "<cr>", { desc = "Tab " .. i })
 end
-map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
-map("n", "]d", diagnostic_goto(true), { desc = "Next Diagnostic" })
-map("n", "[d", diagnostic_goto(false), { desc = "Prev Diagnostic" })
-map("n", "]e", diagnostic_goto(true, "ERROR"), { desc = "Next Error" })
-map("n", "[e", diagnostic_goto(false, "ERROR"), { desc = "Prev Error" })
-map("n", "]w", diagnostic_goto(true, "WARN"), { desc = "Next Warning" })
-map("n", "[w", diagnostic_goto(false, "WARN"), { desc = "Prev Warning" })
-
--- quit
-map("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit All" })
-
--- highlights under cursor
-map("n", "<leader>ui", vim.show_pos, { desc = "Inspect Pos" })
-map("n", "<leader>uI", "<cmd>InspectTree<cr>", { desc = "Inspect Tree" })
-
--- Terminal Mappings
-map("t", "<esc><esc>", "<c-\\><c-n>", { desc = "Enter Normal Mode" })
-map("t", "<C-h>", "<cmd>wincmd h<cr>", { desc = "Go to Left Window" })
-map("t", "<C-j>", "<cmd>wincmd j<cr>", { desc = "Go to Lower Window" })
-map("t", "<C-k>", "<cmd>wincmd k<cr>", { desc = "Go to Upper Window" })
-map("t", "<C-l>", "<cmd>wincmd l<cr>", { desc = "Go to Right Window" })
-map("t", "<C-/>", "<cmd>close<cr>", { desc = "Hide Terminal" })
-map("t", "<c-_>", "<cmd>close<cr>", { desc = "which_key_ignore" })
-
--- windows
-map("n", "<leader>ww", "<C-W>p", { desc = "Other Window", remap = true })
-map("n", "<leader>wd", "<C-W>c", { desc = "Delete Window", remap = true })
-map("n", "<leader>w-", "<C-W>s", { desc = "Split Window Below", remap = true })
-map("n", "<leader>w|", "<C-W>v", { desc = "Split Window Right", remap = true })
-map("n", "<leader>-", "<C-W>s", { desc = "Split Window Below", remap = true })
-map("n", "<leader>|", "<C-W>v", { desc = "Split Window Right", remap = true })
-
--- tabs
-map("n", "<leader><tab>l", "<cmd>tablast<cr>", { desc = "Last Tab" })
-map("n", "<leader><tab>o", "<cmd>tabonly<cr>", { desc = "Close Other Tabs" })
-map("n", "<leader><tab>f", "<cmd>tabfirst<cr>", { desc = "First Tab" })
-map("n", "<leader><tab><tab>", "<cmd>tabnew<cr>", { desc = "New Tab" })
-map("n", "<leader><tab>]", "<cmd>tabnext<cr>", { desc = "Next Tab" })
-map("n", "<leader><tab>d", "<cmd>tabclose<cr>", { desc = "Close Tab" })
-map("n", "<leader><tab>[", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
-
-vim.api.nvim_create_user_command("FormatDisable", function(args)
-  if args.bang then
-    -- FormatDisable! will disable formatting just for this buffer
-    vim.b.disable_autoformat = true
-  else
-    vim.g.disable_autoformat = true
-  end
-end, {
-  desc = "Disable autoformat-on-save",
-  bang = true,
-})
-vim.api.nvim_create_user_command("FormatEnable", function()
-  vim.b.disable_autoformat = false
-  vim.g.disable_autoformat = false
-end, {
-  desc = "Re-enable autoformat-on-save",
-})
-
--- Define a global variable to enable/disable autoformat
-local auto_format = true
-map("n", "<leader>uf", function()
-  auto_format = not auto_format
-  if auto_format then
-    vim.cmd("FormatEnable")
-  else
-    vim.cmd("FormatDisable")
-  end
-end, { desc = "Toggle Autoformat" })
-
--- ------------------------------------------------------------------------- }}}
--- {{{ Folding commands.
-
--- Author: Karl Yngve Lervåg
---    See: https://github.com/lervag/dotnvim
-
--- Close all fold except the current one.
-map("n", "zv", "zMzvzz", {
-  desc = "Close all folds except the current one",
-})
-
--- Close current fold when open. Always open next fold.
-map("n", "zj", "zcjzOzz", {
-  desc = "Close current fold when open. Always open next fold.",
-})
-
--- Close current fold when open. Always open previous fold.
-map("n", "zk", "zckzOzz", {
-  desc = "Close current fold when open. Always open previous fold.",
-})
-
--- Refer [FAQ - Neovide](https://neovide.dev/faq.html#how-can-i-use-cmd-ccmd-v-to-copy-and-paste)
-if vim.g.neovide then
-  vim.keymap.set("n", "<D-s>", ":w<CR>") -- Save
-  vim.keymap.set("v", "<D-c>", '"+y') -- Copy
-  vim.keymap.set({ "n", "v" }, "<D-v>", '"+P') -- Paste normal and visual mode
-  vim.keymap.set({ "i", "c" }, "<D-v>", "<C-R>+") -- Paste insert and command mode
-  vim.keymap.set("t", "<D-v>", [[<C-\><C-N>"+P]]) -- Paste terminal mode  vim.keymap.set("n", "<D-s>", ":w<CR>") -- Save
-end
-
--- Silent keymap option
-local opts = { silent = true }
-
--- Better paste
--- remap "p" in visual mode to delete the highlighted text without overwriting your yanked/copied text, and then paste the content from the unnamed register.
-map("v", "p", '"_dP', opts)
-
--- Copy whole file content to clipboard with C-c
-map("n", "<C-c>", ":%y+<CR>", opts)
-
--- Select all text in buffer with Alt-a
-map("n", "<A-a>", "ggVG", { noremap = true, silent = true, desc = "Select all" })
-
--- Visual --
--- Stay in indent mode
-map("v", "<", "<gv", opts)
-map("v", ">", ">gv", opts)
-
--- Easier access to beginning and end of lines
-map("n", "<A-h>", "^", {
-  desc = "Go to start of line",
-  silent = true,
-})
-map("n", "<A-l>", "$", {
-  desc = "Go to end of line",
-  silent = true,
-})
-
--- Move live up or down
--- moving
-map("n", "<A-Down>", ":m .+1<CR>", opts)
-map("n", "<A-Up>", ":m .-2<CR>", opts)
-map("i", "<A-Down>", "<Esc>:m .+1<CR>==gi", opts)
-map("i", "<A-Up>", "<Esc>:m .-2<CR>==gi", opts)
-map("v", "<A-Down>", ":m '>+1<CR>gv=gv", opts)
-map("v", "<A-Up>", ":m '<-2<CR>gv=gv", opts)
-
--- Show Lsp info
-map("n", "<leader>cl", "<cmd>LspInfo<CR>", opts)
-
--- Fix Spell checking
-map("n", "z0", "1z=", {
-  desc = "Fix world under cursor",
-})
-
-map(
-  "n",
-  "<leader>us",
-  "<cmd>lua require('utils.cspell').add_word_to_c_spell_dictionary()<CR>",
-  { noremap = true, silent = true, desc = "Add unknown to cspell dictionary" }
-)
-
--- Toggle wrap
-map("n", "<leader>tw", "<cmd>set wrap!<CR>", {
-  desc = "Toggle Wrap",
-  silent = true,
-})
-
--- Toggle spell
-map("n", "<leader>ts", "<cmd>set spell!<CR>", {
-  desc = "Toggle Spell",
-  silent = true,
-})
-
--- Format selected text with jq
-map("x", "<leader>ff", ":<C-u>lua require('utils.format').format_json_with_jq()<CR>", {
-  desc = "Format selected text with jq",
-  silent = true,
-})
-
-local Diagnostics = require("utils.diagnostics")
-local Lsp = require("utils.lsp")
-local Cmd = require("utils.cmd")
-
-map("n", "<leader>td", function()
-  Diagnostics.toggle_diagnostics_level()
-end, { noremap = true, silent = true, desc = "Toggle Diagnostics Level" })
-
--- Stop LSP client by name
-Cmd.create_cmd("StopLspClient", function()
-  -- List all active clients
-  local clients = vim.lsp.get_active_clients()
-  local items = {}
-  for _, client in ipairs(clients) do
-    table.insert(items, client.name)
-  end
-
-  -- Show list of clients with ui select
-  vim.ui.select(items, {
-    prompt = "Select LSP client to stop",
-  }, function(choice)
-    if choice ~= nil then
-      Lsp.stop_lsp_client_by_name(choice)
+map("n", "<leader>f<tab>", function()
+  vim.ui.select(vim.api.nvim_list_tabpages(), {
+    prompt = "Select Tab:",
+    format_item = function(tabid)
+      local wins = vim.api.nvim_tabpage_list_wins(tabid)
+      local not_floating_win = function(winid)
+        return vim.api.nvim_win_get_config(winid).relative == ""
+      end
+      wins = vim.tbl_filter(not_floating_win, wins)
+      local bufs = {}
+      for _, win in ipairs(wins) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        local buftype = vim.api.nvim_get_option_value("buftype", { buf = buf })
+        if buftype ~= "nofile" then
+          local fname = vim.api.nvim_buf_get_name(buf)
+          table.insert(bufs, vim.fn.fnamemodify(fname, ":t"))
+        end
+      end
+      local tabnr = vim.api.nvim_tabpage_get_number(tabid)
+      local cwd = string.format(" %8s: ", vim.fn.fnamemodify(vim.fn.getcwd(-1, tabnr), ":t"))
+      local is_current = vim.api.nvim_tabpage_get_number(0) == tabnr and "✸" or " "
+      return tabnr .. is_current .. cwd .. table.concat(bufs, ", ")
+    end,
+  }, function(tabid)
+    if tabid ~= nil then
+      vim.cmd(tabid .. "tabnext")
     end
   end)
-end, { nargs = 0 })
+end, { desc = "Tabs" })
 
-map("n", "<leader>ls", ":StopLspClient<CR>", { noremap = true, silent = true, desc = "Stop LSP Client" })
+-- Buffers
+map("n", "<leader>bf", "<cmd>bfirst<cr>", { desc = "First Buffer" })
+map("n", "<leader>ba", "<cmd>blast<cr>", { desc = "Last Buffer" })
+map("n", "<leader>b<tab>", "<cmd>tabnew %<cr>", { desc = "Current Buffer in New Tab" })
 
--- Change directory to the root of the current LSP client
-Cmd.create_cmd("LspRooter", function()
-  local root_dir = require("utils.root").get()
-  if root_dir then
-    vim.cmd("cd " .. root_dir)
+-- Toggle statusline
+map("n", "<leader>uS", function()
+  if o.laststatus:get() == 0 then
+    o.laststatus = 3
   else
-    print("No root directory found for client")
+    o.laststatus = 0
   end
-end, { nargs = 0 })
-map("n", "<leader>ld", ":LspRooter<CR>", { noremap = true, silent = true, desc = "Change directory to LSP root" })
+end, { desc = "Toggle Statusline" })
+
+-- Toggle tabline
+map("n", "<leader>u<tab>", function()
+  if o.showtabline:get() == 0 then
+    o.showtabline = 2
+  else
+    o.showtabline = 0
+  end
+end, { desc = "Toggle Tabline" })
+
+-- Comment box
+map("n", "]/", "/\\S\\zs\\s*╭<CR>zt", { desc = "Next Block Comment" })
+map("n", "[/", "?\\S\\zs\\s*╭<CR>zt", { desc = "Prev Block Comment" })
+
+-- Plugin Info
+map("n", "<leader>cif", "<cmd>LazyFormatInfo<cr>", { desc = "Formatting" })
+map("n", "<leader>cic", "<cmd>ConformInfo<cr>", { desc = "Conform" })
+local linters = function()
+  local linters_attached = require("lint").linters_by_ft[vim.bo.filetype]
+  local buf_linters = {}
+
+  if not linters_attached then
+    LazyVim.warn("No linters attached", { title = "Linter" })
+    return
+  end
+
+  for _, linter in pairs(linters_attached) do
+    table.insert(buf_linters, linter)
+  end
+
+  local unique_client_names = table.concat(buf_linters, ", ")
+  local linters = string.format("%s", unique_client_names)
+
+  LazyVim.notify(linters, { title = "Linter" })
+end
+map("n", "<leader>ciL", linters, { desc = "Lint" })
+map("n", "<leader>cir", "<cmd>LazyRoot<cr>", { desc = "Root" })
+
+-- U for redo
+map("n", "U", "<C-r>", { desc = "Redo" })
+
+-- Copy whole text to clipboard
+map("n", "<C-c>", ":%y+<CR>", { desc = "Copy Whole Text to Clipboard", silent = true })
+
+-- Motion
+map("c", "<C-a>", "<C-b>", { desc = "Start Of Line" })
+map("i", "<C-a>", "<Home>", { desc = "Start Of Line" })
+map("i", "<C-e>", "<End>", { desc = "End Of Line" })
+
+-- Select all text
+map("n", "<C-e>", "gg<S-V>G", { desc = "Select all Text", silent = true, noremap = true })
+
+-- Paste options
+map("i", "<C-v>", '<C-r>"', { desc = "Paste on Insert Mode" })
+map("v", "p", '"_dP', { desc = "Paste Without Overwriting" })
+
+-- Delete and change without yanking
+map({ "n", "x" }, "<A-d>", '"_d', { desc = "Delete Without Yanking" })
+map({ "n", "x" }, "<A-c>", '"_c', { desc = "Change Without Yanking" })
+
+-- Deleting without yanking empty line
+map("n", "dd", function()
+  local is_empty_line = vim.api.nvim_get_current_line():match("^%s*$")
+  if is_empty_line then
+    return '"_dd'
+  else
+    return "dd"
+  end
+end, { noremap = true, expr = true, desc = "Don't Yank Empty Line to Clipboard" })
+
+-- Search inside visually highlighted text
+map("x", "g/", "<esc>/\\%V", { silent = false, desc = "Search Inside Visual Selection" })
+
+-- Search visually selected text (slightly better than builtins in Neovim>=0.8)
+map("x", "*", [[y/\V<C-R>=escape(@", '/\')<CR><CR>]], { desc = "Search Selected Text", silent = true })
+map("x", "#", [[y?\V<C-R>=escape(@", '?\')<CR><CR>]], { desc = "Search Selected Text (Backwards)", silent = true })
+
+-- Dashboard
+map("n", "<leader>fd", function()
+  if LazyVim.has("alpha-nvim") then
+    require("alpha").start(true)
+  elseif LazyVim.has("dashboard-nvim") then
+    vim.cmd("Dashboard")
+  end
+end, { desc = "Dashboard" })
+
+-- Spelling
+map("n", "<leader>!", "zg", { desc = "Add Word to Dictionary" })
+map("n", "<leader>@", "zug", { desc = "Remove Word from Dictionary" })
+
+-- Terminal Stuff
+if not LazyVim.has("floaterm.nvim") or not LazyVim.has("toggleterm.nvim") then
+  local lazyterm = function()
+    Snacks.terminal(nil, { size = { width = 0.8, height = 0.8 }, cwd = LazyVim.root() })
+  end
+  map("n", "<leader>ft", lazyterm, { desc = "Terminal (Root Dir)" })
+  map("n", "<leader>fT", function()
+    Snacks.terminal(nil, { size = { width = 0.8, height = 0.8 }, cwd = vim.fn.getcwd() })
+  end, { desc = "Terminal (cwd)" })
+  map("n", [[<c-\>]], lazyterm, { desc = "Terminal (Root Dir)" })
+  map("t", [[<c-\>]], "<cmd>close<cr>", { desc = "Hide Terminal" })
+end
+
+-- Marks
+map("n", "dm", function()
+  local cur_line = vim.fn.line(".")
+  -- Delete buffer local mark
+  for _, mark in ipairs(vim.fn.getmarklist("%")) do
+    if mark.pos[2] == cur_line and mark.mark:match("[a-zA-Z]") then
+      vim.api.nvim_buf_del_mark(0, string.sub(mark.mark, 2, #mark.mark))
+      return
+    end
+  end
+  -- Delete global marks
+  local cur_buf = vim.api.nvim_win_get_buf(vim.api.nvim_get_current_win())
+  for _, mark in ipairs(vim.fn.getmarklist()) do
+    if mark.pos[1] == cur_buf and mark.pos[2] == cur_line and mark.mark:match("[a-zA-Z]") then
+      vim.api.nvim_buf_del_mark(0, string.sub(mark.mark, 2, #mark.mark))
+      return
+    end
+  end
+end, { noremap = true, desc = "Mark on Current Line" })
+
+-- Empty Line
+map("n", "gO", "<Cmd>call append(line('.') - 1, repeat([''], v:count1))<CR>", { desc = "Empty Line Above" })
+map("n", "go", "<Cmd>call append(line('.'), repeat([''], v:count1))<CR>", { desc = "Empty Line Below" })
+
+-- Insert Mode
+map({ "c", "i", "t" }, "<M-BS>", "<C-w>", { desc = "Delete Word" })
+
+-- Git
+map("n", "<leader>ghb", Snacks.git.blame_line, { desc = "Blame Line" })
+
+-- Windows Split
+map("n", "<leader>_", "<C-W>s", { desc = "Split Window Below", remap = true })
+map("n", "<leader>\\", "<C-W>v", { desc = "Split Window Right", remap = true })

@@ -6,3 +6,9 @@ debug
 foo.*
 *.log
 data
+*.pyc
+*.pyo
+*.pyclass
+*.java
+*.class
+*.c

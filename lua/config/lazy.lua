@@ -1,43 +1,50 @@
-local M = {}
-
----@param name "autocmds" | "options" | "keymaps"
-function M.load(name)
-  local function _load(mod)
-    if require("lazy.core.cache").find(mod)[1] then
-      require(mod)
-    end
-  end
-
-  _load("config." .. name)
-
-  local pattern = "NvimIde" .. name:sub(1, 1):upper() .. name:sub(2)
-  vim.api.nvim_exec_autocmds("User", { pattern = pattern, modeline = false })
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.uv.fs_stat(lazypath) then
+  -- bootstrap lazy.nvim
+  -- stylua: ignore
+  vim.fn.system({ "git", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", "--branch=stable",
+    lazypath })
 end
+vim.opt.rtp:prepend(vim.env.LAZY or lazypath)
 
----@param colorscheme string
-function M.setup(colorscheme)
-  -- autocmds can be loaded lazily when not opening a file
-  local lazy_autocmds = vim.fn.argc(-1) == 0
-  if not lazy_autocmds then
-    M.load("autocmds")
-  end
-
-  local group = vim.api.nvim_create_augroup("NvimIde", { clear = true })
-  vim.api.nvim_create_autocmd("User", {
-    group = group,
-    pattern = "VeryLazy",
-    callback = function()
-      if lazy_autocmds then
-        M.load("autocmds")
-      end
-      M.load("keymaps")
-    end,
-  })
-
-  if colorscheme == "" then
-    return
-  end
-  vim.cmd.colorscheme(colorscheme)
-end
-
-return M
+require("lazy").setup({
+  spec = {
+    {
+      "LazyVim/LazyVim",
+      import = "lazyvim.plugins",
+      opts = {
+        colorscheme = "catppuccin",
+      },
+    },
+    {
+      import = "plugins",
+    },
+  },
+  ui = {
+    backdrop = 100,
+  },
+  defaults = {
+    lazy = true,
+    version = false, -- always use the latest git commit
+    -- version = "*", -- try installing the latest stable version for plugins that support semver
+  },
+  local_spec = true,
+  checker = { enabled = true }, -- automatically check for plugin updates
+  performance = {
+    cache = {
+      enabled = true,
+      -- disable_events = {},
+    },
+    rtp = {
+      -- disable some rtp plugins
+      disabled_plugins = {
+        "gzip",
+        "tarPlugin",
+        "tohtml",
+        "tutor",
+        "netrwPlugin",
+        "zipPlugin",
+      },
+    },
+  },
+})
