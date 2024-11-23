@@ -1,206 +1,168 @@
--- Função para aplicar o esquema de cores com transparência total
-local function ColorMyPencils(colorScheme)
-  colorScheme = colorScheme or "carbonfox"
-  vim.cmd.colorscheme(colorScheme)
-
-  -- Definindo a transparência para o fundo
-  local set_hl = vim.api.nvim_set_hl
-  local transparent_groups = {
-    "Normal",
-    "NormalNC",
-    "NormalFloat",
-    "EndOfBuffer",
-    "SignColumn",
-    "StatusLine",
-    "StatusLineNC",
-    "NeoTreeNormal",
-    "NeoTreeNormalNC",
-    "NeoTreeCursorLine",
-    "NeoTreeEndOfBuffer",
-  }
-  for _, group in ipairs(transparent_groups) do
-    set_hl(0, group, { bg = "none" })
-  end
-
-  -- Definições de destaque adicionais
-  vim.cmd([[
-  highlight CmpTransparent guibg=NONE ctermbg=NONE
-  highlight CmpBorderVibrant guifg=#00FFFF gui=bold
-  ]])
-end
-
--- Função auxiliar para ajuste de cor
-local function adjust_color(color, fallback)
-  return type(color) == "string" and color or fallback
-end
-
--- Configuração dos temas com transparência e estilo "Dark Knight"
+-- Theme/Colorscheme (uncomment section for whichever theme you prefer or use your own)
+-- Kanagawa Theme (Custom Palette)
 return {
-  -- Kanagawa Theme Config
-  {
-    "rebelot/kanagawa.nvim",
-    lazy = true,
-    opts = {
-      dimInactive = true,
-      colors = {
-        theme = {
-          all = {
-            ui = {
-              bg_gutter = "none", -- sem fundo na margem
-            },
-          },
-        },
-      },
-      overrides = function(colors)
-        local theme = colors.theme
-        return {
-          NormalFloat = { bg = "none" },
-          FloatBorder = { bg = "none" },
-          FloatTitle = { bg = "none" },
-          NormalDark = { fg = theme.ui.fg_dim, bg = theme.ui.bg_m3 },
-          LazyNormal = { bg = theme.ui.bg_m3, fg = theme.ui.fg_dim },
-          MasonNormal = { bg = theme.ui.bg_m3, fg = theme.ui.fg_dim },
-        }
-      end,
+  -- https://github.com/rebelot/kanagawa.nvim
+  'rebelot/kanagawa.nvim', -- You can replace this with your favorite colorscheme
+  lazy = false, -- We want the colorscheme to load immediately when starting Neovim
+  priority = 1000, -- Load the colorscheme before other non-lazy-loaded plugins
+  opts = {
+    -- Replace this with your scheme-specific settings or remove to use the defaults
+    -- transparent = true,
+    background = {
+      -- light = "lotus",
+      dark = "wave", -- "wave, dragon"
     },
-  },
+    colors = {
+      palette = {
+        -- Background colors
+        sumiInk0 = "#161616", -- modified
+        sumiInk1 = "#181818", -- modified
+        sumiInk2 = "#1a1a1a", -- modified
+        sumiInk3 = "#1F1F1F", -- modified
+        sumiInk4 = "#2A2A2A", -- modified
+        sumiInk5 = "#363636", -- modified
+        sumiInk6 = "#545454", -- modified
 
-  -- Carbonfox Theme Config
-  {
-    "EdenEast/nightfox.nvim",
-    opts = {
-      options = {
-        transparent = true, -- sempre transparente
-        terminal_colors = true,
-        styles = {
-          comments = "italic",
-          keywords = "bold",
-          types = "italic,bold",
-        },
-      },
-      palettes = {
-        carbonfox = {
-          bg1 = "#0d0d0d", -- fundo principal, preto
-          fg1 = "#e5e5e5", -- texto quase branco
-          blue = "#0abdc6", -- azul neon
-          green = "#51fa7b", -- verde neon
-          red = "#ff5555", -- vermelho intenso
-          yellow = "#f57800", -- amarelo suave
-          magenta = "#ff79c6", -- rosa neon
-          cyan = "#8be9fd", -- ciano
-        },
-      },
-      groups = {
-        carbonfox = {
-          CursorLine = { bg = "#282a36" },
-          Normal = { bg = "none", fg = "#e5e5e5" },
-          Comment = { fg = "#b8b8b8", style = "italic" },
-          Function = { fg = "#0abdc6", style = "italic,bold" },
-          NeoTreeNormal = { bg = "none" },
-        },
-      },
-    },
-    config = function()
-      ColorMyPencils("carbonfox")
-    end,
-  },
+        -- Popup and Floats
+        waveBlue1 = "#322C47", -- modified
+        waveBlue2 = "#4c4464", -- modified
 
-  -- Outros Temas com Transparência Ativada
-  {
-    "rose-pine/neovim",
-    name = "rose-pine",
-    opts = {
-      variant = "moon",
-      disable_background = true,
-      disable_float_background = true,
-      styles = {
-        bold = true,
-        italic = true,
-      },
-    },
-    lazy = true,
-  },
-  {
-    "catppuccin/nvim",
-    lazy = true,
-    name = "catppuccin",
-    opts = {
-      transparent_background = true,
-      integrations = {
-        cmp = true,
-        dashboard = true,
-        flash = true,
-        gitsigns = true,
-        headlines = true,
-        indent_blankline = { enabled = true },
-        lsp_trouble = true,
-        mason = true,
-        markdown = true,
-        mini = true,
-        native_lsp = {
-          enabled = true,
-          underlines = {
-            errors = { "undercurl" },
-            hints = { "undercurl" },
-            warnings = { "undercurl" },
-            information = { "undercurl" },
-          },
-        },
-        neotest = true,
-        noice = true,
-        notify = true,
-        semantic_tokens = true,
-        treesitter = true,
-        treesitter_context = true,
-        which_key = true,
-        fzf = true,
+        -- Diff and Git
+        winterGreen = "#2B3328",
+        winterYellow = "#49443C",
+        winterRed = "#43242B",
+        winterBlue = "#252535",
+        autumnGreen = "#76A56A", -- modified
+        autumnRed = "#C34043",
+        autumnYellow = "#DCA561",
+
+        -- Diag
+        samuraiRed = "#E82424",
+        roninYellow = "#FF9E3B",
+        waveAqua1 = "#7E9CD8", -- modified
+        dragonBlue = "#7FB4CA", -- modified
+
+        -- Foreground and Comments
+        oldWhite = "#C8C093",
+        fujiWhite = "#F9E7C0", -- modified
+        fujiGray = "#727169",
+        oniViolet = "#BFA3E6", -- modified
+        oniViolet2 = "#BCACDB", -- modified
+        crystalBlue = "#8CABFF", -- modified
+        springViolet1 = "#938AA9",
+        springViolet2 = "#9CABCA",
+        springBlue = "#7FC4EF", -- modified
+        waveAqua2 = "#77BBDD", -- modified
+
+        springGreen = "#98BB6C",
+        boatYellow1 = "#938056",
+        boatYellow2 = "#C0A36E",
+        carpYellow = "#FFEE99", -- modified
+
+        sakuraPink = "#D27E99",
+        waveRed = "#E46876",
+        peachRed = "#FF5D62",
+        surimiOrange = "#FFAA44", -- modified
+        katanaGray = "#717C7C",
       },
     },
   },
-  {
-    "Mofiqul/dracula.nvim",
-    lazy = true,
-    opts = {
-      transparent_bg = true,
-      show_end_of_buffer = true,
-      italic_comment = true,
-    },
-    config = function(_, opts)
-      local dracula = require("plugins.ui.colorschemes.dracula")
-      dracula.setup(opts)
-      vim.o.spell = false
-    end,
-  },
-  {
-    "lalitmee/cobalt2.nvim",
-    lazy = true,
-    dependencies = { "tjdevries/colorbuddy.nvim", tag = "v1.0.0" },
-    init = function()
-      require("colorbuddy").colorscheme("cobalt2")
-      vim.o.spell = false
-    end,
-  },
-  {
-    "oxfist/night-owl.nvim",
-    lazy = true,
-    opts = {
-      bold = true,
-      italics = true,
-      underline = true,
-      undercurl = true,
-      transparent_background = true,
-    },
-  },
-  {
-    "folke/tokyonight.nvim",
-    lazy = true,
-    opts = {
-      style = "moon",
-      transparent = true,
-      styles = {
-        sidebars = "transparent",
-        floats = "transparent",
-      },
-    },
-  },
+  config = function(_, opts)
+    require('kanagawa').setup(opts) -- Replace this with your favorite colorscheme
+    vim.cmd("colorscheme kanagawa") -- Replace this with your favorite colorscheme
+
+    -- Custom diff colors
+    vim.cmd([[
+      autocmd VimEnter * hi DiffAdd guifg=#00FF00 guibg=#005500
+      autocmd VimEnter * hi DiffDelete guifg=#FF0000 guibg=#550000
+      autocmd VimEnter * hi DiffChange guifg=#CCCCCC guibg=#555555
+      autocmd VimEnter * hi DiffText guifg=#00FF00 guibg=#005500
+    ]])
+
+    -- Custom border colors
+    vim.cmd([[
+      autocmd ColorScheme * hi NormalFloat guifg=#F9E7C0 guibg=#1F1F1F
+      autocmd ColorScheme * hi FloatBorder guifg=#F9E7C0 guibg=#1F1F1F
+    ]])
+  end
 }
+
+-- Kanagawa Theme (Original)
+-- return {
+--   -- https://github.com/rebelot/kanagawa.nvim
+--   'rebelot/kanagawa.nvim', -- You can replace this with your favorite colorscheme
+--   lazy = false, -- We want the colorscheme to load immediately when starting Neovim
+--   priority = 1000, -- Load the colorscheme before other non-lazy-loaded plugins
+--   opts = {
+--     -- Replace this with your scheme-specific settings or remove to use the defaults
+--     -- transparent = true,
+--     background = {
+--       -- light = "lotus",
+--       dark = "wave", -- "wave, dragon"
+--     },
+--   },
+--   config = function(_, opts)
+--     require('kanagawa').setup(opts) -- Replace this with your favorite colorscheme
+--     vim.cmd("colorscheme kanagawa") -- Replace this with your favorite colorscheme
+--   end
+-- }
+
+-- Tokyo Night Theme
+-- return {
+--   -- https://github.com/folke/tokyonight.nvim
+--   'folke/tokyonight.nvim', -- You can replace this with your favorite colorscheme
+--   lazy = false, -- We want the colorscheme to load immediately when starting Neovim
+--   priority = 1000, -- Load the colorscheme before other non-lazy-loaded plugins
+--   opts = {
+--     -- Replace this with your scheme-specific settings or remove to use the defaults
+--     -- transparent = true,
+--     style = "night", -- other variations "storm, night, moon, day"
+--   },
+--   config = function(_, opts)
+--     require('tokyonight').setup(opts) -- Replace this with your favorite colorscheme
+--     vim.cmd("colorscheme tokyonight") -- Replace this with your favorite colorscheme
+--   end
+-- }
+
+-- Catppuccin Theme
+-- return {
+--   -- https://github.com/catppuccin/nvim
+--   'catppuccin/nvim',
+--   name = "catppuccin", -- name is needed otherwise plugin shows up as "nvim" due to github URI
+--   lazy = false, -- We want the colorscheme to load immediately when starting Neovim
+--   priority = 1000, -- Load the colorscheme before other non-lazy-loaded plugins
+--   opts = {
+--   --   -- Replace this with your scheme-specific settings or remove to use the defaults
+--     -- transparent = true,
+--     flavour = "mocha", -- "latte, frappe, macchiato, mocha"
+--   },
+--   config = function(_, opts)
+--     require('catppuccin').setup(opts) -- Replace this with your favorite colorscheme
+--     vim.cmd("colorscheme catppuccin") -- Replace this with your favorite colorscheme
+--   end
+-- }
+
+-- Sonokai Theme
+-- return {
+--   -- https://github.com/sainnhe/sonokai
+--   'sainnhe/sonokai',
+--   lazy = false, -- We want the colorscheme to load immediately when starting Neovim
+--   priority = 1000, -- Load the colorscheme before other non-lazy-loaded plugins
+--   config = function(_, opts)
+--     vim.g.sonokai_style = "default" -- "default, atlantis, andromeda, shusia, maia, espresso"
+--     vim.cmd("colorscheme sonokai") -- Replace this with your favorite colorscheme
+--   end
+-- }
+
+-- One Nord Theme
+-- return {
+--   -- https://github.com/rmehri01/onenord.nvim
+--   'rmehri01/onenord.nvim',
+--   lazy = false, -- We want the colorscheme to load immediately when starting Neovim
+--   priority = 1000, -- Load the colorscheme before other non-lazy-loaded plugins
+--   config = function(_, opts)
+--     vim.cmd("colorscheme onenord") -- Replace this with your favorite colorscheme
+--   end
+-- }
+
+
