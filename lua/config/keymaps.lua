@@ -1,13 +1,16 @@
+-- Keymaps are automatically loaded on the VeryLazy event
+-- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
+-- Add any additional keymaps here
 local map = vim.keymap.set
 local o = vim.opt
 
-local lazy = require("lazy")
+local lazy = require("plugins.editor.telescope.lazy")
 
--- Search current word
-local searching_brave = function()
-  vim.fn.system({ "xdg-open", "https://search.brave.com/search?q=" .. vim.fn.expand("<cword>") })
+-- Search current word using Zen-Browser
+local searching_zen = function()
+  vim.fn.system({ "xdg-open", "https://search.zenbrowser.com/search?q=" .. vim.fn.expand("<cword>") })
 end
-map("n", "<leader>?", searching_brave, { noremap = true, silent = true, desc = "Search Current Word on Brave Search" })
+map("n", "<leader>?", searching_zen, { noremap = true, silent = true, desc = "Search Current Word on Zen-Browser" })
 
 -- Lazy options
 map("n", "<leader>l", "<Nop>")

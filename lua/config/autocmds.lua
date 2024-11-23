@@ -1,3 +1,6 @@
+-- Autocmds are automatically loaded on the VeryLazy event
+-- Default autocmds that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua
+-- Add any additional autocmds here
 local ac = vim.api.nvim_create_autocmd
 local ag = vim.api.nvim_create_augroup
 
@@ -5,7 +8,7 @@ local ag = vim.api.nvim_create_augroup
 ac("BufRead", {
   pattern = ".env",
   callback = function()
-    vim.diagnostic.disable(false)
+    vim.diagnostic.enable(false)
   end,
 })
 
@@ -20,10 +23,11 @@ local auto_close_filetype = {
 }
 
 -- Auto close window when leaving
+
 ac("BufLeave", {
   group = ag("lazyvim_auto_close_win", { clear = true }),
   callback = function(event)
-    local ft = vim.api.nvim_buf_get_option(event.buf, "filetype")
+    local ft = vim.bo[event.buf].filetype
 
     if vim.fn.index(auto_close_filetype, ft) ~= -1 then
       local winids = vim.fn.win_findbuf(event.buf)
@@ -75,7 +79,7 @@ ac({ "BufNewFile", "BufRead" }, {
   group = ag("DisableEslintOnNodeModules", { clear = true }),
   pattern = { "**/node_modules/**", "node_modules", "/node_modules/*" },
   callback = function()
-    vim.diagnostic.disable(false)
+    vim.diagnostic.enable(false)
   end,
 })
 
