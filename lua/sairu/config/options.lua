@@ -98,7 +98,7 @@ opt.fillchars = {
   vertright = '┣',
   verthoriz = '╋',
 }
-opt.statuscolumn = [[%!v:lua.require'snacks.statuscolumn'.get()]]
+-- opt.statuscolumn = [[%!v:lua.require'snacks.statuscolumn'.get()]]
 opt.smoothscroll = vim.fn.has('nvim-0.10') == 1 or vim.fn.has('nvim-0.11') == 1
 opt.foldexpr = "v:lua.require'lazyvim.util'.ui.foldexpr()"
 opt.foldmethod = 'expr'

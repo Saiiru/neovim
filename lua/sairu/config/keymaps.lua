@@ -1,3 +1,6 @@
+-- Define opts
+local opts = { noremap = true, silent = true }
+
 -- Open parent directory
 vim.keymap.set("n", "-", "<CMD>Oil --float<CR>", { desc = "Open parent directory" })
 
@@ -13,6 +16,7 @@ vim.keymap.set("n", "Y", "y$")
 
 -- Select all
 vim.keymap.set("n", "==", "gg<S-v>G")
+
 -- Better window navigation
 vim.keymap.set("n", "<m-h>", "<C-w>h", opts)
 vim.keymap.set("n", "<m-j>", "<C-w>j", opts)
@@ -24,13 +28,12 @@ vim.keymap.set("n", "<C-j>", "<C-w>j", opts)
 vim.keymap.set("n", "<C-k>", "<C-w>k", opts)
 vim.keymap.set("n", "<C-l>", "<C-w>l", opts)
 
-
 -- Keep window centered when going up/down
 vim.keymap.set("n", "J", "mzJ`z")
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
-vim.keymap.set("n", "n", "nzzzv")
-vim.keymap.set("n", "N", "Nzzzv")
+vim.keymap.set("n", "n", "*nzzzv")
+vim.keymap.set("n", "N", "*Nzzzv")
 
 -- Paste without overwriting register
 vim.keymap.set("v", "p", '"_dP')
@@ -40,7 +43,7 @@ vim.keymap.set("n", "<leader>y", "\"+y", { desc = "Yank into \" register" })
 vim.keymap.set("v", "<leader>y", "\"+y", { desc = "Yank into \" register" })
 vim.keymap.set("n", "<leader>Y", "\"+Y", { desc = "Yank into \" register" })
 
--- Delete text to " registe
+-- Delete text to " register
 vim.keymap.set("n", "<leader>d", "\"_d", { desc = "Delete into \" register" })
 vim.keymap.set("v", "<leader>d", "\"_d", { desc = "Delete into \" register" })
 
