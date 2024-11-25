@@ -1,28 +1,30 @@
--- Bootstrap lazy
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
-    "git",
-    "clone",
-    "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable", -- latest stable release
-    lazypath,
-  })
-end
-vim.opt.rtp:prepend(lazypath)
-
--- This has to be set before initializing lazy
-vim.g.mapleader = " "
-
--- Initialize lazy with dynamic loading of anything in the plugins directory
-require("lazy").setup("plugins", {
-   change_detection = {
-    enabled = true, -- automatically check for config file changes and reload the ui
-    notify = false, -- turn off notifications whenever plugin changes are made
-  },
-})
-
--- These modules are not loaded by lazy
-require("core.options")
-require("core.keymaps")
+require "sairu.config.launch"
+require "sairu.config.options"
+require "sairu.config.keymaps"
+require "sairu.config.autocmds"
+-- spec "sairu.plugins.colorscheme"
+-- spec "sairu.plugins.devicons"
+-- spec "sairu.plugins.treesitter"
+-- spec "sairu.plugins.mason"
+-- spec "sairu.plugins.schemastore"
+-- spec "sairu.plugins.lspconfig"
+-- spec "sairu.plugins.cmp"
+-- spec "sairu.plugins.telescope"
+-- spec "sairu.plugins.none-ls"
+-- spec "sairu.plugins.illuminate"
+-- spec "sairu.plugins.gitsigns"
+-- spec "sairu.plugins.whichkey"
+-- spec "sairu.plugins.nvimtree"
+-- spec "sairu.plugins.comment"
+-- spec "sairu.plugins.lualine"
+-- spec "sairu.plugins.navic"
+-- spec "sairu.plugins.breadcrumbs"'
+-- spec "sairu.plugins.harpoon"
+-- spec "sairu.plugins.neotest"
+-- spec "sairu.plugins.autopairs"
+-- spec "sairu.plugins.neogit"
+-- spec "sairu.plugins.alpha"
+-- spec "sairu.plugins.project"
+-- spec "sairu.plugins.indentline"
+-- spec "sairu.plugins.toggleterm"
+-- require "sairu.lazy"
