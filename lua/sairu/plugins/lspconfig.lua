@@ -1,4 +1,4 @@
--- File: lua/config/lspconfig.lua
+-- File: lua/sairu/plugins/lspconfig.lua
 local M = {
   "neovim/nvim-lspconfig",
   event = { "BufReadPre", "BufNewFile" },
@@ -16,24 +16,17 @@ function M.config()
   local cmp_nvim_lsp = require("cmp_nvim_lsp")
   local lsp_signature = require("lsp_signature")
   local neodev = require("neodev")
-  local icons = require "sairu.icons"
-  -- Diagnostic icons
-  -- local diagnostics_icons = {
-  --   Error = " ",
-  --   Warn = " ",
-  --   Hint = " ",
-  --   Info = " ",
-  -- }
+  local icons = require("sairu.icons")
 
   -- Configure diagnostic signs
-  -- for type, icon in pairs(diagnostics_icons) do
-  --   local hl = "DiagnosticSign" .. type
-  --   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-  -- end
+  for type, icon in pairs(icons.diagnostics) do
+    local hl = "DiagnosticSign" .. type
+    vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+  end
 
   -- General diagnostic configuration
   vim.diagnostic.config({
-   signs = {
+    signs = {
       active = true,
       values = {
         { name = "DiagnosticSignError", text = icons.diagnostics.Error },
@@ -50,7 +43,7 @@ function M.config()
       focusable = true,
       style = "minimal",
       border = "rounded",
-      source = "always",
+      source = "if_many",
       header = "",
       prefix = "",
     },
@@ -81,7 +74,7 @@ function M.config()
 
     lsp_signature.on_attach({
       bind = true,
-      hint_prefix = "💡 ",
+      hint_prefix = icons.misc.Lightbulb,
     }, bufnr)
   end
 
@@ -90,36 +83,34 @@ function M.config()
     lua_ls = {
       settings = {
         Lua = {
-					format = {
-        enable = false,
-      },
           runtime = {
             version = "LuaJIT",
             path = vim.split(package.path, ";"),
-						 special = {
-								spec = "require",
-						},
+            special = {
+              spec = "require",
+            },
           },
           diagnostics = {
+						enable = true,
             globals = { "vim", "spec" },
           },
           workspace = {
             library = {
-							[vim.fn.expand "$VIMRUNTIME/lua"] = true,
-							[vim.fn.stdpath "config" .. "/lua"] = true,
-					},
+              [vim.fn.expand("$VIMRUNTIME/lua")] = true,
+              [vim.fn.stdpath("config") .. "/lua"] = true,
+            },
             checkThirdParty = false,
           },
           telemetry = { enable = false },
-					 hint = {
-        enable = false,
-        arrayIndex = "Disable", -- "Enable" | "Auto" | "Disable"
-        await = true,
-        paramName = "Disable", -- "All" | "Literal" | "Disable"
-        paramType = true,
-        semicolon = "All", -- "All" | "SameLine" | "Disable"
-        setType = false,
-      },
+          hint = {
+            enable = false,
+            arrayIndex = "Disable",
+            await = true,
+            paramName = "Disable",
+            paramType = true,
+            semicolon = "All",
+            setType = false,
+          },
         },
       },
     },
@@ -149,20 +140,21 @@ function M.config()
     intelephense = {},
     clangd = {},
     jsonls = {
-		 settings = {
-    json = {
-      schemas = require("schemastore").json.schemas(),
-    },
-  },
-  setup = {
-    commands = {
-      Format = {
-        function()
-          vim.lsp.buf.range_formatting({}, { 0, 0 }, { vim.fn.line "$", 0 })
-        end,
+      settings = {
+        json = {
+          schemas = require("schemastore").json.schemas(),
+        },
+      },
+      setup = {
+        commands = {
+          Format = {
+            function()
+              vim.lsp.buf.range_formatting({}, { 0, 0 }, { vim.fn.line("$"), 0 })
+            end,
+          },
+        },
       },
     },
-  },},
     yamlls = {
       settings = {
         yaml = {
@@ -186,4 +178,3 @@ function M.config()
 end
 
 return M
-

@@ -14,38 +14,38 @@ local M = {
     },
     { "hrsh7th/cmp-emoji", event = "InsertEnter" },
     { "hrsh7th/cmp-nvim-lua" },
+    {
+      "tzachar/cmp-tabnine",
+      build = "./install.sh",
+      config = function()
+        local tabnine = require "cmp_tabnine.config"
+        tabnine:setup {
+          max_lines = 1000,
+          max_num_results = 3,
+          sort = true,
+          show_prediction_strength = false,
+          run_on_every_keystroke = true,
+          snippet_placeholder = "..",
+          ignored_file_types = {},
+        }
+      end,
+    },
+    { "hrsh7th/cmp-copilot" },
   },
 }
 
 function M.config()
   local cmp = require("cmp")
   local luasnip = require("luasnip")
-  require("luasnip.loaders.from_vscode").lazy_load()
+  local icons = require("sairu.icons")
 
-  -- Define custom highlights
-  vim.api.nvim_set_hl(0, "CmpItemKindCopilot", { fg = "#6CC644" })
-  vim.api.nvim_set_hl(0, "CmpItemKindTabnine", { fg = "#CA42F0" })
-  vim.api.nvim_set_hl(0, "CmpItemKindEmoji", { fg = "#FDE030" })
+  require("luasnip.loaders.from_vscode").lazy_load()
 
   -- Helper function for backspace check
   local check_backspace = function()
     local col = vim.fn.col "." - 1
     return col == 0 or vim.fn.getline("."):sub(col, col):match "%s"
   end
-
-  -- Icon setup
-  local icons = {
-    kind = {
-      Text = "", Method = "", Function = "", Constructor = "", Field = "", Variable = "",
-      Class = "ﴯ", Interface = "", Module = "", Property = "ﰠ", Unit = "", Value = "",
-      Enum = "", Keyword = "", Snippet = "", Color = "", File = "", Reference = "",
-      Folder = "", EnumMember = "", Constant = "", Struct = "פּ", Event = "", Operator = "",
-      TypeParameter = "",
-    },
-    misc = {
-      Robot = "🤖", Smiley = "😄",
-    },
-  }
 
   -- nvim-cmp setup
   cmp.setup({
@@ -99,15 +99,14 @@ function M.config()
         if entry.source.name == "emoji" then
           vim_item.kind = icons.misc.Smiley
         elseif entry.source.name == "copilot" then
-          vim_item.kind = ""
+          vim_item.kind = icons.git.Copilot
         elseif entry.source.name == "cmp_tabnine" then
           vim_item.kind = icons.misc.Robot
         end
 
-		-- Add snippet expandable indicator
         if entry.source.name == "luasnip" then
           vim_item.kind = icons.kind.Snippet
-          vim_item.expandable_indicator = "▶"  -- Example of an expandable indicator
+          vim_item.expandable_indicator = "▶"
         end
 
         return vim_item
@@ -116,12 +115,43 @@ function M.config()
     sources = {
       { name = "nvim_lsp" },
       { name = "luasnip" },
-			{ name = "copilot"},
-			{ name = "buffer" },
+      { name = "copilot" },
+      { name = "buffer" },
       { name = "path" },
       { name = "emoji" },
       { name = "cmp_tabnine" },
-
+    },
+    sorting = {
+      priority_weight = 2,
+      comparators = {
+        require("copilot_cmp.comparators").prioritize or function() end,
+        function(entry1, entry2)
+          if entry1:get_kind() == cmp.lsp.CompletionItemKind.Snippet then
+            return false
+          elseif entry2:get_kind() == cmp.lsp.CompletionItemKind.Snippet then
+            return true
+          end
+        end,
+        require("cmp").config.compare.exact,
+        require("cmp").config.compare.locality,
+        require("cmp").config.compare.recently_used,
+        function(entry1, entry2)
+          local _, entry1_under = entry1.completion_item.label:find("^_+")
+          local _, entry2_under = entry2.completion_item.label:find("^_+")
+          entry1_under = entry1_under or 0
+          entry2_under = entry2_under or 0
+          if entry1_under > entry2_under then
+            return false
+          elseif entry1_under < entry2_under then
+            return true
+          end
+        end,
+        require("cmp").config.compare.score,
+        require("cmp").config.compare.kind,
+        require("cmp").config.compare.length,
+        require("cmp").config.compare.order,
+        require("cmp").config.compare.sort_text,
+      },
     },
     confirm_opts = {
       behavior = cmp.ConfirmBehavior.Replace,
@@ -132,6 +162,7 @@ function M.config()
         border = "rounded",
         winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None",
         pumblend = 15,
+        max_item_count = 10,
       },
       documentation = {
         border = "rounded",
@@ -160,4 +191,3 @@ function M.config()
 end
 
 return M
-

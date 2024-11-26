@@ -1,34 +1,42 @@
--- File: lua/sairu/init.lua
-require "sairu.config.launch"
-require "sairu.config.options"
-require "sairu.config.keymaps"
-require "sairu.config.autocmds"
+-- Declare the path where lazy will clone plugin code
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
--- Lazy plugin specifications array
-LAZY_PLUGIN_SPEC = {}
-
--- Function to dynamically load all plugins from the plugins directory
-local function load_plugins()
-  -- Find all Lua files in the plugins directory and its subdirectories
-  local plugin_files = vim.fn.glob("lua/sairu/plugins/**/*.lua", true, true)
-  for _, file in ipairs(plugin_files) do
-    -- Convert file path into a Lua module path for requiring
-    local plugin = file:match("lua/sairu/plugins/(.+)%.lua$")
-    if plugin then
-      local success, err = pcall(function()
-        -- Add the plugin module to LAZY_PLUGIN_SPEC using the spec function
-        spec("sairu.plugins." .. plugin:gsub("/", "."))
-      end)
-      if not success then
-        vim.notify("Failed to load plugin spec: " .. plugin .. "\nError: " .. err, vim.log.levels.ERROR)
-      end
-    end
-  end
+-- Check to see if lazy itself has been cloned, if not clone it into the lazy.nvim directory
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+    vim.fn.system({
+        "git",
+        "clone",
+        "--filter=blob:none",
+        "https://github.com/folke/lazy.nvim.git",
+        "--branch=stable", -- latest stable release
+        lazypath,
+    })
 end
 
--- Load all plugin specifications
-load_plugins()
+-- Add the path to the lazy plugin repositories to the vim runtime path
+vim.opt.rtp:prepend(lazypath)
 
--- Initialize lazy loading
-require "sairu.lazy"
+-- Declare a few options for lazy
+local opts = {
+    change_detection = {
+        -- Don't notify us every time a change is made to the configuration
+        notify = false,
+    },
+    checker = {
+        -- Automatically check for package updates
+        enabled = true,
+        -- Don't spam us with notification every time there is an update available
+        notify = false,
+    },
+}
 
+-- Load the options from the config/options.lua file
+require("sairu.config.options")
+-- Load the keymaps from the config/keymaps.lua file
+require("sairu.config.keymaps")
+-- Load the auto commands from the config/autocmds.lua file
+require("sairu.config.autocmds")
+-- Setup lazy, this should always be last
+-- Tell lazy that all plugin specs are found in the plugins directory
+-- Pass it the options we specified above
+require("lazy").setup("sairu.plugins", opts)
