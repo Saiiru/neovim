@@ -1,3 +1,4 @@
+
 -- Função para aplicar o esquema de cores com transparência total
 local function ColorMyPencils(colorScheme)
   colorScheme = colorScheme or "carbonfox"
@@ -34,8 +35,17 @@ local function adjust_color(color, fallback)
   return type(color) == "string" and color or fallback
 end
 
--- Configuração dos temas com transparência e estilo "Dark Knight"
-return {
+local M = {
+  -- LunarVim darkplus theme
+  {
+    "LunarVim/darkplus.nvim",
+    lazy = false, -- make sure we load this during startup if it is your main colorscheme
+    priority = 1000, -- make sure to load this before all the other start plugins
+  },
+  config = function()
+    -- vim.cmd.colorscheme "darkplus"
+  end,
+
   -- Kanagawa Theme Config
   {
     "rebelot/kanagawa.nvim",
@@ -204,3 +214,4 @@ return {
     },
   },
 }
+return M

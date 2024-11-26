@@ -23,4 +23,8 @@ require("lazy").setup {
     enabled = true,
     notify = false,
   },
+	defaults = {
+		lazy = false,
+		version = false,
+	},
 }
