@@ -13,4 +13,5 @@ data
 *.class
 *.c
 bak
-undodir
+undodir/
+./undodir
