@@ -1,10 +1,13 @@
 -- NOTE: Only enable either copilot-vim or codeium-vim at the same time
 local M = {
   -- Use native snippets from Neovim v0.10
+  -- Use native snippets from Neovim v0.10
   {
     "nvim-cmp",
     ---@param opts cmp.ConfigSchema
     opts = function(_, opts)
+      -- Ensure opts.experimental is defined before accessing it
+      opts.experimental = opts.experimental or {}
       -- Disable ghost text for nvim-cmp, use copilot suggestion instead
       opts.experimental.ghost_text = false
     end,
@@ -47,25 +50,25 @@ local M = {
       keymap("i", "<C-d>", "<Plug>(copilot-dismiss)", opts)
     end,
   },
-  -- Add status line icon for copilot
-  {
-    "nvim-lualine/lualine.nvim",
-    opts = function(_, opts)
-      table.insert(opts.sections.lualine_x, 2, {
-        function()
-          local icon = ""  -- Use the Copilot icon directly here, as example
-          return icon
-        end,
-        cond = function()
-          local ok, clients = pcall(vim.lsp.get_active_clients, { name = "copilot", bufnr = 0 })
-          return ok and #clients > 0
-        end,
-        color = function()
-          return { fg = "#50fa7b" }  -- Use color directly, as example
-        end,
-      })
-    end,
-  },
+  -- -- Add status line icon for copilot
+  -- {
+  --   "nvim-lualine/lualine.nvim",
+  --   opts = function(_, opts)
+  --     table.insert(opts.sections.lualine_x, 2, {
+  --       function()
+  --         local icon = ""  -- Use the Copilot icon directly here, as example
+  --         return icon
+  --       end,
+  --       cond = function()
+  --         local ok, clients = pcall(vim.lsp.get_active_clients, { name = "copilot", bufnr = 0 })
+  --         return ok and #clients > 0
+  --       end,
+  --       color = function()
+  --         return { fg = "#50fa7b" }  -- Use color directly, as example
+  --       end,
+  --     })
+  --   end,
+  -- },
 }
 
 function M.config()

@@ -20,6 +20,7 @@ local prompts = {
 
 local M = {
   { import = "sairu.plugins.extras.copilot-vim" },
+  { import = "sairu.plugins.extras.codecompanion" },
   {
     "CopilotC-Nvim/CopilotChat.nvim",
     version = "1.9.1",

@@ -31,6 +31,12 @@ local M = {
       end,
     },
     { "hrsh7th/cmp-copilot" },
+    {
+      "zbirenbaum/copilot-cmp",
+      config = function ()
+        require("copilot_cmp").setup()
+      end
+    }
   },
 }
 
@@ -46,6 +52,9 @@ function M.config()
     local col = vim.fn.col "." - 1
     return col == 0 or vim.fn.getline("."):sub(col, col):match "%s"
   end
+
+  -- Safely require copilot_cmp.comparators
+  local copilot_cmp_comparators_ok, copilot_cmp_comparators = pcall(require, "copilot_cmp.comparators")
 
   -- nvim-cmp setup
   cmp.setup({
@@ -88,12 +97,14 @@ function M.config()
       format = function(entry, vim_item)
         vim_item.kind = icons.kind[vim_item.kind]
         vim_item.menu = ({
+          luasnip = "[Snip]",
           nvim_lsp = "[LSP]",
           nvim_lua = "[Lua]",
-          luasnip = "[Snip]",
           buffer = "[Buffer]",
           path = "[Path]",
           emoji = "[Emoji]",
+          copilot = "[Copilot]",
+          cmp_tabnine = "[Tabnine]",
         })[entry.source.name]
 
         if entry.source.name == "emoji" then
@@ -104,27 +115,28 @@ function M.config()
           vim_item.kind = icons.misc.Robot
         end
 
-        if entry.source.name == "luasnip" then
-          vim_item.kind = icons.kind.Snippet
-          vim_item.expandable_indicator = "▶"
-        end
-
         return vim_item
       end,
     },
-    sources = {
+    sources = cmp.config.sources({
+      { name = "copilot" },
       { name = "nvim_lsp" },
       { name = "luasnip" },
-      { name = "copilot" },
+      { name = "cmp_tabnine" },
+      { name = "nvim_lua" },
+    }, {
       { name = "buffer" },
       { name = "path" },
+      { name = "calc" },
       { name = "emoji" },
-      { name = "cmp_tabnine" },
-    },
+      { name = "treesitter" },
+      { name = "crates" },
+      { name = "tmux" }
+    }),
     sorting = {
       priority_weight = 2,
       comparators = {
-        require("copilot_cmp.comparators").prioritize or function() end,
+        copilot_cmp_comparators_ok and copilot_cmp_comparators.prioritize or function() end,
         function(entry1, entry2)
           if entry1:get_kind() == cmp.lsp.CompletionItemKind.Snippet then
             return false
@@ -170,7 +182,7 @@ function M.config()
       },
     },
     experimental = {
-      ghost_text = true,
+      ghost_text = false,
     },
   })
 
