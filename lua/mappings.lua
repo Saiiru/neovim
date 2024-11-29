@@ -1,5 +1,5 @@
 local map = vim.keymap.set
-
+vim.keymap.set("n", "-", "<CMD>Oil --float<CR>", { desc = "Open parent directory" })
 -- general mappings
 map("n", "<C-s>", "<cmd> w <CR>")
 map("i", "jk", "<ESC>")

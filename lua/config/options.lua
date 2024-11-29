@@ -36,8 +36,10 @@ vim.env.PATH = vim.env.PATH .. (is_windows and ";" or ":") .. vim.fn.stdpath "da
 vim.api.nvim_set_hl(0, "IndentLine", { link = "Comment" })
 
 -- Disable unnecessary providers
+vim.g.loaded_python3_provider = 0
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0
+vim.g.loaded_node_provider = 0
 
 -- General options
 local opt = vim.opt
@@ -103,7 +105,7 @@ opt.winminheight = 1
 opt.pumblend = 10
 opt.pumheight = 10
 opt.showbreak = '⤷  '
-opt.listchars = { tab = ' ▏', extends = '⟫', precedes = '⟪', conceal = '', nbsp = '␣', trail = '·' }
+opt.listchars = { tab = '  ', extends = '⟫', precedes = '⟪', conceal = '', nbsp = '␣', trail = '·' }
 opt.fillchars = {
   foldopen = '',
   foldclose = '',
