@@ -2,7 +2,6 @@ local M = {
   "hrsh7th/nvim-cmp",
   event = "InsertEnter",
   dependencies = {
-    -- Snippet Engine and default snippets
     {
       "L3MON4D3/LuaSnip",
       build = (function()
@@ -21,16 +20,12 @@ local M = {
       },
     },
     "saadparwaiz1/cmp_luasnip",
-
-    -- LSP and completion sources
     "hrsh7th/cmp-nvim-lsp",
     "hrsh7th/cmp-buffer",
     "hrsh7th/cmp-path",
     "hrsh7th/cmp-nvim-lua",
     "hrsh7th/cmp-cmdline",
     "hrsh7th/cmp-emoji",
-
-    -- AI and advanced completions
     {
       "tzachar/cmp-tabnine",
       build = "./install.sh",
@@ -48,8 +43,6 @@ local M = {
         require("copilot_cmp").setup()
       end,
     },
-
-    -- Auto-pairing integration
     {
       "windwp/nvim-autopairs",
       config = function()
@@ -64,7 +57,7 @@ local M = {
 function M.config()
   local cmp = require "cmp"
   local luasnip = require "luasnip"
-  local icons = require "icons" -- Ensure this points to your icons setup
+  local icons = require "icons"
 
   require("luasnip.loaders.from_vscode").lazy_load()
   luasnip.config.setup {}
@@ -77,15 +70,11 @@ function M.config()
 
   -- Custom comparators for sorting
   local function prefer_snippets(entry1, entry2)
-    if entry1:get_kind() == cmp.lsp.CompletionItemKind.Snippet then
-      return true
-    elseif entry2:get_kind() == cmp.lsp.CompletionItemKind.Snippet then
-      return false
+    local is_snippet1 = entry1:get_kind() == cmp.lsp.CompletionItemKind.Snippet
+    local is_snippet2 = entry2:get_kind() == cmp.lsp.CompletionItemKind.Snippet
+    if is_snippet1 ~= is_snippet2 then
+      return is_snippet1
     end
-  end
-
-  local function prefer_exact_matches(entry1, entry2)
-    return cmp.config.compare.exact(entry1, entry2)
   end
 
   -- nvim-cmp setup
@@ -96,13 +85,13 @@ function M.config()
       end,
     },
     mapping = cmp.mapping.preset.insert {
-      ["<C-j>"] = cmp.mapping.select_next_item(), -- Next suggestion
-      ["<C-k>"] = cmp.mapping.select_prev_item(), -- Previous suggestion
-      ["<C-b>"] = cmp.mapping.scroll_docs(-4), -- Scroll docs up
-      ["<C-f>"] = cmp.mapping.scroll_docs(4), -- Scroll docs down
-      ["<C-Space>"] = cmp.mapping.complete(), -- Show completions
-      ["<C-e>"] = cmp.mapping.abort(), -- Close completion menu
-      ["<CR>"] = cmp.mapping.confirm { select = true }, -- Confirm selection
+      ["<C-j>"] = cmp.mapping.select_next_item(),
+      ["<C-k>"] = cmp.mapping.select_prev_item(),
+      ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+      ["<C-f>"] = cmp.mapping.scroll_docs(4),
+      ["<C-Space>"] = cmp.mapping.complete(),
+      ["<C-e>"] = cmp.mapping.abort(),
+      ["<CR>"] = cmp.mapping.confirm { select = true },
       ["<Tab>"] = cmp.mapping(function(fallback)
         if cmp.visible() then
           cmp.select_next_item()
@@ -147,7 +136,7 @@ function M.config()
       { name = "cmp_tabnine" },
       { name = "nvim_lua" },
     }, {
-      { name = "buffer", keyword_length = 3 }, -- Show only after typing 3 chars
+      { name = "buffer", keyword_length = 3 },
       { name = "path" },
       { name = "emoji" },
     }),
@@ -155,7 +144,7 @@ function M.config()
       priority_weight = 2,
       comparators = {
         prefer_snippets,
-        prefer_exact_matches,
+        cmp.config.compare.exact,
         cmp.config.compare.score,
         cmp.config.compare.recently_used,
         cmp.config.compare.locality,

@@ -70,12 +70,6 @@ map("n", "<leader>tp", ":tabprevious<CR>", "Switch to the previous tab")
 map("n", "<C-n>", "<cmd>NvimTreeToggle<CR>", "Toggle NvimTree")
 map("n", "<C-h>", "<cmd>NvimTreeFocus<CR>", "Focus NvimTree")
 
--- Telescope
-map("n", "<leader>ff", "<cmd>Telescope find_files<CR>", "Find files")
-map("n", "<leader>fo", "<cmd>Telescope oldfiles<CR>", "Find recently opened files")
-map("n", "<leader>fw", "<cmd>Telescope live_grep<CR>", "Live grep")
-map("n", "<leader>gt", "<cmd>Telescope git_status<CR>", "Git status")
-
 -- Bufferline
 map("n", "<Tab>", "<cmd>BufferLineCycleNext<CR>", "Cycle to next buffer")
 map("n", "<S-Tab>", "<cmd>BufferLineCyclePrev<CR>", "Cycle to previous buffer")

@@ -10,9 +10,10 @@ local M = {
       require "nvim-web-devicons"
     end,
   },
-  { "folke/lazy.nvim", version = false },
-  { "LazyVim/LazyVim", version = false },
+  { "folke/lazy.nvim",                                version = false },
+  { "LazyVim/LazyVim",                                version = false },
   { import = "lazyvim.plugins.extras.ai.copilot-chat" },
+  { import = "plugins.langs" },
 }
 
 return M
