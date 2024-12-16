@@ -1,10 +1,10 @@
--- Function to apply the color scheme with full transparency
+
+-- Função para aplicar o esquema de cores com transparência total
 local function ColorMyPencils(colorScheme)
   colorScheme = colorScheme or "carbonfox"
-  -- Apply the color scheme
-  pcall(vim.cmd.colorscheme, colorScheme)
+  vim.cmd.colorscheme(colorScheme)
 
-  -- Setting transparency for the background
+  -- Definindo a transparência para o fundo
   local set_hl = vim.api.nvim_set_hl
   local transparent_groups = {
     "Normal",
@@ -23,20 +23,29 @@ local function ColorMyPencils(colorScheme)
     set_hl(0, group, { bg = "none" })
   end
 
-  -- Additional highlight definitions
-  vim.cmd [[
+  -- Definições de destaque adicionais
+  vim.cmd([[
   highlight CmpTransparent guibg=NONE ctermbg=NONE
   highlight CmpBorderVibrant guifg=#00FFFF gui=bold
-  ]]
+  ]])
 end
 
--- Helper function to adjust colors
+-- Função auxiliar para ajuste de cor
 local function adjust_color(color, fallback)
   return type(color) == "string" and color or fallback
 end
 
--- Configuration for themes with transparency and "Dark Knight" style
-return {
+local M = {
+  -- LunarVim darkplus theme
+  {
+    "LunarVim/darkplus.nvim",
+    lazy = false, -- make sure we load this during startup if it is your main colorscheme
+    priority = 1000, -- make sure to load this before all the other start plugins
+  },
+  config = function()
+    -- vim.cmd.colorscheme "darkplus"
+  end,
+
   -- Kanagawa Theme Config
   {
     "rebelot/kanagawa.nvim",
@@ -47,7 +56,7 @@ return {
         theme = {
           all = {
             ui = {
-              bg_gutter = "none", -- no background in the gutter
+              bg_gutter = "none", -- sem fundo na margem
             },
           },
         },
@@ -71,7 +80,7 @@ return {
     "EdenEast/nightfox.nvim",
     opts = {
       options = {
-        transparent = true, -- always transparent
+        transparent = true, -- sempre transparente
         terminal_colors = true,
         styles = {
           comments = "italic",
@@ -81,32 +90,32 @@ return {
       },
       palettes = {
         carbonfox = {
-          bg1 = "#1a1a1a", -- Darker background
-          fg1 = "#f8f8f2", -- Brighter text
-          blue = "#8be9fd", -- Vibrant cyan
-          green = "#50fa7b", -- Vibrant green
-          red = "#ff5555", -- Intense red
-          yellow = "#f1fa8c", -- Bright yellow
-          magenta = "#ff79c6", -- Bright magenta
-          cyan = "#8be9fd", -- Bright cyan
+          bg1 = "#0d0d0d", -- fundo principal, preto
+          fg1 = "#e5e5e5", -- texto quase branco
+          blue = "#0abdc6", -- azul neon
+          green = "#51fa7b", -- verde neon
+          red = "#ff5555", -- vermelho intenso
+          yellow = "#f57800", -- amarelo suave
+          magenta = "#ff79c6", -- rosa neon
+          cyan = "#8be9fd", -- ciano
         },
       },
       groups = {
         carbonfox = {
           CursorLine = { bg = "#282a36" },
-          Normal = { bg = "none", fg = "#f8f8f2" },
+          Normal = { bg = "none", fg = "#e5e5e5" },
           Comment = { fg = "#b8b8b8", style = "italic" },
-          Function = { fg = "#8be9fd", style = "italic,bold" },
+          Function = { fg = "#0abdc6", style = "italic,bold" },
           NeoTreeNormal = { bg = "none" },
         },
       },
     },
     config = function()
-      ColorMyPencils "carbonfox"
+      ColorMyPencils("carbonfox")
     end,
   },
 
-  -- Other Themes with Transparency Enabled
+  -- Outros Temas com Transparência Ativada
   {
     "rose-pine/neovim",
     name = "rose-pine",
@@ -167,7 +176,7 @@ return {
       italic_comment = true,
     },
     config = function(_, opts)
-      local dracula = require "dracula"
+      local dracula = require("dracula")
       dracula.setup(opts)
       vim.o.spell = false
     end,
@@ -177,7 +186,7 @@ return {
     lazy = true,
     dependencies = { "tjdevries/colorbuddy.nvim", tag = "v1.0.0" },
     init = function()
-      require("colorbuddy").colorscheme "cobalt2"
+      require("colorbuddy").colorscheme("cobalt2")
       vim.o.spell = false
     end,
   },
@@ -205,3 +214,4 @@ return {
     },
   },
 }
+return M

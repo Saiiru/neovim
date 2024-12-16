@@ -1,224 +1,105 @@
-local o = vim.o
+local go = vim.g
+local o = vim.opt
 
+-- Borrow those settings from LazyVim
 vim.g.mapleader = " "
-vim.g.maplocalleader = ';'
-
-o.laststatus = 3 -- global statusline
-o.showmode = false
-o.clipboard = "unnamedplus"
-
--- Indenting
-o.expandtab = true
-o.shiftwidth = 2
-o.smartindent = true
-o.tabstop = 2
-o.softtabstop = 2
-
-vim.opt.fillchars = { eob = " " }
-o.ignorecase = true
-o.smartcase = true
-o.mouse = "a"
-o.number = true
-o.signcolumn = "yes"
-o.splitbelow = true
-o.splitright = true
-o.termguicolors = true
-o.timeoutlen = 400
-o.undofile = true
-o.cursorline = true
-o.cursorlineopt = "number"
-o.colorcolumn = "80"
-
--- Add binaries installed by mason.nvim to path
-local is_windows = vim.loop.os_uname().sysname == "Windows_NT"
-vim.env.PATH = vim.env.PATH .. (is_windows and ";" or ":") .. vim.fn.stdpath "data" .. "/mason/bin"
-
-vim.api.nvim_set_hl(0, "IndentLine", { link = "Comment" })
-
--- Disable unnecessary providers
-vim.g.loaded_python3_provider = 0
-vim.g.loaded_perl_provider = 0
-vim.g.loaded_ruby_provider = 0
-vim.g.loaded_node_provider = 0
-
--- General options
-local opt = vim.opt
-opt.title = true
-opt.titlestring = '%<%F%=%l/%L - nvim'
-opt.mouse = 'nv'  -- Enable mouse in normal and visual modes only
-opt.virtualedit = 'block'
-opt.conceallevel = 2
-opt.confirm = true
-opt.signcolumn = 'yes'
-opt.spelloptions:append('camel')
-opt.updatetime = 200
-
--- Clipboard options
-opt.clipboard = vim.env.SSH_TTY and '' or 'unnamedplus'
-
--- Completion options
-opt.completeopt = 'menu,menuone,noselect'
-opt.wildmode = 'longest:full,full'
-opt.diffopt:append({ 'indent-heuristic', 'algorithm:patience' })
-
--- Text formatting options
-opt.textwidth = 80
-opt.tabstop = 2
-opt.shiftwidth = 2
-opt.smartindent = true
-opt.shiftround = true
-opt.sessionoptions = { 'buffers', 'curdir', 'tabpages', 'winsize', 'help', 'globals', 'skiprtp', 'folds' }
-opt.undofile = true
-opt.undolevels = 10000
-opt.writebackup = false
-
--- Searching options
-opt.ignorecase = true
-opt.smartcase = true
-opt.incsearch = true
-opt.hlsearch = false
-
--- Editor UI options
-opt.termguicolors = true
-opt.shortmess:append({ W = true, I = true, c = true })
-opt.showcmd = false
-opt.showmode = false
-opt.laststatus = 3
-opt.scrolloff = 4
-opt.sidescrolloff = 8
-opt.numberwidth = 2
-opt.ruler = false
-opt.list = true
-opt.foldlevel = 99
-opt.cursorline = true
-opt.splitbelow = true
-opt.splitright = true
-opt.splitkeep = 'screen'
-opt.cmdheight = 0
-opt.colorcolumn = '+0'
-opt.showtabline = 2
-opt.helpheight = 0
-opt.winwidth = 30
-opt.winminwidth = 1
-opt.winheight = 1
-opt.winminheight = 1
-opt.pumblend = 10
-opt.pumheight = 10
-opt.showbreak = '⤷  '
-opt.listchars = { tab = '  ', extends = '⟫', precedes = '⟪', conceal = '', nbsp = '␣', trail = '·' }
-opt.fillchars = {
-  foldopen = '',
-  foldclose = '',
-  fold = ' ',
-  foldsep = ' ',
-  diff = '╱',
-  eob = ' ',
-  horiz = '━',
-  horizup = '┻',
-  horizdown = '┳',
-  vert = '┃',
-  vertleft = '┫',
-  vertright = '┣',
-  verthoriz = '╋',
-}
-opt.smoothscroll = vim.fn.has('nvim-0.10') == 1 or vim.fn.has('nvim-0.11') == 1
-opt.foldexpr = "v:lua.require'lazyvim.util'.ui.foldexpr()"
-opt.foldmethod = 'expr'
-opt.foldtext = ''
-
--- Filetype detection
-vim.filetype.add({
-  filename = {
-    Brewfile = 'ruby',
-    justfile = 'just',
-    Justfile = 'just',
-    ['.buckconfig'] = 'toml',
-    ['.flowconfig'] = 'ini',
-    ['.jsbeautifyrc'] = 'json',
-    ['.jscsrc'] = 'json',
-    ['.watchmanconfig'] = 'json',
-    ['helmfile.yaml'] = 'yaml',
-    ['todo.txt'] = 'todotxt',
-    ['yarn.lock'] = 'yaml',
-  },
-  pattern = {
-    ['%.config/git/users/.*'] = 'gitconfig',
-    ['%.kube/config'] = 'yaml',
-    ['.*%.js%.map'] = 'json',
-    ['.*%.postman_collection'] = 'json',
-    ['Jenkinsfile.*'] = 'groovy',
-  },
-})
-
--- Codificação
-opt.encoding = "utf-8"
-opt.fileencoding = "utf-8"
-
--- Interface
-opt.nu = true
-opt.relativenumber = true
-
--- Tabs e Indentação
-vim.bo.softtabstop = 2
-
--- Divisões e Janelas
-opt.splitbelow = true
-opt.splitright = true
-
--- Linha de Status
-opt.laststatus = 3
-
--- Aparência
-vim.diagnostic.config({ float = { border = "rounded" } })
-
--- Configuração do Cursor
-opt.guicursor = {
-  "n-v-c:block",
-  "i-ci:ver25-blinkwait300-blinkoff150-blinkon150",
-  "r-cr:hor20-blinkwait300-blinkoff150-blinkon150",
-}
-
--- Mouse e Teclado
-opt.whichwrap:append("<>[]hl")
-
--- Undo e Backup
-opt.swapfile = false
-opt.backup = false
-opt.undodir = vim.fn.stdpath("config") .. "/undodir"
-
--- Tempo e Atualização
-opt.timeoutlen = 300
-
--- Line Wrapping
-opt.wrap = false
-
--- Folding
-opt.foldlevel = 20
-opt.foldmethod = "expr"
-opt.foldexpr = "nvim_treesitter#foldexpr()"
-
--- Clipboard
-opt.clipboard:append("unnamedplus")
-
--- Consideração de Palavras
-opt.iskeyword:append("-")
-
--- Comandos Específicos para Arquivos
-vim.cmd([[au BufNewFile,BufRead *.astro setf astro]])
-vim.cmd([[au BufNewFile,BufRead Podfile setf ruby]])
+vim.g.maplocalleader = "\\"
 
 -- Hide deprecation warnings
 vim.g.deprecation_warnings = false
+
+local opt = vim.opt
+
+opt.autowrite = true -- Enable auto write
+-- only set clipboard if not in ssh, to make sure the OSC 52
+-- integration works automatically. Requires Neovim >= 0.10.0
+opt.clipboard = vim.env.SSH_TTY and "" or "unnamedplus" -- Sync with system clipboard
+opt.completeopt = "menu,menuone,noselect"
+opt.conceallevel = 0
+opt.confirm = true -- Confirm to save changes before exiting modified buffer
+opt.cursorline = true -- Enable highlighting of the current line
+opt.expandtab = true -- Use spaces instead of tabs
+opt.formatoptions = "jcroqlnt" -- tcqj
+opt.grepformat = "%f:%l:%c:%m"
+opt.grepprg = "rg --vimgrep"
+opt.ignorecase = true -- Ignore case
+opt.inccommand = "nosplit" -- preview incremental substitute
+opt.laststatus = 3 -- global statusline
+opt.linebreak = true -- Wrap lines at convenient points
+opt.list = false -- Show some invisible characters (tabs...
+opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
+opt.mouse = "a" -- Enable mouse mode
+opt.number = true -- Print line number
+opt.pumblend = 10 -- Popup blend
+opt.pumheight = 10 -- Maximum number of entries in a popup
+opt.relativenumber = true -- Relative line numbers
+opt.ruler = false -- Disable the default ruler
+opt.scrolloff = 4 -- Lines of context
+opt.sessionoptions = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp", "folds" }
+opt.shiftround = true -- Round indent
+opt.shiftwidth = 2 -- Size of an indent
+opt.shortmess:append { W = true, I = true, c = true, C = true }
+opt.showmode = false -- Dont show mode since we have a statusline
+opt.sidescrolloff = 8 -- Columns of context
+opt.signcolumn = "yes" -- Always show the signcolumn, otherwise it would shift the text each time
+opt.smartcase = true -- Don't ignore case with capitals
+opt.smartindent = true -- Insert indents automatically
+opt.spelllang = { "en" }
+opt.spelloptions:append "noplainbuffer"
+opt.splitbelow = true -- Put new windows below current
+opt.splitkeep = "screen"
+opt.splitright = true -- Put new windows right of current
+opt.tabstop = 2 -- Number of spaces tabs count for
+opt.termguicolors = true -- True color support
+opt.timeoutlen = vim.g.vscode and 1000 or 300 -- Lower than default (1000) to quickly trigger which-key
+opt.undofile = true
+opt.undolevels = 10000
+opt.updatetime = 200 -- Save swap file and trigger CursorHold
+opt.virtualedit = "block" -- Allow cursor to move where there is no text in visual block mode
+opt.wildmode = "longest:full,full" -- Command-line completion mode
+opt.winminwidth = 5 -- Minimum window width
+opt.wrap = false -- Disable line wrap
+
+-- Fix markdown indentation settings
+vim.g.markdown_recommended_style = 0
+
+-- Folding
+opt.fillchars = {
+  foldopen = "",
+  foldclose = "",
+  fold = " ",
+  foldsep = " ",
+  diff = "╱",
+  eob = " ",
+}
+opt.foldlevel = 99
+if vim.fn.has "nvim-0.10" == 1 or vim.fn.has "nvim-0.11" then
+  opt.smoothscroll = true
+  opt.foldexpr = "v:lua.require'utils.ui'.foldexpr()"
+  opt.foldmethod = "expr"
+  opt.foldtext = ""
+else
+  opt.foldmethod = "indent"
+  opt.foldtext = "v:lua.require'utils.ui'.foldtext()"
+end
 
 -- Enable spell check by default unless in vscode
 if not vim.g.vscode then
   vim.o.spell = true
 end
 
--- Misc settings
-vim.g.no_gitrebase_maps = 1
-vim.g.no_man_maps = 1
+-- Disable providers
+vim.g.loaded_ruby_provider = 0
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_node_provider = 0
+vim.g.loaded_python3_provider = 0
 
--- Fix markdown indentation settings
-vim.g.markdown_recommended_style = 0
-vim.g.yaml_indent_multiline_scalar = 1
+-- Setup options for Neovide
+-- Install neovide: ❯ brew install --ignore-dependencies  neovide
+if vim.g.neovide then
+  vim.o.guifont = "OperatorMonoLig Nerd Font:h20"
+  vim.g.neovide_hide_mouse_when_typing = true
+  vim.g.neovide_cursor_antialiasing = false
+  vim.g.neovide_input_macos_option_key_is_meta = "only_left"
+  vim.g.neovide_input_ime = true
+end

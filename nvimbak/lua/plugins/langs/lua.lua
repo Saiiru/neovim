@@ -62,5 +62,5 @@ return {
       })
     end,
   },
-  { "folke/neodev.nvim",    enabled = false }, -- make sure to uninstall or disable neodev.nvim
+  { "folke/neodev.nvim", enabled = false }, -- make sure to uninstall or disable neodev.nvim
 }
