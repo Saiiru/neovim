@@ -1,207 +1,79 @@
--- Function to apply the color scheme with full transparency
+-- Função para aplicar o esquema de cores com total personalização
 local function ColorMyPencils(colorScheme)
-  colorScheme = colorScheme or "carbonfox"
-  -- Apply the color scheme
+  colorScheme = colorScheme or "carbonfox" -- Define o esquema de cores padrão
+  -- Aplica o esquema de cores
   pcall(vim.cmd.colorscheme, colorScheme)
 
-  -- Setting transparency for the background
+  -- Configurações personalizadas de destaque
   local set_hl = vim.api.nvim_set_hl
-  local transparent_groups = {
-    "Normal",
-    "NormalNC",
-    "NormalFloat",
-    "EndOfBuffer",
-    "SignColumn",
-    "StatusLine",
-    "StatusLineNC",
-    "NeoTreeNormal",
-    "NeoTreeNormalNC",
-    "NeoTreeCursorLine",
-    "NeoTreeEndOfBuffer",
+  local custom_groups = {
+    Normal = { bg = "#0d0d0d", fg = "#f8f8f2" }, -- Fundo preto profundo e texto branco
+    NormalNC = { bg = "#0d0d0d" },
+    NormalFloat = { bg = "#0d0d0d" },
+    EndOfBuffer = { bg = "#0d0d0d", fg = "#0d0d0d" },
+    SignColumn = { bg = "#0d0d0d" },
+    StatusLine = { bg = "#0d0d0d", fg = "#00FFFF" }, -- Ciano neon para a barra de status
+    StatusLineNC = { bg = "#0d0d0d", fg = "#666666" }, -- Status para janelas inativas
+    CursorLine = { bg = "#1a1a1a" }, -- Linha de cursor em cinza sutil
+    CursorLineNr = { fg = "#FF79C6", bg = "#1a1a1a", bold = true }, -- Números de linha em rosa neon
+    LineNr = { fg = "#666666" }, -- Números de linha apagados
+    VertSplit = { fg = "#44475a" }, -- Cor de borda de divisão sutil
+    FloatBorder = { bg = "#0d0d0d", fg = "#8be9fd" }, -- Borda vibrante para janelas flutuantes
+    Pmenu = { bg = "#0d0d0d", fg = "#f8f8f2" }, -- Menu de popup
+    PmenuSel = { bg = "#44475a", fg = "#50fa7b" }, -- Seleção em menu de popup
+    Comment = { fg = "#6272a4", italic = true }, -- Comentários em azul neon e itálico
+    Keyword = { fg = "#FF79C6", bold = true }, -- Palavras-chave em rosa neon e negrito
+    Function = { fg = "#8be9fd", italic = true, bold = true }, -- Funções em ciano neon
+    String = { fg = "#50fa7b" }, -- Strings em verde vibrante
+    Terminal = { bg = "#0d0d0d", fg = "#f8f8f2" }, -- Cor do terminal
+    Error = { fg = "#FF5555", bold = true }, -- Erros em vermelho
+    WarningMsg = { fg = "#f1fa8c", bold = true }, -- Avisos em amarelo
   }
-  for _, group in ipairs(transparent_groups) do
-    set_hl(0, group, { bg = "none" })
+  -- Aplica os grupos personalizados
+  for group, settings in pairs(custom_groups) do
+    set_hl(0, group, settings)
   end
-
-  -- Additional highlight definitions
-  vim.cmd [[
-  highlight CmpTransparent guibg=NONE ctermbg=NONE
-  highlight CmpBorderVibrant guifg=#00FFFF gui=bold
-  ]]
 end
 
--- Helper function to adjust colors
-local function adjust_color(color, fallback)
-  return type(color) == "string" and color or fallback
-end
-
--- Configuration for themes with transparency and "Dark Knight" style
+-- Configuração do tema
 return {
-  -- Kanagawa Theme Config
   {
-    "rebelot/kanagawa.nvim",
-    lazy = true,
-    opts = {
-      dimInactive = true,
-      colors = {
-        theme = {
-          all = {
-            ui = {
-              bg_gutter = "none", -- no background in the gutter
-            },
-          },
-        },
-      },
-      overrides = function(colors)
-        local theme = colors.theme
-        return {
-          NormalFloat = { bg = "none" },
-          FloatBorder = { bg = "none" },
-          FloatTitle = { bg = "none" },
-          NormalDark = { fg = theme.ui.fg_dim, bg = theme.ui.bg_m3 },
-          LazyNormal = { bg = theme.ui.bg_m3, fg = theme.ui.fg_dim },
-          MasonNormal = { bg = theme.ui.bg_m3, fg = theme.ui.fg_dim },
-        }
-      end,
-    },
-  },
-
-  -- Carbonfox Theme Config
-  {
-    "EdenEast/nightfox.nvim",
+    "EdenEast/nightfox.nvim", -- Plugin para gerenciamento de esquemas de cores
+    lazy = false,
+    priority = 1000,
     opts = {
       options = {
-        transparent = true, -- always transparent
-        terminal_colors = true,
+        transparent = false, -- Desativa a transparência
+        terminal_colors = true, -- Permite que as cores do terminal sejam usadas
         styles = {
-          comments = "italic",
-          keywords = "bold",
-          types = "italic,bold",
+          comments = "italic", -- Comentários em itálico
+          keywords = "bold", -- Palavras-chave em negrito
+          types = "italic,bold", -- Tipos em itálico e negrito
         },
       },
       palettes = {
         carbonfox = {
-          bg1 = "#1a1a1a", -- Darker background
-          fg1 = "#f8f8f2", -- Brighter text
-          blue = "#8be9fd", -- Vibrant cyan
-          green = "#50fa7b", -- Vibrant green
-          red = "#ff5555", -- Intense red
-          yellow = "#f1fa8c", -- Bright yellow
-          magenta = "#ff79c6", -- Bright magenta
-          cyan = "#8be9fd", -- Bright cyan
+          bg1 = "#0d0d0d", -- Cor de fundo profunda
+          fg1 = "#f8f8f2", -- Cor de texto clara
+          blue = "#8be9fd", -- Ciano neon
+          green = "#50fa7b", -- Verde vibrante
+          red = "#ff5555", -- Vermelho intenso
+          yellow = "#f1fa8c", -- Amarelo brilhante
+          magenta = "#ff79c6", -- Magenta brilhante
+          cyan = "#8be9fd", -- Ciano neon
         },
       },
       groups = {
         carbonfox = {
-          CursorLine = { bg = "#282a36" },
-          Normal = { bg = "none", fg = "#f8f8f2" },
-          Comment = { fg = "#b8b8b8", style = "italic" },
-          Function = { fg = "#8be9fd", style = "italic,bold" },
-          NeoTreeNormal = { bg = "none" },
+          CursorLine = { bg = "#1a1a1a" }, -- Linha de cursor em cinza sutil
+          Normal = { bg = "#0d0d0d", fg = "#f8f8f2" }, -- Normal com fundo preto
+          Comment = { fg = "#6272a4", style = "italic" }, -- Comentários em azul neon e itálico
+          Function = { fg = "#8be9fd", style = "italic,bold" }, -- Funções em ciano neon
         },
       },
     },
     config = function()
-      ColorMyPencils "carbonfox"
+      ColorMyPencils("carbonfox") -- Aplica o esquema de cores customizado
     end,
-  },
-
-  -- Other Themes with Transparency Enabled
-  {
-    "rose-pine/neovim",
-    name = "rose-pine",
-    opts = {
-      variant = "moon",
-      disable_background = true,
-      disable_float_background = true,
-      styles = {
-        bold = true,
-        italic = true,
-      },
-    },
-    lazy = true,
-  },
-  {
-    "catppuccin/nvim",
-    lazy = true,
-    name = "catppuccin",
-    opts = {
-      transparent_background = true,
-      integrations = {
-        cmp = true,
-        dashboard = true,
-        flash = true,
-        gitsigns = true,
-        headlines = true,
-        indent_blankline = { enabled = true },
-        lsp_trouble = true,
-        mason = true,
-        markdown = true,
-        mini = true,
-        native_lsp = {
-          enabled = true,
-          underlines = {
-            errors = { "undercurl" },
-            hints = { "undercurl" },
-            warnings = { "undercurl" },
-            information = { "undercurl" },
-          },
-        },
-        neotest = true,
-        noice = true,
-        notify = true,
-        semantic_tokens = true,
-        treesitter = true,
-        treesitter_context = true,
-        which_key = true,
-        fzf = true,
-      },
-    },
-  },
-  {
-    "Mofiqul/dracula.nvim",
-    lazy = true,
-    opts = {
-      transparent_bg = true,
-      show_end_of_buffer = true,
-      italic_comment = true,
-    },
-    config = function(_, opts)
-      local dracula = require "dracula"
-      dracula.setup(opts)
-      vim.o.spell = false
-    end,
-  },
-  {
-    "lalitmee/cobalt2.nvim",
-    lazy = true,
-    dependencies = { "tjdevries/colorbuddy.nvim", tag = "v1.0.0" },
-    init = function()
-      require("colorbuddy").colorscheme "cobalt2"
-      vim.o.spell = false
-    end,
-  },
-  {
-    "oxfist/night-owl.nvim",
-    lazy = true,
-    opts = {
-      bold = true,
-      italics = true,
-      underline = true,
-      undercurl = true,
-      transparent_background = true,
-    },
-  },
-  {
-    "folke/tokyonight.nvim",
-    lazy = true,
-    opts = {
-      style = "moon",
-      transparent = true,
-      styles = {
-        sidebars = "transparent",
-        floats = "transparent",
-      },
-    },
   },
 }

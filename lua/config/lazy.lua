@@ -1,18 +1,36 @@
-local lazypath = vim.fn.stdpath "data" .. "/lazy/lazy.nvim"
-if not vim.uv.fs_stat(lazypath) then
-  -- bootstrap lazy.nvim
-  -- stylua: ignore
-  vim.fn.system({ "git", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", "--branch=stable",
-    lazypath })
-end
-vim.opt.rtp:prepend(vim.env.LAZY or lazypath)
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
-require("lazy").setup {
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable",
+    lazypath,
+  })
+end
+
+vim.opt.rtp:prepend(vim.env.LAZY or lazypath)
+vim.cmd([[command! -nargs=0 GoToCommand :Telescope commands]])
+vim.cmd([[command! -nargs=0 GoToFile :Telescope smart_open]])
+vim.cmd([[command! -nargs=0 GoToSymbol :Telescope lsp_document_symbols]])
+vim.cmd([[command! -nargs=0 Grep :Telescope live_grep]])
+vim.cmd([[command! -nargs=0 SmartGoTo :Telescope smart_goto]])
+vim.o.cursorlineopt = "number"
+
+require("lazy").setup({
   spec = {
     {
       "LazyVim/LazyVim",
       import = "lazyvim.plugins",
+      opts = {
+        defaults = { keymaps = true },
+      },
     },
+
+    -- TODO: create my own plugin configs?
+    -- maybe use cht.sh or something like that
     -- import any extras modules here
     -- { import = "lazyvim.plugins.extras.linting.eslint" },
     -- { import = "lazyvim.plugins.extras.formatting.prettier" },
@@ -29,35 +47,30 @@ require("lazy").setup {
     -- { import = "lazyvim.plugins.extras.coding.yanky" },
     -- { import = "lazyvim.plugins.extras.editor.mini-files" },
     -- { import = "lazyvim.plugins.extras.util.project" },
-    {
-      import = "plugins",
-    },
-  },
-  ui = {
-    backdrop = 100,
+    -- my plugins
+    { import = "plugins" },
+    { import = "plugins/ai" },
   },
   defaults = {
     lazy = true,
-    version = false, -- always use the latest git commit
-    -- version = "*", -- try installing the latest stable version for plugins that support semver
+    version = false,
   },
-  local_spec = true,
-  checker = { enabled = true }, -- automatically check for plugin updates
+  install = { colorscheme = { "catppuccin" } },
+  ui = { border = "single" },
+  checker = { enabled = false },
   performance = {
-    cache = {
-      enabled = true,
-      -- disable_events = {},
-    },
     rtp = {
       -- disable some rtp plugins
       disabled_plugins = {
         "gzip",
+        -- "matchit",
+        -- "matchparen",
+        -- "netrwPlugin",
         "tarPlugin",
         "tohtml",
         "tutor",
-        "netrwPlugin",
         "zipPlugin",
       },
     },
   },
-}
+})

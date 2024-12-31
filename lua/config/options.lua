@@ -1,69 +1,60 @@
-local go = vim.g
-local o = vim.opt
+-- Options are automatically loaded before lazy.nvim startup
+-- Default options that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
+-- Add any additional options here
+local opt = vim.opt
 
--- Borrow those settings from LazyVim
+-- Leader and local leader keys
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
--- Hide deprecation warnings
+-- General settings
 vim.g.deprecation_warnings = false
+vim.g.loaded_ruby_provider = 0
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_node_provider = 0
+vim.g.loaded_python3_provider = 0
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
 
-local opt = vim.opt
+-- Clipboard setup: disable clipboard on SSH
+opt.clipboard = vim.env.SSH_TTY and "" or "unnamedplus"
 
-opt.autowrite = true -- Enable auto write
--- only set clipboard if not in ssh, to make sure the OSC 52
--- integration works automatically. Requires Neovim >= 0.10.0
-opt.clipboard = vim.env.SSH_TTY and "" or "unnamedplus" -- Sync with system clipboard
+-- Completion and search settings
 opt.completeopt = "menu,menuone,noselect"
-opt.conceallevel = 0
-opt.confirm = true -- Confirm to save changes before exiting modified buffer
-opt.cursorline = true -- Enable highlighting of the current line
-opt.expandtab = true -- Use spaces instead of tabs
-opt.formatoptions = "jcroqlnt" -- tcqj
+opt.ignorecase = true
+opt.smartcase = true
+opt.inccommand = "nosplit" -- Preview incremental substitute
+opt.hlsearch = true
+opt.incsearch = true
 opt.grepformat = "%f:%l:%c:%m"
 opt.grepprg = "rg --vimgrep"
-opt.ignorecase = true -- Ignore case
-opt.inccommand = "nosplit" -- preview incremental substitute
-opt.laststatus = 3 -- global statusline
-opt.linebreak = true -- Wrap lines at convenient points
-opt.list = false -- Show some invisible characters (tabs...
-opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
-opt.mouse = "a" -- Enable mouse mode
-opt.number = true -- Print line number
-opt.pumblend = 10 -- Popup blend
-opt.pumheight = 10 -- Maximum number of entries in a popup
+
+-- Interface settings
+opt.cursorline = true -- Highlight current line
+opt.termguicolors = true -- Enable true color support
+opt.number = true -- Show line numbers
 opt.relativenumber = true -- Relative line numbers
-opt.ruler = false -- Disable the default ruler
-opt.scrolloff = 4 -- Lines of context
-opt.sessionoptions = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp", "folds" }
-opt.shiftround = true -- Round indent
-opt.shiftwidth = 2 -- Size of an indent
-opt.shortmess:append { W = true, I = true, c = true, C = true }
-opt.showmode = false -- Dont show mode since we have a statusline
-opt.sidescrolloff = 8 -- Columns of context
-opt.signcolumn = "yes" -- Always show the signcolumn, otherwise it would shift the text each time
-opt.smartcase = true -- Don't ignore case with capitals
-opt.smartindent = true -- Insert indents automatically
-opt.spelllang = { "en" }
-opt.spelloptions:append "noplainbuffer"
-opt.splitbelow = true -- Put new windows below current
-opt.splitkeep = "screen"
-opt.splitright = true -- Put new windows right of current
-opt.tabstop = 2 -- Number of spaces tabs count for
-opt.termguicolors = true -- True color support
-opt.timeoutlen = vim.g.vscode and 1000 or 300 -- Lower than default (1000) to quickly trigger which-key
-opt.undofile = true
-opt.undolevels = 10000
-opt.updatetime = 200 -- Save swap file and trigger CursorHold
-opt.virtualedit = "block" -- Allow cursor to move where there is no text in visual block mode
-opt.wildmode = "longest:full,full" -- Command-line completion mode
-opt.winminwidth = 5 -- Minimum window width
-opt.wrap = false -- Disable line wrap
+opt.scrolloff = 4 -- Lines of context around cursor
+opt.sidescrolloff = 8 -- Columns of context around cursor
+opt.signcolumn = "yes" -- Always show sign column
+opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 
--- Fix markdown indentation settings
-vim.g.markdown_recommended_style = 0
+-- File handling and backup settings
+opt.autowrite = true -- Enable auto-write
+opt.undofile = true -- Enable undo file
+opt.undodir = os.getenv("HOME") .. "/.local/state/nvim/undo"
+opt.swapfile = false
+opt.backup = false
 
--- Folding
+-- Indentation settings
+opt.expandtab = true
+opt.tabstop = 2
+opt.softtabstop = 2
+opt.shiftwidth = 2
+opt.smartindent = true
+opt.shiftround = true
+
+-- Folding settings
 opt.fillchars = {
   foldopen = "",
   foldclose = "",
@@ -73,29 +64,16 @@ opt.fillchars = {
   eob = " ",
 }
 opt.foldlevel = 99
-if vim.fn.has "nvim-0.10" == 1 or vim.fn.has "nvim-0.11" then
-  opt.smoothscroll = true
-  opt.foldexpr = "v:lua.require'utils.ui'.foldexpr()"
-  opt.foldmethod = "expr"
-  opt.foldtext = ""
-else
-  opt.foldmethod = "indent"
-  opt.foldtext = "v:lua.require'utils.ui'.foldtext()"
-end
+opt.foldmethod = "expr"
+opt.foldtext = "v:lua.require'utils.ui'.foldtext()"
 
--- Enable spell check by default unless in vscode
-if not vim.g.vscode then
-  vim.o.spell = true
-end
+-- Mouse and input settings
+opt.mouse = "a" -- Enable mouse support
+opt.timeoutlen = 300 -- Faster timeout for key mappings
+opt.updatetime = 200 -- Trigger CursorHold quicker
+opt.virtualedit = "block" -- Allow block cursor movement in empty spaces
 
--- Disable providers
-vim.g.loaded_ruby_provider = 0
-vim.g.loaded_perl_provider = 0
-vim.g.loaded_node_provider = 0
-vim.g.loaded_python3_provider = 0
-
--- Setup options for Neovide
--- Install neovide: ❯ brew install --ignore-dependencies  neovide
+-- Neovide settings (if using Neovide)
 if vim.g.neovide then
   vim.o.guifont = "OperatorMonoLig Nerd Font:h20"
   vim.g.neovide_hide_mouse_when_typing = true
@@ -103,3 +81,30 @@ if vim.g.neovide then
   vim.g.neovide_input_macos_option_key_is_meta = "only_left"
   vim.g.neovide_input_ime = true
 end
+
+-- Spell check settings
+vim.o.spell = false
+vim.o.spelllang = "en_us,pt_br"
+
+-- Visual and UI settings
+opt.showmode = false -- Don't show mode in the statusline
+opt.laststatus = 3 -- Global statusline
+opt.winblend = 0 -- No transparency for the window
+opt.wrap = false -- Disable line wrapping
+opt.linebreak = true -- Wrap lines at word boundaries
+
+-- Ex line and status line options
+vim.o.ls = 0
+vim.o.ch = 0
+vim.o.ruler = false -- Disable default ruler
+vim.opt.splitkeep = "screen" -- Keep splits in the same position on resize
+
+-- Miscellaneous settings
+opt.showtabline = 0 -- Hide tabline
+opt.splitbelow = true -- Open splits below the current window
+opt.splitright = true -- Open splits to the right of the current window
+-- opt.guicursor = "" -- Disable cursor shape overrides
+
+-- Leader and clipboard setup
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "

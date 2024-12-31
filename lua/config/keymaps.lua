@@ -1,27 +1,47 @@
+-- Keymaps are automatically loaded on the VeryLazy event
+-- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
+-- Add any additional keymaps here
 local map = vim.keymap.set
 local o = vim.opt
 
-local lazy = require "lazy"
+local lazy = require("lazy")
 
--- Search current word
+-- Search current word with Brave and notify user
 local searching_brave = function()
-  vim.fn.system { "xdg-open", "https://google.com/search?q=" .. vim.fn.expand "<cword>" }
+  vim.fn.system({ "xdg-open", "https://google.com/search?q=" .. vim.fn.expand("<cword>") })
+  vim.notify("Searching for: " .. vim.fn.expand("<cword>"), vim.log.levels.INFO)
 end
 map("n", "<leader>?", searching_brave, { noremap = true, silent = true, desc = "Search Current Word on Brave Search" })
 
--- Lazy options
+-- Lazy options with feedback
 map("n", "<leader>l", "<Nop>")
 map("n", "<leader>ll", "<cmd>Lazy<cr>", { desc = "Lazy" })
--- stylua: ignore start
-map("n", "<leader>ld", function() vim.fn.system({ "xdg-open", "https://lazyvim.org" }) end, { desc = "LazyVim Docs" })
-map("n", "<leader>lr", function() vim.fn.system({ "xdg-open", "https://github.com/LazyVim/LazyVim" }) end, { desc = "LazyVim Repo" })
+map("n", "<leader>ld", function()
+  vim.fn.system({ "xdg-open", "https://lazyvim.org" })
+  vim.notify("Opening LazyVim Docs", vim.log.levels.INFO)
+end, { desc = "LazyVim Docs" })
+map("n", "<leader>lr", function()
+  vim.fn.system({ "xdg-open", "https://github.com/LazyVim/LazyVim" })
+  vim.notify("Opening LazyVim Repo", vim.log.levels.INFO)
+end, { desc = "LazyVim Repo" })
 map("n", "<leader>lx", "<cmd>LazyExtras<cr>", { desc = "Extras" })
-map("n", "<leader>lc", function() LazyVim.news.changelog() end, { desc = "LazyVim Changelog" })
+map("n", "<leader>lc", function()
+  LazyVim.news.changelog()
+  vim.notify("Opening LazyVim Changelog", vim.log.levels.INFO)
+end, { desc = "LazyVim Changelog" })
 
-map("n", "<leader>lu", function() lazy.update() end, { desc = "Lazy Update" })
-map("n", "<leader>lC", function() lazy.check() end, { desc = "Lazy Check" })
-map("n", "<leader>ls", function() lazy.sync() end, { desc = "Lazy Sync" })
--- stylua: ignore end
+map("n", "<leader>lu", function()
+  lazy.update()
+  vim.notify("Lazy Update initiated", vim.log.levels.INFO)
+end, { desc = "Lazy Update" })
+map("n", "<leader>lC", function()
+  lazy.check()
+  vim.notify("Lazy Check initiated", vim.log.levels.INFO)
+end, { desc = "Lazy Check" })
+map("n", "<leader>ls", function()
+  lazy.sync()
+  vim.notify("Lazy Sync initiated", vim.log.levels.INFO)
+end, { desc = "Lazy Sync" })
 
 -- Disable LazyVim bindings
 map("n", "<leader>L", "<Nop>")
@@ -81,6 +101,7 @@ map("n", "<leader>f<tab>", function()
   }, function(tabid)
     if tabid ~= nil then
       vim.cmd(tabid .. "tabnext")
+      vim.notify("Switched to Tab " .. tabid, vim.log.levels.INFO)
     end
   end)
 end, { desc = "Tabs" })
@@ -97,6 +118,7 @@ map("n", "<leader>uS", function()
   else
     o.laststatus = 0
   end
+  vim.notify("Toggled Statusline", vim.log.levels.INFO)
 end, { desc = "Toggle Statusline" })
 
 -- Toggle tabline
@@ -106,6 +128,7 @@ map("n", "<leader>u<tab>", function()
   else
     o.showtabline = 0
   end
+  vim.notify("Toggled Tabline", vim.log.levels.INFO)
 end, { desc = "Toggle Tabline" })
 
 -- Comment box
@@ -132,6 +155,7 @@ local linters = function()
   local linters = string.format("%s", unique_client_names)
 
   LazyVim.notify(linters, { title = "Linter" })
+  vim.notify("Attached linters: " .. linters, vim.log.levels.INFO)
 end
 map("n", "<leader>ciL", linters, { desc = "Lint" })
 map("n", "<leader>cir", "<cmd>LazyRoot<cr>", { desc = "Root" })
@@ -158,79 +182,95 @@ map("v", "p", '"_dP', { desc = "Paste Without Overwriting" })
 map({ "n", "x" }, "<A-d>", '"_d', { desc = "Delete Without Yanking" })
 map({ "n", "x" }, "<A-c>", '"_c', { desc = "Change Without Yanking" })
 
--- Deleting without yanking empty line
-map("n", "dd", function()
-  local is_empty_line = vim.api.nvim_get_current_line():match "^%s*$"
-  if is_empty_line then
-    return '"_dd'
+-- Delete without yanking (for empty lines or any line)
+map("n", "<leader>dd", '"_dd', { desc = "Delete Line Without Yanking" })
+
+-- Copy whole text to clipboard
+map("n", "<C-c>", ":%y+<CR>", { desc = "Copy Whole Text to Clipboard", silent = true })
+
+-- Paste from clipboard
+map("n", "<C-v>", '"+p', { desc = "Paste from Clipboard", silent = true })
+
+-- Navigate through quickfix list
+map("n", "<leader>qn", "<cmd>cnext<CR>", { desc = "Next Quickfix Item" })
+map("n", "<leader>qp", "<cmd>cprev<CR>", { desc = "Previous Quickfix Item" })
+
+-- Toggle Spell Check
+map("n", "<leader>ts", function()
+  if vim.wo.spell then
+    vim.wo.spell = false
+    vim.notify("Spell Check Disabled", vim.log.levels.INFO)
   else
-    return "dd"
+    vim.wo.spell = true
+    vim.notify("Spell Check Enabled", vim.log.levels.INFO)
   end
-end, { noremap = true, expr = true, desc = "Don't Yank Empty Line to Clipboard" })
+end, { desc = "Toggle Spell Check" })
 
--- Search inside visually highlighted text
-map("x", "g/", "<esc>/\\%V", { silent = false, desc = "Search Inside Visual Selection" })
-
--- Search visually selected text (slightly better than builtins in Neovim>=0.8)
-map("x", "*", [[y/\V<C-R>=escape(@", '/\')<CR><CR>]], { desc = "Search Selected Text", silent = true })
-map("x", "#", [[y?\V<C-R>=escape(@", '?\')<CR><CR>]], { desc = "Search Selected Text (Backwards)", silent = true })
-
--- Dashboard
-map("n", "<leader>fd", function()
-  if LazyVim.has "alpha-nvim" then
-    require("alpha").start(true)
-  elseif LazyVim.has "dashboard-nvim" then
-    vim.cmd "Dashboard"
+-- Enable/Disable line numbers
+map("n", "<leader>tn", function()
+  if vim.wo.number then
+    vim.wo.number = false
+    vim.notify("Line Numbers Disabled", vim.log.levels.INFO)
+  else
+    vim.wo.number = true
+    vim.notify("Line Numbers Enabled", vim.log.levels.INFO)
   end
-end, { desc = "Dashboard" })
+end, { desc = "Toggle Line Numbers" })
 
--- Spelling
-map("n", "<leader>!", "zg", { desc = "Add Word to Dictionary" })
-map("n", "<leader>@", "zug", { desc = "Remove Word from Dictionary" })
-
--- Terminal Stuff
-if not LazyVim.has "floaterm.nvim" or not LazyVim.has "toggleterm.nvim" then
-  local lazyterm = function()
-    Snacks.terminal(nil, { size = { width = 0.8, height = 0.8 }, cwd = LazyVim.root() })
+-- Toggle relative line numbers
+map("n", "<leader>tr", function()
+  if vim.wo.relativenumber then
+    vim.wo.relativenumber = false
+    vim.notify("Relative Line Numbers Disabled", vim.log.levels.INFO)
+  else
+    vim.wo.relativenumber = true
+    vim.notify("Relative Line Numbers Enabled", vim.log.levels.INFO)
   end
-  map("n", "<leader>ft", lazyterm, { desc = "Terminal (Root Dir)" })
-  map("n", "<leader>fT", function()
-    Snacks.terminal(nil, { size = { width = 0.8, height = 0.8 }, cwd = vim.fn.getcwd() })
-  end, { desc = "Terminal (cwd)" })
-  map("n", [[<c-\>]], lazyterm, { desc = "Terminal (Root Dir)" })
-  map("t", [[<c-\>]], "<cmd>close<cr>", { desc = "Hide Terminal" })
-end
+end, { desc = "Toggle Relative Line Numbers" })
 
--- Marks
-map("n", "dm", function()
-  local cur_line = vim.fn.line "."
-  -- Delete buffer local mark
-  for _, mark in ipairs(vim.fn.getmarklist "%") do
-    if mark.pos[2] == cur_line and mark.mark:match "[a-zA-Z]" then
-      vim.api.nvim_buf_del_mark(0, string.sub(mark.mark, 2, #mark.mark))
+-- Toggle invisible characters
+map("n", "<leader>ti", function()
+  if vim.wo.list then
+    vim.wo.list = false
+    vim.notify("Invisible Characters Hidden", vim.log.levels.INFO)
+  else
+    vim.wo.list = true
+    vim.notify("Invisible Characters Shown", vim.log.levels.INFO)
+  end
+end, { desc = "Toggle Invisible Characters" })
+
+-- Open terminal window
+map("n", "<leader>tt", "<cmd>terminal<cr>", { desc = "Open Terminal" })
+
+-- Open file tree
+map("n", "<leader>ft", "<cmd>Ex<cr>", { desc = "Open File Tree" })
+
+-- Close current buffer
+map("n", "<leader>bd", "<cmd>bdelete<cr>", { desc = "Close Current Buffer" })
+
+-- Close all buffers except the current one
+map("n", "<leader>ba", "<cmd>bufdo bd<cr>", { desc = "Close All Buffers Except Current" })
+
+-- Toggle transparency
+map("n", "<leader>ttb", function()
+  if vim.g.transparent_background then
+    vim.g.transparent_background = false
+    vim.notify("Transparency Disabled", vim.log.levels.INFO)
+  else
+    vim.g.transparent_background = true
+    vim.notify("Transparency Enabled", vim.log.levels.INFO)
+  end
+end, { desc = "Toggle Transparency" })
+
+-- Focus on terminal window
+map("n", "<leader>ftw", function()
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    local buf = vim.api.nvim_win_get_buf(win)
+    if vim.api.nvim_buf_get_option(buf, "buftype") == "terminal" then
+      vim.api.nvim_set_current_win(win)
+      vim.notify("Switched to Terminal Window", vim.log.levels.INFO)
       return
     end
   end
-  -- Delete global marks
-  local cur_buf = vim.api.nvim_win_get_buf(vim.api.nvim_get_current_win())
-  for _, mark in ipairs(vim.fn.getmarklist()) do
-    if mark.pos[1] == cur_buf and mark.pos[2] == cur_line and mark.mark:match "[a-zA-Z]" then
-      vim.api.nvim_buf_del_mark(0, string.sub(mark.mark, 2, #mark.mark))
-      return
-    end
-  end
-end, { noremap = true, desc = "Mark on Current Line" })
-
--- Empty Line
-map("n", "gO", "<Cmd>call append(line('.') - 1, repeat([''], v:count1))<CR>", { desc = "Empty Line Above" })
-map("n", "go", "<Cmd>call append(line('.'), repeat([''], v:count1))<CR>", { desc = "Empty Line Below" })
-
--- Insert Mode
-map({ "c", "i", "t" }, "<M-BS>", "<C-w>", { desc = "Delete Word" })
-
--- Git
-map("n", "<leader>ghb", Snacks.git.blame_line, { desc = "Blame Line" })
-
--- Windows Split
-map("n", "<leader>_", "<C-W>s", { desc = "Split Window Below", remap = true })
-map("n", "<leader>\\", "<C-W>v", { desc = "Split Window Right", remap = true })
+  vim.notify("No Terminal Windows Found", vim.log.levels.WARN)
+end, { desc = "Focus on Terminal Window" })
