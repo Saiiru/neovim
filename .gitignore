@@ -1,5 +1,4 @@
 tt.*
-lazy-lock.json
 .tests
 doc/tags
 debug
@@ -7,12 +6,3 @@ debug
 foo.*
 *.log
 data
-*.pyc
-*.pyo
-*.pyclass
-*.java
-*.class
-*.c
-bak
-undodir/
-./undodir
