@@ -1,108 +1,104 @@
--- Configuração do nvim-treesitter
 return {
-  -- Primeiro bloco para nvim-treesitter e dependências
+  {
+    "windwp/nvim-ts-autotag",
+    dependencies = "nvim-treesitter/nvim-treesitter",
+    config = function()
+      require("nvim-ts-autotag").setup({})
+    end,
+    lazy = true,
+    event = "VeryLazy",
+  },
+  { "nvim-treesitter/nvim-treesitter-textobjects" },
   {
     "nvim-treesitter/nvim-treesitter",
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter-textobjects",
-      "RRethy/nvim-treesitter-endwise", -- Incluindo a dependência adicional
-    },
     build = ":TSUpdate",
-    opts = {
-      -- Garantir que as linguagens que você deseja sejam instaladas
-      ensure_installed = {
-        "go",
-        "lua",
-        "python",
-        "rust",
-        "typescript",
-        "regex",
-        "bash",
-        "markdown",
-        "markdown_inline",
-        "kdl",
-        "sql",
-        "org",
-        "terraform",
-        "html",
-        "css",
-        "javascript",
-        "yaml",
-        "json",
-        "toml",
-        "c",
-        "cpp",
-        "vimdoc",
-        "vim",
-      },
+    config = function()
+      local configs = require("nvim-treesitter.configs")
 
-      -- Habilitar destaque de sintaxe, indentação e seleção incremental
-      highlight = { enable = true },
-      indent = { enable = true },
-
-      -- Configuração de seleção incremental
-      incremental_selection = {
-        enable = true,
-        keymaps = {
-          init_selection = "<c-space>",
-          node_incremental = "<c-space>",
-          scope_incremental = "<c-s>",
-          node_decremental = "<c-backspace>",
+      configs.setup({
+        ensure_installed = {
+          "javascript",
+          "typescript",
+          "c",
+          "lua",
+          "vim",
+          "vimdoc",
+          "query",
+          "elixir",
+          "erlang",
+          "heex",
+          "eex",
+          "kotlin",
+          "jq",
+          "dockerfile",
+          "json",
+          "html",
+          "terraform",
+          "go",
+          "tsx",
+          "bash",
+          "ruby",
+          "markdown",
+          "java",
+          "astro",
         },
-      },
-
-      -- Configuração de objetos de texto
-      textobjects = {
-        select = {
+        sync_install = false,
+        highlight = { enable = true },
+        indent = { enable = true },
+        incremental_selection = {
           enable = true,
-          lookahead = true, -- Pular automaticamente para o próximo objeto de texto
           keymaps = {
-            ["aa"] = "@parameter.outer",
-            ["ia"] = "@parameter.inner",
-            ["af"] = "@function.outer",
-            ["if"] = "@function.inner",
-            ["ac"] = "@class.outer",
-            ["ic"] = "@class.inner",
-            ["ii"] = "@conditional.inner",
-            ["ai"] = "@conditional.outer",
-            ["at"] = "@comment.outer",
+            init_selection = "<C-space>",
+            node_incremental = "<C-space>",
+            scope_incremental = "<C-CR>",
+            node_decremental = "<bs>",
           },
         },
-        move = {
-          enable = true,
-          set_jumps = true,
-          goto_next_start = {
-            ["]f"] = "@function.outer",
-            ["]]"] = "@class.outer",
+        textobjects = {
+          select = {
+            enable = true,
+            lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
+            keymaps = {
+              -- You can use the capture groups defined in textobjects.scm
+              ["aa"] = "@parameter.outer",
+              ["ia"] = "@parameter.inner",
+              ["af"] = "@function.outer",
+              ["if"] = "@function.inner",
+              ["ac"] = "@class.outer",
+              ["ic"] = "@class.inner",
+            },
           },
-          goto_next_end = {
-            ["]F"] = "@function.outer",
-            ["]["] = "@class.outer",
+          move = {
+            enable = true,
+            set_jumps = true, -- whether to set jumps in the jumplist
+            goto_next_start = {
+              ["]m"] = "@function.outer",
+              ["]]"] = "@class.outer",
+            },
+            goto_next_end = {
+              ["]M"] = "@function.outer",
+              ["]["] = "@class.outer",
+            },
+            goto_previous_start = {
+              ["[m"] = "@function.outer",
+              ["[["] = "@class.outer",
+            },
+            goto_previous_end = {
+              ["[M"] = "@function.outer",
+              ["[]"] = "@class.outer",
+            },
           },
-          goto_previous_start = {
-            ["[f"] = "@function.outer",
-            ["[["] = "@class.outer",
-          },
-          goto_previous_end = {
-            ["[F"] = "@function.outer",
-            ["[]"] = "@class.outer",
+          swap = {
+            enable = true,
+            swap_next = {
+              ["<leader>p"] = "@parameter.inner",
+            },
+            swap_previous = {
+              ["<leader>ps"] = "@parameter.inner",
+            },
           },
         },
-        swap = {
-          enable = true,
-          swap_next = {
-            ["<leader>a"] = "@parameter.inner",
-          },
-          swap_previous = {
-            ["<leader>A"] = "@parameter.inner",
-          },
-        },
-      },
-
-      -- Configuração do endwise para adicionar automaticamente blocos
-      endwise = {
-        enable = true,
-      },
-    },
+      })
+    end,
   },
 }

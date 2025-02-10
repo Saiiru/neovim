@@ -1,77 +1,97 @@
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
+-----------------------------------------------------------
+-- Load Additional Configuration Modules
+-----------------------------------------------------------
+-- Ensure you have corresponding Lua files in your nvim/lua/ directory.
+require("config.keymaps")   -- Key mappings configuration.
+require("config.autocmds")  -- Autocmds configuration.
+require("config.options")   -- General options.
+-----------------------------------------------------------
+-- init.lua
+-- Main Initialization File for Neovim
+--
+-- - Enables the experimental loader (if available)
+-- - Defines a global debug function (_G.dd) and alias (vim.print)
+-- - Bootstraps lazy.nvim (if not already installed)
+-- - Loads additional configuration modules (keymaps, autocmds, options, etc.)
+-- - Configures lazy.nvim for plugin management.
+-----------------------------------------------------------
+
+-- Enable the experimental loader (improves startup performance)
+if vim.loader then
+  vim.loader.enable()
+end
+
+-----------------------------------------------------------
+-- Global Debug Utility
+-----------------------------------------------------------
+-- Shortcut for dumping values using your util.debug module.
+_G.dd = function(...)
+  require("util.debug").dump(...)
+end
+vim.print = _G.dd
+
+-----------------------------------------------------------
+-- Bootstrap and Load lazy.nvim
+-----------------------------------------------------------
+-- Optionally load an external lazy config file if you prefer.
+-- require("config.lazy")  -- Uncomment if you want to load a separate lazy config
+
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
     "git",
     "clone",
     "--filter=blob:none",
     "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable",
+    "--branch=stable",  -- use the latest stable release
     lazypath,
   })
 end
+vim.opt.rtp:prepend(lazypath)
 
-vim.opt.rtp:prepend(vim.env.LAZY or lazypath)
-vim.cmd([[command! -nargs=0 GoToCommand :Telescope commands]])
-vim.cmd([[command! -nargs=0 GoToFile :Telescope smart_open]])
-vim.cmd([[command! -nargs=0 GoToSymbol :Telescope lsp_document_symbols]])
-vim.cmd([[command! -nargs=0 Grep :Telescope live_grep]])
-vim.cmd([[command! -nargs=0 SmartGoTo :Telescope smart_goto]])
-vim.o.cursorlineopt = "number"
-
+-----------------------------------------------------------
+-- Plugin Management with lazy.nvim
+-----------------------------------------------------------
 require("lazy").setup({
   spec = {
-    {
-      "LazyVim/LazyVim",
-      import = "lazyvim.plugins",
-      opts = {
-        defaults = { keymaps = true },
-      },
-    },
-
-    -- TODO: create my own plugin configs?
-    -- maybe use cht.sh or something like that
-    -- import any extras modules here
+    -- Import your plugin modules here.
+    -- Uncomment and adjust the LazyVim block if needed:
+    --
+    -- {
+    --   "LazyVim/LazyVim",
+    --   import = "lazyvim.plugins",
+    --   opts = {
+    --     colorscheme = "solarized-osaka",
+    --     news = {
+    --       lazyvim = true,
+    --       neovim = true,
+    --     },
+    --   },
+    -- },
+    --
+    -- You can also import additional extra modules:
     -- { import = "lazyvim.plugins.extras.linting.eslint" },
     -- { import = "lazyvim.plugins.extras.formatting.prettier" },
-    -- { import = "lazyvim.plugins.extras.lang.typescript" },
-    -- { import = "lazyvim.plugins.extras.lang.json" },
-    -- { import = "lazyvim.plugins.extras.lang.markdown" },
-    -- { import = "lazyvim.plugins.extras.lang.rust" },
-    -- { import = "lazyvim.plugins.extras.lang.tailwind" },
-    -- { import = "lazyvim.plugins.extras.coding.copilot" },
-    -- { import = "lazyvim.plugins.extras.dap.core" },
-    -- { import = "lazyvim.plugins.extras.vscode" },
-    -- { import = "lazyvim.plugins.extras.util.mini-hipatterns" },
-    -- { import = "lazyvim.plugins.extras.test.core" },
-    -- { import = "lazyvim.plugins.extras.coding.yanky" },
-    -- { import = "lazyvim.plugins.extras.editor.mini-files" },
-    -- { import = "lazyvim.plugins.extras.util.project" },
-    -- my plugins
+    -- etc.
+
+    -- In your case, import your custom plugins:
     { import = "plugins" },
-    -- { import = "plugins/ai" },
-    { import = "plugins/extras" },
   },
   defaults = {
-    lazy = true,
+    -- By default, your custom plugins will load during startup.
+    lazy = false,
+    -- Disable versioning to always use the latest commit.
     version = false,
   },
-  install = { colorscheme = { "catppuccin" } },
-  ui = { border = "single" },
-  checker = { enabled = false },
-  performance = {
-    rtp = {
-      -- disable some rtp plugins
-      disabled_plugins = {
-        "gzip",
-        -- "matchit",
-        -- "matchparen",
-        -- "netrwPlugin",
-        "tarPlugin",
-        "tohtml",
-        "tutor",
-        "zipPlugin",
-      },
-    },
+  change_detection={
+    notify = false
   },
+  -- (Optional) Uncomment and adjust these sections as needed:
+  -- dev = { path = "~/.ghq/github.com" },
+  -- checker = { enabled = true }, -- Auto-check for plugin updates.
+  -- performance = { ... },
+  -- ui = { ... },
+  -- debug = false,
 })
+

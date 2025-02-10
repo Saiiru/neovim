@@ -1,79 +1,97 @@
--- Função para aplicar o esquema de cores com total personalização
-local function ColorMyPencils(colorScheme)
-  colorScheme = colorScheme or "carbonfox" -- Define o esquema de cores padrão
-  -- Aplica o esquema de cores
-  pcall(vim.cmd.colorscheme, colorScheme)
+-- Função para aplicar o tema e as cores personalizadas
+function ColorMyPencils(color)
+  color = color or "sonokai"  -- Tema padrão
+  vim.cmd.colorscheme(color)
 
-  -- Configurações personalizadas de destaque
-  local set_hl = vim.api.nvim_set_hl
-  local custom_groups = {
-    Normal = { bg = "#0d0d0d", fg = "#f8f8f2" }, -- Fundo preto profundo e texto branco
-    NormalNC = { bg = "#0d0d0d" },
-    NormalFloat = { bg = "#0d0d0d" },
-    EndOfBuffer = { bg = "#0d0d0d", fg = "#0d0d0d" },
-    SignColumn = { bg = "#0d0d0d" },
-    StatusLine = { bg = "#0d0d0d", fg = "#00FFFF" }, -- Ciano neon para a barra de status
-    StatusLineNC = { bg = "#0d0d0d", fg = "#666666" }, -- Status para janelas inativas
-    CursorLine = { bg = "#1a1a1a" }, -- Linha de cursor em cinza sutil
-    CursorLineNr = { fg = "#FF79C6", bg = "#1a1a1a", bold = true }, -- Números de linha em rosa neon
-    LineNr = { fg = "#666666" }, -- Números de linha apagados
-    VertSplit = { fg = "#44475a" }, -- Cor de borda de divisão sutil
-    FloatBorder = { bg = "#0d0d0d", fg = "#8be9fd" }, -- Borda vibrante para janelas flutuantes
-    Pmenu = { bg = "#0d0d0d", fg = "#f8f8f2" }, -- Menu de popup
-    PmenuSel = { bg = "#44475a", fg = "#50fa7b" }, -- Seleção em menu de popup
-    Comment = { fg = "#6272a4", italic = true }, -- Comentários em azul neon e itálico
-    Keyword = { fg = "#FF79C6", bold = true }, -- Palavras-chave em rosa neon e negrito
-    Function = { fg = "#8be9fd", italic = true, bold = true }, -- Funções em ciano neon
-    String = { fg = "#50fa7b" }, -- Strings em verde vibrante
-    Terminal = { bg = "#0d0d0d", fg = "#f8f8f2" }, -- Cor do terminal
-    Error = { fg = "#FF5555", bold = true }, -- Erros em vermelho
-    WarningMsg = { fg = "#f1fa8c", bold = true }, -- Avisos em amarelo
-  }
-  -- Aplica os grupos personalizados
-  for group, settings in pairs(custom_groups) do
-    set_hl(0, group, settings)
-  end
+  -- Remover o fundo das janelas para estilo neon
+  vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+  vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+
+  -- Ajuste de negrito para maior contraste no estilo neon
+  vim.api.nvim_set_hl(0, "Pmenu", { bg = "#282c34", fg = "#abb2bf" })
+  vim.api.nvim_set_hl(0, "CursorLine", { bg = "#3e4451" })
+  vim.api.nvim_set_hl(0, "CursorColumn", { bg = "#3e4451" })
+
+  -- Definir o tema para interfaces de Neovim como o NeoTree
+  vim.api.nvim_set_hl(0, "NeoTreeNormal", { fg = "#ffffff", bg = "#21252b" })
+  vim.api.nvim_set_hl(0, "NeoTreeDirectoryIcon", { fg = "#98c379" })
+  vim.api.nvim_set_hl(0, "NeoTreeFileIcon", { fg = "#e06c75" })
 end
 
--- Configuração do tema
+-- Configuração do Tema Sonokai
 return {
+  -- Tema Sonokai
   {
-    "EdenEast/nightfox.nvim", -- Plugin para gerenciamento de esquemas de cores
+    "sainnhe/sonokai",
+    priority = 1000,
+    config = function()
+      vim.g.sonokai_transparent_background = "1"
+      vim.g.sonokai_enable_italic = "1"
+      vim.g.sonokai_style = "andromeda"
+      -- Aplica o tema Sonokai
+      vim.cmd.colorscheme("sonokai")
+
+      -- Chama a função para aplicar as cores personalizadas
+      ColorMyPencils("sonokai")
+    end,
+  },
+
+  {
+    "folke/tokyonight.nvim",
+    priority = 1000,
+    config = function()
+      require("tokyonight").setup({
+        style = "night",  -- Night style
+        transparent = true,  -- Transparent background
+        terminal_colors = true,  -- Enable terminal colors
+        styles = {
+          comments = { italic = false },
+          keywords = { italic = false },
+          sidebars = "transparent",  -- Transparent sidebars
+          floats = "transparent",  -- Transparent floating windows
+        },
+      })
+    end,
+  },
+
+  {
+    "EdenEast/nightfox.nvim",
     lazy = false,
     priority = 1000,
     opts = {
       options = {
-        transparent = false, -- Desativa a transparência
-        terminal_colors = true, -- Permite que as cores do terminal sejam usadas
+        transparent = false,  -- Disable transparency for better visibility
+        terminal_colors = true,  -- Enable terminal colors
         styles = {
-          comments = "italic", -- Comentários em itálico
-          keywords = "bold", -- Palavras-chave em negrito
-          types = "italic,bold", -- Tipos em itálico e negrito
+          comments = "italic",  -- Comments in italics
+          keywords = "bold",  -- Keywords in bold
+          types = "italic,bold",  -- Types in both italic and bold
         },
       },
       palettes = {
         carbonfox = {
-          bg1 = "#0d0d0d", -- Cor de fundo profunda
-          fg1 = "#f8f8f2", -- Cor de texto clara
-          blue = "#8be9fd", -- Ciano neon
-          green = "#50fa7b", -- Verde vibrante
-          red = "#ff5555", -- Vermelho intenso
-          yellow = "#f1fa8c", -- Amarelo brilhante
-          magenta = "#ff79c6", -- Magenta brilhante
-          cyan = "#8be9fd", -- Ciano neon
+          bg1 = "#0d0d0d",
+          fg1 = "#f8f8f2",
+          blue = "#8be9fd",
+          green = "#50fa7b",
+          red = "#ff5555",
+          yellow = "#f1fa8c",
+          magenta = "#ff79c6",
+          cyan = "#8be9fd",
         },
       },
       groups = {
         carbonfox = {
-          CursorLine = { bg = "#1a1a1a" }, -- Linha de cursor em cinza sutil
-          Normal = { bg = "#0d0d0d", fg = "#f8f8f2" }, -- Normal com fundo preto
-          Comment = { fg = "#6272a4", style = "italic" }, -- Comentários em azul neon e itálico
-          Function = { fg = "#8be9fd", style = "italic,bold" }, -- Funções em ciano neon
+          CursorLine = { bg = "#1a1a1a" },
+          Normal = { bg = "#0d0d0d", fg = "#f8f8f2" },
+          Comment = { fg = "#6272a4", style = "italic" },
+          Function = { fg = "#8be9fd", style = "italic,bold" },
         },
       },
     },
     config = function()
-      ColorMyPencils("carbonfox") -- Aplica o esquema de cores customizado
+      -- vim.cmd.colorscheme("carbonfox")
     end,
   },
 }
+
