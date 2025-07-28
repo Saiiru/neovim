@@ -1,42 +1,46 @@
------------------------------------------------------------
--- Load Additional Configuration Modules
------------------------------------------------------------
--- Ensure you have corresponding Lua files in your nvim/lua/ directory.
-require("config.keymaps")   -- Key mappings configuration.
-require("config.autocmds")  -- Autocmds configuration.
-require("config.options")   -- General options.
+-- Neovim Initialization - BATMAN VEGA System Bootstrap
+-- =====================================================
 
------------------------------------------------------------
--- init.lua
--- Main Initialization File for Neovim
---
--- - Enables the experimental loader (if available)
--- - Defines a global debug function (_G.dd) and alias (vim.print)
--- - Bootstraps lazy.nvim (if not already installed)
--- - Loads additional configuration modules (keymaps, autocmds, options, etc.)
--- - Configures lazy.nvim for plugin management.
------------------------------------------------------------
+-- UTF-8 Encoding Protocol
+vim.opt.encoding = "utf-8"
+vim.opt.fileencoding = "utf-8"
 
--- Enable the experimental loader (improves startup performance)Z
-if vim.loader then
-  vim.loader.enable()
-end
+-- Interface Enhancement Matrix
+vim.opt.number = true
+vim.opt.relativenumber = true
+vim.opt.wrap = false
+vim.opt.termguicolors = true
 
------------------------------------------------------------
--- Global Debug Utility
------------------------------------------------------------
--- Shortcut for dumping values using your util.debug module.
-_G.dd = function(...)
-  require("util.debug").dump(...)
-end
-vim.print = _G.dd
+-- Undo System - Persistent Memory Matrix
+vim.opt.undofile = true
+vim.opt.undodir = os.getenv("HOME") .. "/.cache/nvim/undo"
 
------------------------------------------------------------
--- Bootstrap and Load lazy.nvim
------------------------------------------------------------
--- Optionally load an external lazy config file if you prefer.
--- require("config.lazy")  -- Uncomment if you want to load a separate lazy config
 
+vim.opt.listchars = {
+  tab = "→ ",
+  eol = "↲",
+  nbsp = "␣",
+  trail = "•",
+  extends = "⟩",
+  precedes = "⟨",
+}
+
+-- Cursor Behavior Matrix
+vim.opt.guicursor = "n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50"
+
+-- Input Enhancement Systems
+vim.opt.mouse = "a"
+vim.opt.clipboard = "unnamedplus"
+
+-- Disable Default File Explorer - Prepare for nvim-tree deployment
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+-- Module Loading - Core System Components
+require("sairu.config.options")
+require("sairu.config.keymaps")
+
+-- Lazy.nvim Bootstrap Protocol
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
@@ -44,52 +48,23 @@ if not vim.loop.fs_stat(lazypath) then
     "clone",
     "--filter=blob:none",
     "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable",  -- use the latest stable release
+    "--branch=stable",
     lazypath,
   })
 end
 vim.opt.rtp:prepend(lazypath)
 
------------------------------------------------------------
--- Plugin Management with lazy.nvim
------------------------------------------------------------
-require("lazy").setup({
-  spec = {
-    -- Import your plugin modules here.
-    -- Uncomment and adjust the LazyVim block if needed:
-    --
-    -- {
-    --   "LazyVim/LazyVim",
-    --   import = "lazyvim.plugins",
-    --   opts = {
-    --     colorscheme = "solarized-osaka",
-    --     news = {
-    --       lazyvim = true,
-    --       neovim = true,
-    --     },
-    --   },
-    -- },
-    --
-    -- You can also import additional extra modules:
-    -- { import = "lazyvim.plugins.extras.linting.eslint" },
-    -- { import = "lazyvim.plugins.extras.formatting.prettier" },
-    -- etc.
-
-    -- In your case, import your custom plugins:
-    { import = "plugins" },
+-- Plugin Management System
+require("lazy").setup("sairu.plugins", {
+  ui = {
+    border = "rounded",
+    title = "PLUGIN MATRIX",
+    title_pos = "center",
   },
-  defaults = {
-    -- By default, your custom plugins will load during startup.
-    lazy = false,
-    -- Disable versioning to always use the latest commit.
-    version = false,
+  change_detection = {
+    notify = false,
   },
-
-  -- (Optional) Uncomment and adjust these sections as needed:
-  -- dev = { path = "~/.ghq/github.com" },
-  -- checker = { enabled = true }, -- Auto-check for plugin updates.
-  -- performance = { ... },
-  -- ui = { ... },
-  -- debug = false,
 })
 
+-- Post-initialization Protocols
+require("sairu.config.autocmds")
