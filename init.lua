@@ -1,70 +1,186 @@
--- Neovim Initialization - BATMAN VEGA System Bootstrap
--- =====================================================
-
--- UTF-8 Encoding Protocol
-vim.opt.encoding = "utf-8"
-vim.opt.fileencoding = "utf-8"
-
--- Interface Enhancement Matrix
-vim.opt.number = true
-vim.opt.relativenumber = true
-vim.opt.wrap = false
-vim.opt.termguicolors = true
-
--- Undo System - Persistent Memory Matrix
-vim.opt.undofile = true
-vim.opt.undodir = os.getenv("HOME") .. "/.cache/nvim/undo"
-
-
-vim.opt.listchars = {
-  tab = "→ ",
-  eol = "↲",
-  nbsp = "␣",
-  trail = "•",
-  extends = "⟩",
-  precedes = "⟨",
+-- ╔══════════════════════════════════════════════════════════════════════════╗
+-- ║                    KORA NEURAL DEVELOPMENT MATRIX                        ║
+-- ║          Neural Personal Development Environment :: SYSTEM ONLINE        ║
+-- ╚══════════════════════════════════════════════════════════════════════════╝
+-- Performance optimization matrix
+vim.loader.enable()
+-- Disable built-in plugins for maximum performance
+local disabled_built_ins = {
+  "2html_plugin",
+  "getscript",
+  "getscriptPlugin",
+  "gzip",
+  "logipat",
+  "netrw",
+  "netrwPlugin",
+  "netrwSettings",
+  "netrwFileHandlers",
+  "matchit",
+  "tar",
+  "tarPlugin",
+  "rrhelper",
+  "spellfile_plugin",
+  "vimball",
+  "vimballPlugin",
+  "zip",
+  "zipPlugin",
+  "tutor",
+  "rplugin",
+  "syntax",
+  "synmenu",
+  "optwin",
+  "compiler",
+  "bugreport",
+  "ftplugin",
 }
+for _, plugin in pairs(disabled_built_ins) do
+  vim.g["loaded_" .. plugin] = 1
+end
 
--- Cursor Behavior Matrix
-vim.opt.guicursor = "n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50"
+-- Leader key assignment - Command center access
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
 
--- Input Enhancement Systems
-vim.opt.mouse = "a"
-vim.opt.clipboard = "unnamedplus"
+-- Core module initialization
+require("kora.core.options")
+require("kora.core.keymaps")
 
--- Disable Default File Explorer - Prepare for nvim-tree deployment
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
-
--- Module Loading - Core System Components
-require("sairu.config.options")
-require("sairu.config.keymaps")
-
--- Lazy.nvim Bootstrap Protocol
+-- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
-    "git",
-    "clone",
-    "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable",
-    lazypath,
-  })
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+  local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+  local out =
+    vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+  if vim.v.shell_error ~= 0 then
+    vim.api.nvim_echo({
+      { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+      { out, "WarningMsg" },
+      { "\nPress any key to exit..." },
+    }, true, {})
+    vim.fn.getchar()
+    os.exit(1)
+  end
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Plugin Management System
-require("lazy").setup("sairu.plugins", {
-  ui = {
-    border = "rounded",
-    title = "PLUGIN MATRIX",
-    title_pos = "center",
+-- Plugin management system
+require("lazy").setup({
+  spec = {
+    { import = "kora.plugins" },
+    { import = "kora.plugins.lsp" },
+    { import = "kora.plugins.ui.colorscheme" },
+    { import = "kora.plugins.ui" },
+    { import = "kora.plugins.editor" },
+    { import = "kora.plugins.completion" },
+    { import = "kora.plugins.ai" },
+  },
+  defaults = {
+    lazy = false,
+    version = false,
+  },
+  install = {
+    colorscheme = { "cyberdream", "tokyonight", "habamax" },
+  },
+  checker = {
+    enabled = true,
+    notify = false, -- DISABLED: Reduce notification spam
   },
   change_detection = {
-    notify = false,
+    enabled = true,
+    notify = false, -- DISABLED: Reduce notification spam
+  },
+  performance = {
+    cache = {
+      enabled = true,
+    },
+    reset_packpath = true,
+    rtp = {
+      disabled_plugins = {
+        "gzip",
+        "matchit",
+        "matchparen",
+        "netrwPlugin",
+        "tarPlugin",
+        "tohtml",
+        "tutor",
+        "zipPlugin",
+      },
+    },
+  },
+  ui = {
+    border = "rounded",
+    backdrop = 60,
+    title = "󰓩  KORA NEURAL MATRIX",
+    title_pos = "center",
+    icons = {
+      cmd = "",
+      config = "",
+      event = "",
+      ft = "",
+      init = "",
+      keys = "",
+      plugin = "",
+      runtime = "櫓",
+      require = "",
+      source = "",
+      start = "",
+      task = "",
+      lazy = "鈴",
+    },
   },
 })
 
--- Post-initialization Protocols
-require("sairu.config.autocmds")
+-- Autocommands initialization
+require("kora.core.autocmds")
+
+-- REMOVED: All startup notifications that were causing spam
+-- The autocmds.lua file now handles the single startup notification properly
+
+-- -- Optional: ASCII BANNER (only in CLI, not in GUI) - SIMPLIFIED
+-- if vim.fn.has("gui_running") == 0 and os.getenv("TERM") ~= "dumb" then
+-- 	-- Only show banner in appropriate terminals
+-- 	local banner_lines = {
+-- 		"",
+-- 		"    󰓩  KORA NEURAL MATRIX :: SYSTEM ONLINE",
+-- 		"    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+-- 		"    [KORA]: Neural subsystems initialized.",
+-- 		"",
+-- 	}
+
+-- 	-- Print banner without vim.notify to avoid notification spam
+-- 	for _, line in ipairs(banner_lines) do
+-- 		print(line)
+-- 	end
+-- end
+
+-- Add a command to manually show system status if needed
+-- vim.api.nvim_create_user_command("KoraStatus", function()
+--   local lazy_stats = require("lazy").stats()
+--   local message = string.format(
+--     "󰓩 KORA Neural Matrix\n" .. "📦 Plugins: %d loaded, %d total\n" .. "⚡ Startup: %.2fms",
+--     lazy_stats.loaded,
+--     lazy_stats.count,
+--     lazy_stats.startuptime or 0
+--   )
+--   vim.notify(message, vim.log.levels.INFO, {
+--     title = "KORA System Status",
+--     timeout = 3000,
+--   })
+-- end, { desc = "Show KORA system status" })
+
+-- Add keybind for manual status check
+vim.keymap.set("n", "<leader>uk", "<cmd>KoraStatus<cr>", { desc = "󰓩 KORA Status" })
+-- ASCII BANNER (prints only in CLI, not in GUI)
+-- if vim.fn.has("gui_running") == 0 then
+--   print([[
+--     󰓩  KORA SYSTEM STATUS: ONLINE
+--     ██╗  ██╗ ██████╗ ██████╗  █████╗     ███╗   ██╗███████╗██╗   ██╗██████╗  █████╗ ██╗
+--     ██║ ██╔╝██╔═══██╗██╔══██╗██╔══██╗    ████╗  ██║██╔════╝██║   ██║██╔══██╗██╔══██╗██║
+--     █████╔╝ ██║   ██║██████╔╝███████║    ██╔██╗ ██║█████╗  ██║   ██║██████╔╝███████║██║
+--     ██╔═██╗ ██║   ██║██╔══██╗██╔══██║    ██║╚██╗██║██╔══╝  ██║   ██║██╔══██╗██╔══██║██║
+--     ██║  ██╗╚██████╔╝██║  ██║██║  ██║    ██║ ╚████║███████╗╚██████╔╝██║  ██║██║  ██║███████╗
+--     ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝    ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝
+
+--     [KORA]: All neural subsystems initialized. Awaiting your instructions, operator.
+--   ]])
+-- end
