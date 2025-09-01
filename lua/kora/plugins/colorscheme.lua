@@ -1,11 +1,346 @@
--- lua/kora/plugins/colorscheme.lua
--- KORA NEURAL VISUAL MATRIX - CYBERPUNK x ROSEPINE HYBRID v3.0
--- Centralized colorscheme configuration for KORA.
+local M = {}
 
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
+-- CYBERSYNTH NEURAL PALETTE - Core color definitions
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
+local synth_palette = {
+  -- Base layers - The noir foundation
+  void = "#0B0A12",      -- The digital abyss
+  surface = "#141127",    -- Neural substrate
+  shadow = "#16213E",     -- Primary background
+  whisper = "#1A1A2E",   -- Subtle UI elements
+  ghost = "#1E1E2E",     -- Floating elements
+  
+  -- Neon spectrum - The electric soul
+  neon_pink = "#FF2D95",     -- Primary accent
+  neon_magenta = "#FF6EC7",  -- Selection highlight
+  neon_cyan = "#00F0FF",     -- Function calls
+  neon_blue = "#00CFFF",     -- Information
+  neon_purple = "#9A6CFF",   -- Keywords
+  neon_yellow = "#FFD166",   -- Warnings
+  neon_green = "#7CFF00",    -- Success states
+  
+  -- Classic spectrum - Enhanced originals
+  dracula_pink = "#FF79C6",
+  dracula_purple = "#BD93F9",
+  dracula_cyan = "#8BE9FD",
+  dracula_green = "#50FA7B",
+  dracula_orange = "#FFB86C",
+  dracula_yellow = "#F1FA8C",
+  dracula_red = "#FF5555",
+  
+  -- Text hierarchy
+  text_primary = "#F8F8F2",
+  text_secondary = "#CDD6F4",
+  text_muted = "#6C7086",
+  text_disabled = "#313244",
+  
+  -- LSP semantic enhancement
+  medium_slate_blue = "#7B68EE",
+}
+
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
+-- NEURAL SYNTAX MATRIX - Enhanced treesitter + LSP semantic tokens
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
+local function get_syntax_highlights(palette)
+  return {
+    -- Core language constructs
+    Comment = { fg = palette.medium_slate_blue, italic = true },
+    ["@comment"] = { fg = palette.medium_slate_blue, italic = true },
+    
+    -- Keywords 
+    ["@keyword"] = { fg = palette.dracula_pink, italic = true },
+    ["@keyword.function"] = { fg = palette.dracula_pink, italic = true },
+    ["@keyword.return"] = { fg = palette.dracula_pink, italic = true },
+    ["@keyword.operator"] = { fg = palette.dracula_pink, italic = false },
+    
+    -- Strings and literals - The incantations
+    ["@string"] = { fg = palette.dracula_green },
+    ["@string.escape"] = { fg = palette.dracula_yellow, bold = true },
+    
+    -- Variables and identifiers
+    ["@variable"] = { fg = palette.text_primary },
+    ["@variable.builtin"] = { fg = palette.dracula_purple, italic = true },
+    
+    -- Functions - The neural pathways
+    ["@function"] = { fg = palette.dracula_cyan, italic = false },
+    ["@function.builtin"] = { fg = palette.dracula_cyan, italic = true },
+    ["@function.call"] = { fg = palette.dracula_cyan },
+    ["@method"] = { fg = palette.dracula_cyan },
+    ["@method.call"] = { fg = palette.dracula_cyan },
+    
+    -- Types - The data architects
+    ["@type"] = { fg = palette.dracula_orange, italic = true },
+    ["@type.builtin"] = { fg = palette.dracula_orange, italic = true },
+    ["@type.definition"] = { fg = palette.dracula_orange, bold = true },
+    
+    -- Constants and macros
+    ["@constant"] = { fg = palette.dracula_purple },
+    ["@constant.builtin"] = { fg = palette.dracula_purple, italic = true },
+    ["@constant.macro"] = { fg = palette.dracula_purple, bold = true },
+    
+    -- Operators and punctuation
+    ["@operator"] = { fg = palette.dracula_pink },
+    ["@punctuation"] = { fg = palette.text_primary },
+    ["@punctuation.bracket"] = { fg = palette.text_primary },
+    ["@punctuation.delimiter"] = { fg = palette.text_primary },
+    
+    -- Markup and tags
+    ["@tag"] = { fg = palette.dracula_pink },
+    ["@tag.attribute"] = { fg = palette.dracula_green, italic = true },
+    ["@tag.delimiter"] = { fg = palette.text_primary },
+    
+    -- Structure elements
+    ["@namespace"] = { fg = palette.dracula_orange, italic = true },
+    ["@property"] = { fg = palette.dracula_green },
+    ["@field"] = { fg = palette.dracula_green },
+    ["@parameter"] = { fg = palette.dracula_orange, italic = true },
+    ["@label"] = { fg = palette.dracula_pink },
+  }
+end
+
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
+-- LSP SEMANTIC ENHANCEMENTS - Neural language server integration
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
+local function get_lsp_highlights(palette)
+  return {
+    -- Semantic token types
+    ["@lsp.type.class"] = { fg = palette.dracula_orange, italic = true },
+    ["@lsp.type.interface"] = { fg = palette.dracula_orange, italic = true },
+    ["@lsp.type.enum"] = { fg = palette.dracula_orange, italic = true },
+    ["@lsp.type.struct"] = { fg = palette.dracula_orange, italic = true },
+    ["@lsp.type.parameter"] = { fg = palette.dracula_orange, italic = true },
+    ["@lsp.type.property"] = { fg = palette.dracula_green },
+    ["@lsp.type.method"] = { fg = palette.dracula_cyan },
+    ["@lsp.type.function"] = { fg = palette.dracula_cyan },
+    ["@lsp.type.variable"] = { fg = palette.text_primary },
+    ["@lsp.type.namespace"] = { fg = palette.dracula_orange, italic = true },
+    ["@lsp.type.typeParameter"] = { fg = palette.dracula_purple, italic = true },
+    
+    -- Semantic modifiers
+    ["@lsp.mod.readonly"] = { italic = true },
+    ["@lsp.mod.deprecated"] = { strikethrough = true },
+  }
+end
+
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
+-- UI NEURAL INTERFACE - Core editor elements
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
+local function get_ui_highlights(palette)
+  return {
+    -- Base interface
+    Normal = { fg = palette.text_primary, bg = palette.shadow },
+    NormalFloat = { bg = palette.ghost, fg = palette.text_secondary },
+    FloatBorder = { fg = palette.medium_slate_blue, bg = palette.ghost },
+    FloatTitle = { fg = palette.dracula_pink, bg = palette.ghost, bold = true },
+    
+    -- Popup menu
+    Pmenu = { bg = palette.ghost, fg = palette.text_secondary },
+    PmenuSel = { bg = palette.text_disabled, fg = palette.text_secondary, bold = true },
+    PmenuSbar = { bg = palette.text_disabled },
+    PmenuThumb = { bg = palette.medium_slate_blue },
+    
+    -- Status and window elements
+    StatusLine = { fg = palette.text_secondary, bg = palette.ghost },
+    StatusLineNC = { fg = palette.text_muted, bg = palette.ghost },
+    WinBar = { fg = palette.text_secondary, bg = "NONE" },
+    WinBarNC = { fg = palette.text_muted, bg = "NONE" },
+    WinSeparator = { fg = palette.text_disabled },
+    
+    -- Cursor and selection
+    CursorLine = { bg = palette.whisper },
+    CursorColumn = { bg = palette.whisper },
+    CursorLineNr = { fg = palette.dracula_pink, bold = true },
+    LineNr = { fg = palette.text_muted },
+    ColorColumn = { bg = palette.whisper },
+    Visual = { bg = palette.text_disabled },
+    
+    -- Search highlighting
+    Search = { bg = palette.dracula_orange, fg = palette.shadow },
+    IncSearch = { bg = palette.dracula_pink, fg = palette.shadow },
+    CurSearch = { bg = palette.dracula_green, fg = palette.shadow },
+    
+    -- Folding
+    Folded = { fg = palette.text_muted, bg = palette.whisper, italic = true },
+    FoldColumn = { fg = palette.text_muted, bg = "NONE" },
+  }
+end
+
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
+-- PLUGIN ECOSYSTEM INTEGRATION - Third-party plugin theming
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
+local function get_plugin_highlights(palette)
+  return {
+    -- Telescope - The neural scope
+    TelescopeBorder = { fg = palette.medium_slate_blue, bg = "NONE" },
+    TelescopePromptBorder = { fg = palette.dracula_pink, bg = "NONE" },
+    TelescopeResultsBorder = { fg = palette.medium_slate_blue, bg = "NONE" },
+    TelescopePreviewBorder = { fg = palette.medium_slate_blue, bg = "NONE" },
+    TelescopeSelectionCaret = { fg = palette.dracula_pink, bg = "NONE" },
+    TelescopeSelection = { bg = palette.text_disabled, fg = palette.text_secondary },
+    TelescopeMatching = { fg = palette.dracula_green, bold = true },
+    TelescopePromptTitle = { fg = palette.dracula_pink, bold = true },
+    TelescopeResultsTitle = { fg = palette.medium_slate_blue, bold = true },
+    TelescopePreviewTitle = { fg = palette.dracula_green, bold = true },
+    TelescopePromptNormal = { bg = palette.ghost },
+    TelescopeResultsNormal = { bg = palette.ghost },
+    TelescopePreviewNormal = { bg = palette.ghost },
+    
+    -- Completion - Neural suggestions
+    CmpBorder = { fg = palette.medium_slate_blue, bg = "NONE" },
+    CmpDocBorder = { fg = palette.neon_blue, bg = "NONE" },
+    CmpItemKind = { fg = palette.dracula_purple },
+    CmpItemMenu = { fg = palette.text_muted },
+    CmpItemAbbr = { fg = palette.text_secondary },
+    CmpItemAbbrMatch = { fg = palette.dracula_green, bold = true },
+    CmpItemAbbrMatchFuzzy = { fg = palette.dracula_green, bold = true },
+    
+    -- Git integration
+    GitSignsAdd = { fg = palette.dracula_green },
+    GitSignsChange = { fg = palette.dracula_orange },
+    GitSignsDelete = { fg = palette.dracula_red },
+    
+    -- Diagnostics - Neural health monitoring
+    DiagnosticError = { fg = palette.dracula_red },
+    DiagnosticWarn = { fg = palette.dracula_orange },
+    DiagnosticInfo = { fg = palette.dracula_cyan },
+    DiagnosticHint = { fg = palette.dracula_purple },
+    
+    -- Tree explorer
+    NvimTreeNormal = { bg = palette.whisper },
+    NvimTreeWinSeparator = { fg = palette.text_disabled, bg = palette.whisper },
+    
+    -- Buffer line
+    BufferLineFill = { bg = "#11111B" },
+    BufferLineBackground = { fg = palette.text_muted, bg = palette.ghost },
+    BufferLineBufferSelected = { fg = palette.text_secondary, bg = palette.text_disabled, bold = true },
+    
+    -- Indent guides
+    IndentBlanklineChar = { fg = palette.text_disabled },
+    IndentBlanklineContextChar = { fg = palette.medium_slate_blue },
+    
+    -- Which-key
+    WhichKey = { fg = palette.dracula_pink, bold = true },
+    WhichKeyGroup = { fg = palette.dracula_cyan },
+    WhichKeyDesc = { fg = palette.text_secondary },
+    
+    -- AI assistants
+    CopilotSuggestion = { fg = palette.text_muted, italic = true },
+    CopilotAnnotation = { fg = palette.medium_slate_blue, italic = true },
+    
+    -- Notifications
+    NotifyBackground = { bg = palette.ghost },
+    NotifyBorder = { fg = palette.medium_slate_blue },
+    
+    -- Trouble
+    TroubleText = { fg = palette.text_secondary },
+    TroubleCount = { fg = palette.dracula_pink, bg = palette.text_disabled },
+    TroubleNormal = { fg = palette.text_secondary, bg = palette.ghost },
+  }
+end
+
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
+-- CYBERSYNTH NEURAL ENHANCEMENT SYSTEM
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
+local function apply_cybersynth_enhancements()
+  local function set_highlight(name, opts)
+    vim.api.nvim_set_hl(0, name, opts)
+  end
+  
+  -- Neural enhancement overlays - subtle neon accents
+  set_highlight("CursorLineNr", { fg = synth_palette.neon_pink, bold = true })
+  set_highlight("PmenuSel", { bg = synth_palette.neon_magenta, fg = synth_palette.void, bold = true })
+  set_highlight("TelescopeBorder", { fg = synth_palette.neon_purple })
+  set_highlight("TelescopePromptBorder", { fg = synth_palette.neon_pink })
+  set_highlight("CmpItemAbbrMatch", { fg = synth_palette.neon_cyan, bold = true })
+  set_highlight("GitSignsAdd", { fg = synth_palette.neon_green })
+  
+  -- Terminal neural palette
+  vim.g.terminal_color_0 = synth_palette.ghost
+  vim.g.terminal_color_1 = synth_palette.neon_pink
+  vim.g.terminal_color_2 = synth_palette.neon_green
+  vim.g.terminal_color_3 = synth_palette.neon_yellow
+  vim.g.terminal_color_4 = synth_palette.neon_cyan
+  vim.g.terminal_color_5 = synth_palette.neon_magenta
+  vim.g.terminal_color_6 = synth_palette.neon_purple
+  vim.g.terminal_color_7 = synth_palette.text_primary
+  vim.g.terminal_color_8 = synth_palette.text_muted
+  vim.g.terminal_color_9 = synth_palette.dracula_red
+  vim.g.terminal_color_10 = synth_palette.dracula_green
+  vim.g.terminal_color_11 = synth_palette.dracula_yellow
+  vim.g.terminal_color_12 = synth_palette.dracula_cyan
+  vim.g.terminal_color_13 = synth_palette.dracula_purple
+  vim.g.terminal_color_14 = synth_palette.dracula_orange
+  vim.g.terminal_color_15 = synth_palette.text_primary
+end
+
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
+-- NEURAL COMMAND INTERFACE - User commands for theme manipulation
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
+local function create_kora_commands()
+  -- CyberSynth intensity booster
+  vim.api.nvim_create_user_command("KoraSynthBoost", function(opts)
+    local mode = opts.args == "off" and "off" or "on"
+    
+    if mode == "on" then
+      vim.api.nvim_set_hl(0, "Normal", { 
+        fg = synth_palette.text_primary, 
+        bg = synth_palette.void 
+      })
+      vim.api.nvim_set_hl(0, "PmenuSel", { 
+        bg = synth_palette.neon_magenta, 
+        fg = synth_palette.void, 
+        bold = true 
+      })
+      vim.notify("⚡ KORA CyberSynth: NEURAL BOOST ACTIVATED", vim.log.levels.INFO)
+    else
+      vim.cmd("colorscheme cyberdream")
+      vim.notify("🔌 KORA CyberSynth: NEURAL BOOST DEACTIVATED", vim.log.levels.INFO)
+    end
+  end, { 
+    nargs = "?", 
+    desc = "Toggle CyberSynth neural enhancement boost"
+  })
+  
+  -- Theme switcher command
+  vim.api.nvim_create_user_command("KoraTheme", function(opts)
+    local themes = {
+      cyber = "cyberdream",
+      rose = "rose-pine",
+      gruvbox = "gruvbox",
+      kanagawa = "kanagawa",
+      osaka = "solarized-osaka",
+      tokyo = "tokyonight"
+    }
+    
+    local theme = themes[opts.args] or opts.args or "cyberdream"
+    vim.cmd("colorscheme " .. theme)
+    
+    if theme == "cyberdream" then
+      apply_cybersynth_enhancements()
+      vim.notify("🌆 KORA: CyberSynth neural matrix activated", vim.log.levels.INFO)
+    else
+      vim.notify("🎨 KORA: Theme switched to " .. theme, vim.log.levels.INFO)
+    end
+  end, {
+    nargs = "?",
+    complete = function() 
+      return { "cyber", "rose", "gruvbox", "kanagawa", "osaka", "tokyo" }
+    end,
+    desc = "Switch between KORA colorschemes"
+  })
+end
+
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
+-- PLUGIN CONFIGURATION MATRIX - LazyVim plugin specifications
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════
 return {
-  -- CYBERDREAM - Core Colorscheme (primary)
+  -- ═════════════════════════════════════════════════════════════════════════════════════════════
+  -- PRIMARY: CYBERDREAM + CYBERSYNTH NEURAL ENHANCEMENT
+  -- ═════════════════════════════════════════════════════════════════════════════════════════════
   {
     "scottmckendry/cyberdream.nvim",
+    name = "cyberdream",
     lazy = false,
     priority = 1000,
     opts = {
@@ -17,239 +352,123 @@ return {
       cache = true,
       theme = {
         variant = "default",
-        saturation = 1.0, -- Adjusted for overall vibrancy
-        highlights = {
-          -- KORA CYBERSYNTH PALETTE HIGHLIGHTS
-          -- Base UI
-          Normal = { fg = "#F8F8F2", bg = "#0B0A12" }, -- near-black background
-          NormalFloat = { fg = "#F8F8F2", bg = "NONE" }, -- allow terminal transparency
-          FloatBorder = { fg = "#9A6CFF", bg = "NONE", bold = true }, -- Neon purple border
-          FloatTitle = { fg = "#FF2D95", bg = "NONE", bold = true }, -- Neon pink title
-
-          -- Line numbers
-          LineNr = { fg = "#6C7086", bg = "NONE" },
-          CursorLineNr = { fg = "#FF2D95", bold = true }, -- Neon pink cursor line number
-          CursorLine = { bg = "#141127" }, -- Darker background for cursor line
-          CursorColumn = { bg = "#141127" }, -- Darker background for cursor column
-          ColorColumn = { bg = "#262533" }, -- Dim background for color column
-
-          -- Visual / selection
-          Visual = { bg = "#9A6CFF", fg = "#0B0A12", bold = true, blend = 10 }, -- Neon purple selection
-          Search = { bg = "#FFD166", fg = "#0B0A12", bold = true }, -- Neon yellow search
-          IncSearch = { bg = "#FF6EC7", fg = "#0B0A12", bold = true }, -- Neon magenta incremental search
-
-          -- Comments, keywords, strings, functions
-          Comment = { fg = "#9A6CFF", italic = true }, -- Neon purple comments
-          [" @comment"] = { fg = "#9A6CFF", italic = true },
-
-          [" @keyword"] = { fg = "#FF2D95", italic = true, bold = true }, -- Neon pink keywords
-          [" @keyword.function"] = { fg = "#FF2D95", italic = true },
-          [" @keyword.return"] = { fg = "#FF2D95", italic = true },
-          [" @keyword.operator"] = { fg = "#FF2D95", italic = false },
-
-          [" @string"] = { fg = "#7CFF00" }, -- Neon green strings
-          [" @string.escape"] = { fg = "#FFD166", bold = true }, -- Neon yellow string escapes
-
-          [" @function"] = { fg = "#00F0FF", bold = true }, -- Neon cyan functions
-          [" @function.builtin"] = { fg = "#00F0FF", italic = true },
-          [" @function.call"] = { fg = "#00CFFF" }, -- Slightly darker cyan for calls
-          [" @method"] = { fg = "#00CFFF" },
-          [" @method.call"] = { fg = "#00CFFF" },
-
-          -- Types, constants, tags
-          [" @type"] = { fg = "#FFD166", italic = true }, -- Neon yellow types
-          [" @type.builtin"] = { fg = "#FFD166", italic = true },
-          [" @type.definition"] = { fg = "#FFD166", bold = true },
-          [" @constant"] = { fg = "#9A6CFF", bold = true }, -- Neon purple constants
-          [" @constant.builtin"] = { fg = "#9A6CFF", italic = true },
-          [" @constant.macro"] = { fg = "#9A6CFF", bold = true },
-          [" @operator"] = { fg = "#FF2D95" }, -- Neon pink operators
-          [" @punctuation"] = { fg = "#F8F8F2" },
-          [" @punctuation.bracket"] = { fg = "#F8F8F2" },
-          [" @punctuation.delimiter"] = { fg = "#F8F8F2" },
-          [" @tag"] = { fg = "#FF2D95" }, -- Neon pink tags
-          [" @tag.attribute"] = { fg = "#7CFF00", italic = true }, -- Neon green tag attributes
-          [" @tag.delimiter"] = { fg = "#F8F8F2" },
-          [" @namespace"] = { fg = "#FFD166", italic = true },
-          [" @property"] = { fg = "#7CFF00" }, -- Neon green properties
-          [" @field"] = { fg = "#7CFF00" },
-          [" @parameter"] = { fg = "#FFD166", italic = true }, -- Neon yellow parameters
-          [" @label"] = { fg = "#FF2D95" }, -- Neon pink labels
-
-          -- LSP SEMANTIC TOKENS (aligned with Tree-sitter)
-          [" @lsp.type.class"] = { fg = "#FFD166", italic = true },
-          [" @lsp.type.interface"] = { fg = "#FFD166", italic = true },
-          [" @lsp.type.enum"] = { fg = "#FFD166", italic = true },
-          [" @lsp.type.struct"] = { fg = "#FFD166", italic = true },
-          [" @lsp.type.parameter"] = { fg = "#FFD166", italic = true },
-          [" @lsp.type.property"] = { fg = "#7CFF00" },
-          [" @lsp.type.method"] = { fg = "#00CFFF" },
-          [" @lsp.type.function"] = { fg = "#00F0FF" },
-          [" @lsp.type.variable"] = { fg = "#F8F8F2" },
-          [" @lsp.type.namespace"] = { fg = "#FFD166", italic = true },
-          [" @lsp.type.typeParameter"] = { fg = "#9A6CFF", italic = true },
-          [" @lsp.mod.readonly"] = { italic = true },
-          [" @lsp.mod.deprecated"] = { strikethrough = true },
-
-          -- DIAGNOSTICS (neon)
-          DiagnosticError = { fg = "#FF2D95" }, -- Neon pink error
-          DiagnosticWarn = { fg = "#FFD166" }, -- Neon yellow warning
-          DiagnosticInfo = { fg = "#00F0FF" }, -- Neon cyan info
-          DiagnosticHint = { fg = "#9A6CFF" }, -- Neon purple hint
-          DiagnosticOk = { fg = "#7CFF00" }, -- Neon green ok
-          DiagnosticVirtualTextError = { fg = "#FF2D95", bg = "#2D1B1F" },
-          DiagnosticVirtualTextWarn = { fg = "#FFD166", bg = "#2D2416" },
-          DiagnosticVirtualTextInfo = { fg = "#00F0FF", bg = "#192A2D" },
-          DiagnosticVirtualTextHint = { fg = "#9A6CFF", bg = "#1E1B2D" },
-          DiagnosticVirtualTextOk = { fg = "#7CFF00", bg = "#193B2D" },
-          DiagnosticUnderlineError = { underline = true, sp = "#FF2D95" },
-          DiagnosticUnderlineWarn = { underline = true, sp = "#FFD166" },
-          DiagnosticUnderlineInfo = { underline = true, sp = "#00F0FF" },
-          DiagnosticUnderlineHint = { underline = true, sp = "#9A6CFF" },
-          DiagnosticUnderlineOk = { underline = true, sp = "#7CFF00" },
-
-          -- GIT SIGNS (neon)
-          GitSignsAdd = { fg = "#7CFF00" }, -- Neon green add
-          GitSignsChange = { fg = "#FFD166" }, -- Neon yellow change
-          GitSignsDelete = { fg = "#FF2D95" }, -- Neon pink delete
-          GitSignsAddInline = { bg = "#7CFF00", fg = "#0B0A12" },
-          GitSignsChangeInline = { bg = "#FFD166", fg = "#0B0A12" },
-          GitSignsDeleteInline = { bg = "#FF2D95", fg = "#0B0A12" },
-          GitSignsAddLn = { bg = "#193B2D" },
-          GitSignsChangeLn = { bg = "#2D2416" },
-          GitSignsDeleteLn = { bg = "#2D1B1F" },
-
-          -- NvimTree (aligned with palette)
-          NvimTreeNormal = { bg = "#0B0A12" },
-          NvimTreeWinSeparator = { fg = "#262533", bg = "#0B0A12" },
-          NvimTreeRootFolder = { fg = "#9A6CFF", bold = true },
-          NvimTreeFolderName = { fg = "#00F0FF" },
-          NvimTreeFolderIcon = { fg = "#FFD166" },
-          NvimTreeOpenedFolderName = { fg = "#7CFF00", bold = true },
-          NvimTreeSpecialFile = { fg = "#FF2D95", underline = true },
-          NvimTreeExecFile = { fg = "#7CFF00", bold = true },
-          NvimTreeImageFile = { fg = "#9A6CFF" },
-          NvimTreeMarkdownFile = { fg = "#00F0FF" },
-          NvimTreeIndentMarker = { fg = "#262533" },
-          NvimTreeSymlink = { fg = "#FF2D95", italic = true },
-          NvimTreeGitDirty = { fg = "#FFD166" },
-          NvimTreeGitStaged = { fg = "#7CFF00" },
-          NvimTreeGitMerge = { fg = "#FF2D95" },
-          NvimTreeGitRenamed = { fg = "#9A6CFF" },
-          NvimTreeGitNew = { fg = "#7CFF00" },
-          NvimTreeGitDeleted = { fg = "#FF2D95" },
-
-          -- Bufferline (aligned with palette)
-          BufferLineFill = { bg = "#0B0A12" },
-          BufferLineBackground = { fg = "#6C7086", bg = "#141127" },
-          BufferLineBufferSelected = { fg = "#F8F8F2", bg = "#9A6CFF", bold = true },
-          BufferLineTab = { fg = "#6C7086", bg = "#141127" },
-          BufferLineTabSelected = { fg = "#F8F8F2", bg = "#9A6CFF" },
-          BufferLineTabClose = { fg = "#FF2D95", bg = "#141127" },
-          BufferLineIndicatorSelected = { fg = "#00F0FF", bg = "#9A6CFF" },
-          BufferLineCloseButton = { fg = "#6C7086", bg = "#141127" },
-          BufferLineCloseButtonSelected = { fg = "#FF2D95", bg = "#9A6CFF" },
-          BufferLineModified = { fg = "#FFD166", bg = "#141127" },
-          BufferLineModifiedSelected = { fg = "#FFD166", bg = "#9A6CFF" },
-
-          -- Indent guides
-          IndentBlanklineChar = { fg = "#262533" },
-          IndentBlanklineContextChar = { fg = "#9A6CFF" },
-          IndentBlanklineContextStart = { underline = true, sp = "#9A6CFF" },
-          IblIndent = { fg = "#262533" },
-          IblScope = { fg = "#9A6CFF" },
-
-          -- Which-key (aligned with palette)
-          WhichKey = { fg = "#FF2D95", bold = true },
-          WhichKeyGroup = { fg = "#00F0FF" },
-          WhichKeyDesc = { fg = "#F8F8F2" },
-          WhichKeySeperator = { fg = "#6C7086" },
-          WhichKeyFloat = { bg = "#141127" },
-          WhichKeyBorder = { fg = "#9A6CFF", bg = "#141127" },
-          WhichKeyValue = { fg = "#9A6CFF" },
-
-          -- Additional UI
-          WinSeparator = { fg = "#262533" },
-          LineNr = { fg = "#6C7086" },
-          CursorLineNr = { fg = "#FF2D95", bold = true },
-          CursorLine = { bg = "#141127" },
-          CursorColumn = { bg = "#141127" },
-          ColorColumn = { bg = "#141127" },
-          Visual = { bg = "#9A6CFF" },
-          VisualNOS = { bg = "#9A6CFF" },
-          Search = { bg = "#FFD166", fg = "#0B0A12" },
-          IncSearch = { bg = "#FF6EC7", fg = "#0B0A12" },
-          CurSearch = { bg = "#7CFF00", fg = "#0B0A12" },
-          MatchParen = { bg = "#262533", bold = true },
-          Substitute = { bg = "#9A6CFF", fg = "#0B0A12" },
-
-          Folded = { fg = "#6C7086", bg = "#141127", italic = true },
-          FoldColumn = { fg = "#6C7086", bg = "NONE" },
-
-          SignColumn = { bg = "NONE" },
-          SignColumnSB = { bg = "#0B0A12" },
-
-          CopilotSuggestion = { fg = "#6C7086", italic = true },
-          CopilotAnnotation = { fg = "#9A6CFF", italic = true },
-
-          NotifyBackground = { bg = "#141127" },
-          NotifyBorder = { fg = "#9A6CFF" },
-          NotifyERRORBorder = { fg = "#FF2D95" },
-          NotifyWARNBorder = { fg = "#FFD166" },
-          NotifyINFOBorder = { fg = "#00F0FF" },
-          NotifyDEBUGBorder = { fg = "#9A6CFF" },
-          NotifyTRACEBorder = { fg = "#7CFF00" },
-          NotifyERRORTitle = { fg = "#FF2D95", bold = true },
-          NotifyWARNTitle = { fg = "#FFD166", bold = true },
-          NotifyINFOTitle = { fg = "#00F0FF", bold = true },
-          NotifyDEBUGTitle = { fg = "#9A6CFF", bold = true },
-          NotifyTRACETitle = { fg = "#7CFF00", bold = true },
-        },
+        saturation = 1.0,
+        highlights = vim.tbl_extend("force",
+          get_syntax_highlights(synth_palette),
+          get_lsp_highlights(synth_palette),
+          get_ui_highlights(synth_palette),
+          get_plugin_highlights(synth_palette)
+        ),
       },
     },
     config = function(_, opts)
       require("cyberdream").setup(opts)
       vim.cmd("colorscheme cyberdream")
-
-      -- KORA CYBERSYNTH TERMINAL PALETTE
-      vim.g.terminal_color_0 = "#0B0A12"
-      vim.g.terminal_color_1 = "#FF2D95"
-      vim.g.terminal_color_2 = "#7CFF00"
-      vim.g.terminal_color_3 = "#FFD166"
-      vim.g.terminal_color_4 = "#00F0FF"
-      vim.g.terminal_color_5 = "#FF6EC7"
-      vim.g.terminal_color_6 = "#9A6CFF"
-      vim.g.terminal_color_7 = "#F8F8F2"
-      vim.g.terminal_color_8 = "#262533"
-      vim.g.terminal_color_9 = "#FF2D95"
-      vim.g.terminal_color_10 = "#7CFF00"
-      vim.g.terminal_color_11 = "#FFD166"
-      vim.g.terminal_color_12 = "#00CFFF"
-      vim.g.terminal_color_13 = "#FF6EC7"
-      vim.g.terminal_color_14 = "#9A6CFF"
-      vim.g.terminal_color_15 = "#FFFFFF"
-
-      -- extra: override endofbuffer to keep "clean" look
-      vim.api.nvim_set_hl(0, "EndOfBuffer", { fg = opts.theme.highlights.Normal.bg })
-
-      -- small UX touches
-      vim.o.pumblend = 10 -- transparency for completion popup (requires term support)
-      vim.o.termguicolors = true
-
-      -- optional user command to toggle "puff" intensity
-      vim.api.nvim_create_user_command("KoraSynthBoost", function(opts)
-        local mode = opts.args == "off" and "off" or "on"
-        if mode == "on" then
-          -- increase saturation by switching highlight variants
-          vim.api.nvim_set_hl(0, "Normal", { fg = "#F8F8F2", bg = "#07060A" })
-          vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#FF6EC7", fg = "#0B0A12", bold = true })
-          vim.notify("KORA CyberSynth: BOOST ON", vim.log.levels.INFO)
-        else
-          vim.api.nvim_set_hl(0, "Normal", { fg = "#F8F8F2", bg = "#0B0A12" })
-          vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#9A6CFF", fg = "#0B0A12", bold = true })
-          vim.notify("KORA CyberSynth: BOOST OFF", vim.log.levels.INFO)
-        end
-      end, { nargs = "?" })
+      
+      -- Apply CyberSynth neural enhancements
+      apply_cybersynth_enhancements()
+      
+      -- Initialize command interface
+      create_kora_commands()
+      
+      vim.notify("⚡ KORA Neural Visual Matrix: ONLINE", vim.log.levels.INFO)
     end,
+  },
+
+  -- ═════════════════════════════════════════════════════════════════════════════════════════════
+  -- ALTERNATIVE COLORSCHEMES - Fallback neural configurations
+  -- ═════════════════════════════════════════════════════════════════════════════════════════════
+  {
+    "rose-pine/neovim",
+    name = "rose-pine",
+    lazy = true,
+    opts = {
+      variant = "main",
+      dark_variant = "main",
+      dim_inactive_windows = false,
+      styles = {
+        bold = true,
+        italic = true,
+        transparency = true,
+      },
+      highlight_groups = {
+        Normal = { bg = "none" },
+        ColorColumn = { bg = "#1C1C21" },
+        Pmenu = { bg = "", fg = "#e0def4" },
+        PmenuSel = { bg = "#4a465d", fg = "#f8f5f2" },
+        PmenuSbar = { bg = "#191724" },
+        PmenuThumb = { bg = "#9ccfd8" },
+      },
+    },
+  },
+
+  {
+    "ellisonleao/gruvbox.nvim",
+    name = "gruvbox",
+    lazy = true,
+    opts = {
+      terminal_colors = true,
+      undercurl = true,
+      underline = true,
+      bold = true,
+      italic = {
+        strings = false,
+        comments = true,
+        folds = false,
+        operators = false,
+      },
+      transparent_mode = true,
+    },
+  },
+
+  {
+    "rebelot/kanagawa.nvim",
+    name = "kanagawa",
+    lazy = true,
+    opts = {
+      compile = false,
+      commentStyle = { italic = true },
+      transparent = true,
+      terminalColors = true,
+      overrides = function(colors)
+        local theme = colors.theme
+        return {
+          NormalFloat = { bg = "none" },
+          FloatBorder = { bg = "none" },
+          TelescopeTitle = { fg = theme.ui.special, bold = true },
+          TelescopePromptBorder = { fg = theme.ui.special },
+        }
+      end,
+      theme = "wave",
+    },
+  },
+
+  {
+    "craftzdog/solarized-osaka.nvim",
+    name = "solarized-osaka",
+    lazy = true,
+    opts = {
+      transparent = true,
+      terminal_colors = true,
+      styles = {
+        comments = { italic = true },
+        keywords = { italic = false },
+      },
+      day_brightness = 0.3,
+    },
+  },
+
+  {
+    "folke/tokyonight.nvim",
+    name = "tokyonight",
+    lazy = true,
+    opts = {
+      style = "night",
+      transparent = true,
+      styles = {
+        comments = { italic = false },
+        keywords = { italic = false },
+      },
+    },
   },
 }

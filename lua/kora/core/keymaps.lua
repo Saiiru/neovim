@@ -116,8 +116,7 @@ end
 
 -- Plugin-specific mappings (kept, but dependent on plugin availability)
 -- Plenary test (uses Plug mapping)
-mset("n", "<leader>tf", "<Plug>PlenaryTestFile", "Run Plenary test file")
-
+mset("n", "<leader>tF", "<Plug>PlenaryTestFile", "Run Plenary test file")
 -- VimWithMe plugin
 mset("n", "<leader>vwm", function()
   if pcall(require, "vim-with-me") then require("vim-with-me").StartVimWithMe() end
