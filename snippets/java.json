@@ -1,0 +1,25 @@
+{
+  "main": {
+    "prefix": "main",
+    "body": [
+      "public class ${1:Main} {",
+      "    public static void main(String[] args) {",
+      "        ${0}// TODO",
+      "    }",
+      "}"
+    ],
+    "description": "main class"
+  },
+  "log": { "prefix": "log", "body": ["System.out.println(${1:expr});"], "description": "println" },
+  "test": {
+    "prefix": "jtest",
+    "body": [
+      "@org.junit.jupiter.api.Test",
+      "void ${1:name}() {",
+      "    // arrange",
+      "    ${0} ",
+      "}"
+    ],
+    "description": "JUnit5 test"
+  }
+}

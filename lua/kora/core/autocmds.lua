@@ -1,213 +1,234 @@
--- ╔══════════════════════════════════════════════════════════════════════════╗
--- ║                   KORA AUTO COMMAND RESPONSE MATRIX                     ║
--- ╚══════════════════════════════════════════════════════════════════════════╝
+-- ~/.config/nvim/lua/kora/core/autocmds.lua
+-- Minimal, rápido, ASCII-only.
 
-local augroup = vim.api.nvim_create_augroup
-local autocmd = vim.api.nvim_create_autocmd
+-- UTF-8 (global). Não force 'fileencoding' por buffer aqui.
+vim.opt.encoding = "utf-8"
 
--- ═════════════════════════════════════════════════════════════════════════
---  NOTIFICATION CONTROL SYSTEM
--- ═════════════════════════════════════════════════════════════════════════
+local aug = vim.api.nvim_create_augroup
+local auc = vim.api.nvim_create_autocmd
+local cmd = vim.cmd
+local fn = vim.fn
 
--- Global notification filter to reduce spam
-local original_notify = vim.notify
-local notify_history = {}
-local notify_filter = {
-	-- Patterns to suppress or reduce frequency
-	suppress = {
-		"Starting",
-		"started",
-		"ready",
-		"attached",
-		"client",
-		"initialized",
-		"loading",
-		"loaded",
-		"enabled",
-		"disabled",
-	},
-	-- Debounce time for similar messages (ms)
-	debounce_time = 2000,
-}
+-- groups
+local g_yank = aug("kora_yank", { clear = true })
+local g_resize = aug("kora_resize", { clear = true })
+local g_numbers = aug("kora_numbers", { clear = true })
+local g_comment = aug("kora_comment", { clear = true })
+local g_mkdir = aug("kora_mkdir", { clear = true })
+local g_trim = aug("kora_trim", { clear = true })
+local g_term = aug("kora_term", { clear = true })
+local g_diag_skip = aug("kora_diag_skip", { clear = true })
+local g_lsp = aug("kora_lsp", { clear = true })
+local g_format = aug("kora_format", { clear = true })
+local g_restore = aug("kora_restore", { clear = true })
+local g_check = aug("kora_checktime", { clear = true })
+local g_large = aug("kora_large", { clear = true })
+local g_md = aug("kora_markdown", { clear = true })
+local g_localft = aug("kora_local_ftplugin", { clear = true })
+local g_runner = aug("kora_runner", { clear = true })
+local g_sanitize = aug("kora_sanitize", { clear = true })
 
--- Enhanced notify function with spam protection
-vim.notify = function(msg, level, opts)
-	if type(msg) ~= "string" then
-		return original_notify(msg, level, opts)
-	end
-
-	-- Check if message should be suppressed
-	for _, pattern in ipairs(notify_filter.suppress) do
-		if msg:lower():find(pattern:lower()) then
-			-- Only show important levels (WARN and ERROR)
-			if level and (level == vim.log.levels.WARN or level == vim.log.levels.ERROR) then
-				return original_notify(msg, level, opts)
-			else
-				return -- Suppress INFO and other levels for spam patterns
-			end
-		end
-	end
-
-	-- Debounce similar messages
-	local now = vim.loop.hrtime() / 1000000 -- Convert to milliseconds
-	local msg_key = msg:sub(1, 50) -- Use first 50 chars as key
-
-	if notify_history[msg_key] then
-		local time_diff = now - notify_history[msg_key]
-		if time_diff < notify_filter.debounce_time then
-			return -- Skip if too recent
-		end
-	end
-
-	notify_history[msg_key] = now
-	return original_notify(msg, level, opts)
-end
-
--- ═════════════════════════════════════════════════════════════════════════
---  CORE AUTOCOMMANDS
--- ═════════════════════════════════════════════════════════════════════════
-
--- 1. Visual feedback ao yank
-autocmd("TextYankPost", {
-	group = augroup("highlight_yank", { clear = true }),
+-- 1) feedback ao yank
+auc("TextYankPost", {
+	group = g_yank,
 	callback = function()
-		vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 })
+		vim.highlight.on_yank({ higroup = "IncSearch", timeout = 120 })
 	end,
 })
 
--- 2. Resize splits automaticamente ao redimensionar janela
-autocmd("VimResized", {
-	group = augroup("resize_splits", { clear = true }),
+-- 2) igualar splits ao redimensionar
+auc("VimResized", {
+	group = g_resize,
 	callback = function()
-		local current_tab = vim.fn.tabpagenr()
-		vim.cmd("tabdo wincmd =")
-		vim.cmd("tabnext " .. current_tab)
+		local tab = fn.tabpagenr()
+		cmd("tabdo wincmd =")
+		cmd("tabnext " .. tab)
 	end,
 })
 
--- 3. Número relativo inteligente (nunca em Insert)
-local numgroup = augroup("numbertoggle", { clear = true })
-autocmd({ "BufEnter", "FocusGained", "InsertLeave", "WinEnter" }, {
-	group = numgroup,
+-- 3) número relativo fora do insert
+auc({ "BufEnter", "FocusGained", "InsertLeave", "WinEnter" }, {
+	group = g_numbers,
 	callback = function()
 		if vim.o.number and vim.api.nvim_get_mode().mode ~= "i" then
-			vim.opt.relativenumber = true
+			vim.o.relativenumber = true
 		end
 	end,
 })
-autocmd({ "BufLeave", "FocusLost", "InsertEnter", "WinLeave" }, {
-	group = numgroup,
+auc({ "BufLeave", "FocusLost", "InsertEnter", "WinLeave" }, {
+	group = g_numbers,
 	callback = function()
 		if vim.o.number then
-			vim.opt.relativenumber = false
+			vim.o.relativenumber = false
 		end
 	end,
 })
 
--- 4. Remove continuação automática de comentário em novas linhas
-autocmd("BufWinEnter", {
-	group = augroup("no_auto_comment", { clear = true }),
+-- 4) sem continuação de comentário
+auc({ "BufWinEnter", "InsertEnter" }, {
+	group = g_comment,
 	callback = function()
-		vim.opt.formatoptions:remove({ "c", "r", "o" })
+		vim.opt_local.formatoptions:remove({ "c", "r", "o" })
 	end,
 })
 
--- 5. Auto-criação de diretórios ao salvar
-autocmd("BufWritePre", {
-	group = augroup("auto_create_dir", { clear = true }),
+-- 5) criar diretório ao salvar
+auc("BufWritePre", {
+	group = g_mkdir,
 	callback = function(args)
 		if args.match:match("^%w%w+://") then
 			return
 		end
-		local file = vim.uv.fs_realpath(args.match) or args.match
-		vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
+		local f = (vim.uv.fs_realpath(args.match) or args.match)
+		fn.mkdir(fn.fnamemodify(f, ":p:h"), "p")
 	end,
 })
 
--- 6. Terminal: sem número, sem spell, sem relativenumber
-autocmd("TermOpen", {
-	group = augroup("terminal_settings", { clear = true }),
+-- helper: só edite buffer de arquivo normal e modificável
+local function can_edit()
+	return vim.bo.buftype == "" and vim.bo.modifiable and not vim.bo.readonly
+end
+
+-- 6) trim trailing whitespace (respeita b:no_trim)
+auc("BufWritePre", {
+	group = g_trim,
+	callback = function()
+		if vim.b.no_trim or not can_edit() then
+			return
+		end
+		local view = fn.winsaveview()
+		cmd([[%s/\s\+$//e]])
+		fn.winrestview(view)
+	end,
+})
+
+-- 7) terminal limpo + startinsert
+auc("TermOpen", {
+	group = g_term,
 	callback = function()
 		vim.opt_local.number = false
 		vim.opt_local.relativenumber = false
-		vim.opt_local.spell = false
 		vim.opt_local.signcolumn = "no"
+		vim.opt_local.spell = false
 		vim.opt_local.foldcolumn = "0"
-		vim.opt_local.winbar = ""
 	end,
 })
-autocmd("BufEnter", {
-	group = augroup("terminal_insert", { clear = true }),
-	pattern = "term://*",
-	command = "startinsert",
-})
+auc("BufEnter", { group = g_term, pattern = "term://*", command = "startinsert" })
 
--- 7. Disable diagnostics em node_modules, .env, vendor
-autocmd({ "BufRead", "BufNewFile" }, {
-	group = augroup("disable_diagnostics", { clear = true }),
-	pattern = { "*/node_modules/*", "*.env*", ".env", "*/vendor/*" },
+-- 8) desativar diagnostics em pastas pesadas
+auc({ "BufRead", "BufNewFile" }, {
+	group = g_diag_skip,
+	pattern = { "*/node_modules/*", "*/vendor/*", "*/dist/*", "*/build/*" },
 	callback = function()
 		vim.diagnostic.disable(0)
 	end,
 })
 
--- 8. LSP: inlay hints e keymaps (com telescope para navegação) - SILENT VERSION
-autocmd("LspAttach", {
-	group = augroup("lsp_attach", { clear = true }),
-	callback = function(event)
-		local opts = { buffer = event.buf, silent = true }
-		vim.keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<cr>", opts)
-		vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<cr>", opts)
-		vim.keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<cr>", opts)
-		vim.keymap.set("n", "gy", "<cmd>Telescope lsp_type_definitions<cr>", opts)
-
-		-- Enable inlay hints silently
-		if event.data and event.data.client_id then
-			local client = vim.lsp.get_client_by_id(event.data.client_id)
-			if client and client.server_capabilities.inlayHintProvider then
-				vim.lsp.inlay_hint.enable(true, { bufnr = event.buf })
-			end
+-- 9) LSP attach: keymaps e inlay hints (fallback se faltar telescope)
+auc("LspAttach", {
+	group = g_lsp,
+	callback = function(ev)
+		local buf = ev.buf
+		local ok, tb = pcall(require, "telescope.builtin")
+		local function map(lhs, rhs, desc)
+			vim.keymap.set("n", lhs, rhs, { buffer = buf, silent = true, desc = desc })
 		end
 
-		-- NO NOTIFICATION - removed spam notification
+		if ok then
+			map("gd", tb.lsp_definitions, "Goto definition")
+			map("gr", tb.lsp_references, "Goto references")
+			map("gi", tb.lsp_implementations, "Goto implementations")
+			map("gy", tb.lsp_type_definitions, "Goto type")
+			map("<leader>ds", tb.lsp_document_symbols, "Doc symbols")
+			map("<leader>ws", tb.lsp_dynamic_workspace_symbols, "Workspace symbols")
+		else
+			map("gd", vim.lsp.buf.definition, "Goto definition")
+			map("gr", vim.lsp.buf.references, "Goto references")
+			map("gi", vim.lsp.buf.implementation, "Goto implementations")
+			map("gy", vim.lsp.buf.type_definition, "Goto type")
+		end
+
+		map("K", vim.lsp.buf.hover, "Hover")
+		map("<leader>rn", vim.lsp.buf.rename, "Rename")
+		map("<leader>ca", vim.lsp.buf.code_action, "Code action")
+		map("[d", vim.diagnostic.goto_prev, "Prev diagnostic")
+		map("]d", vim.diagnostic.goto_next, "Next diagnostic")
+		map("gl", vim.diagnostic.open_float, "Line diagnostics")
+
+		local client = ev.data and vim.lsp.get_client_by_id(ev.data.client_id)
+		if client and client.server_capabilities and client.server_capabilities.inlayHintProvider then
+			pcall(vim.lsp.inlay_hint.enable, true, { bufnr = buf })
+		end
 	end,
 })
 
--- 9. Run-on-Save: keymap <leader>R para rodar arquivos (C, C++, Go, Python, Lua, Java)
-local function map_run(ft, cmd)
-	autocmd("FileType", {
-		pattern = ft,
-		group = augroup("RunOnSave_" .. ft, { clear = true }),
-		callback = function()
-			vim.keymap.set("n", "<leader>R", function()
-				local filename = vim.fn.expand("%")
-				local full_cmd = cmd:gsub("%%f", filename):gsub("%%r", vim.fn.expand("%:r"))
-				vim.cmd("split")
-				vim.cmd("terminal " .. full_cmd)
-				vim.cmd("resize 10")
-			end, { buffer = true, desc = "Run " .. ft .. " file" })
-		end,
-	})
-end
-map_run("c", "gcc %f -o %r && ./%r")
-map_run("cpp", "g++ %f -o %r && ./%r")
-map_run("java", "javac %f && java %r")
-map_run("go", "go run %f")
-map_run("python", "python3 %f")
-map_run("lua", "lua %f")
+-- 10) format on save (skip em RO/!modifiable/large/generated)
+auc("BufWritePre", {
+	group = g_format,
+	callback = function(args)
+		if not can_edit() or vim.b.large_file or vim.b.format_on_save == false then
+			return
+		end
+		local name = args.match:lower()
+		if name:find("/node_modules/") or name:find("/vendor/") then
+			return
+		end
+		local ok, conform = pcall(require, "conform")
+		if ok then
+			conform.format({ bufnr = args.buf, lsp_fallback = true, quiet = true })
+		else
+			pcall(vim.lsp.buf.format, { bufnr = args.buf, async = false, timeout_ms = 1500 })
+		end
+	end,
+})
 
--- 10. Não abrir comentários ao entrar em Insert em nova linha (o mais performático)
-autocmd("InsertEnter", {
-	group = augroup("no_comment_insert", { clear = true }),
+-- 11) restaurar cursor ao reabrir
+auc("BufReadPost", {
+	group = g_restore,
 	callback = function()
-		vim.opt.formatoptions:remove({ "c", "r", "o" })
-		vim.opt_local.formatoptions:remove({ "c", "r", "o" })
+		local mark = fn.line([['"]])
+		if mark > 0 and mark <= fn.line("$") then
+			pcall(cmd, 'normal! g`"')
+		end
 	end,
 })
 
--- 11. Markdown otimizado
-autocmd("FileType", {
-	group = augroup("markdown_optim", { clear = true }),
+-- 12) autoread quando arquivo muda no disco
+auc({ "FocusGained", "BufEnter", "CursorHold" }, {
+	group = g_check,
+	callback = function()
+		if fn.getcmdwintype() == "" then
+			cmd("checktime")
+		end
+	end,
+})
+
+-- 13) otimizar arquivos grandes (> 1 MB)
+auc("BufReadPre", {
+	group = g_large,
+	callback = function()
+		local file = fn.expand("<afile>")
+		local size = fn.getfsize(file)
+		if size > 1024 * 1024 then
+			vim.b.large_file = true
+			vim.opt_local.swapfile = false
+			vim.opt_local.undofile = false
+			vim.opt_local.foldmethod = "manual"
+			pcall(function()
+				vim.treesitter.stop(0)
+			end)
+			vim.defer_fn(function()
+				for _, c in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
+					pcall(vim.lsp.buf_detach_client, 0, c.id)
+				end
+			end, 50)
+		end
+	end,
+})
+
+-- 14) markdown prático
+auc("FileType", {
+	group = g_md,
 	pattern = "markdown",
 	callback = function()
 		vim.opt_local.conceallevel = 2
@@ -219,134 +240,56 @@ autocmd("FileType", {
 	end,
 })
 
--- 12. LARGE FILE OPTIMIZATION - Disable heavy features for large files
-autocmd("BufReadPre", {
-	group = augroup("large_file_optimizations", { clear = true }),
+-- 15) ftplugin local do projeto: .nvim/ftplugin/<ft>.vim
+auc({ "BufReadPost", "BufNewFile" }, {
+	group = g_localft,
 	callback = function()
-		local file = vim.fn.expand("<afile>")
-		local size = vim.fn.getfsize(file)
-
-		-- If file is larger than 1MB, optimize
-		if size > 1024 * 1024 then
-			vim.opt_local.eventignore:append({
-				"FileType",
-				"Syntax",
-				"BufEnter",
-				"BufLeave",
-				"BufNew",
-			})
-			vim.opt_local.undolevels = -1
-			vim.opt_local.undoreload = 0
-			vim.opt_local.swapfile = false
-			vim.opt_local.foldmethod = "manual"
-			vim.opt_local.bufhidden = "unload"
-			vim.opt_local.buftype = "nowrite"
-			vim.opt_local.undofile = false
-
-			-- Disable LSP for very large files
-			vim.defer_fn(function()
-				vim.lsp.stop_client(vim.lsp.get_active_clients({ bufnr = 0 }))
-			end, 100)
+		local ft = vim.bo.filetype
+		if ft == "" then
+			return
+		end
+		local path = fn.getcwd() .. "/.nvim/ftplugin/" .. ft .. ".vim"
+		if fn.filereadable(path) == 1 then
+			cmd("source " .. path)
 		end
 	end,
 })
 
--- 13. CLEANUP NOTIFICATIONS HISTORY - Prevent memory bloat
-autocmd("VimLeavePre", {
-	group = augroup("cleanup_notifications", { clear = true }),
-	callback = function()
-		notify_history = {}
-	end,
-})
+-- 16) runner por filetype (<leader>R) – abre terminal split
+local function map_run(ft, shell)
+	auc("FileType", {
+		group = g_runner,
+		pattern = ft,
+		callback = function()
+			vim.keymap.set("n", "<leader>R", function()
+				if not can_edit() then
+					return
+				end
+				local f = fn.expand("%")
+				local r = fn.expand("%:r")
+				local cmdline = shell:gsub("%%f", f):gsub("%%r", r)
+				cmd("split | terminal " .. cmdline)
+				cmd("resize 12")
+			end, { buffer = true, silent = true, desc = "Run file" })
+		end,
+	})
+end
+map_run("c", "gcc %f -o %r && ./%r")
+map_run("cpp", "g++ %f -o %r && ./%r")
+map_run("go", "go run %f")
+map_run("python", "python3 %f")
+map_run("lua", "lua %f")
+map_run("java", "javac %f && java %r")
 
--- Clean old notification history periodically
-local cleanup_timer = vim.loop.new_timer()
-cleanup_timer:start(300000, 300000, function() -- Every 5 minutes
-	local now = vim.loop.hrtime() / 1000000
-	for key, timestamp in pairs(notify_history) do
-		if now - timestamp > 600000 then -- Remove entries older than 10 minutes
-			notify_history[key] = nil
+-- 17) sanitizar zero-width (ZWSP/ZWNJ/ZWJ/BOM) ao salvar
+auc("BufWritePre", {
+	group = g_sanitize,
+	callback = function()
+		if not can_edit() then
+			return
 		end
-	end
-end)
-
--- ═════════════════════════════════════════════════════════════════════════
---  PROJECT-LOCAL FTPLUGIN LOADING
--- ═════════════════════════════════════════════════════════════════════════
-
--- Autocommand to load project-local ftplugin files
-autocmd({ "BufReadPost", "BufNewFile" }, {
-  group = augroup("project_local_ftplugin", { clear = true }),
-  callback = function(args)
-    local ft = vim.bo.filetype
-    if ft == "" then
-      return -- No filetype, nothing to do
-    end
-
-    -- Construct path to project-local ftplugin file
-    -- Assumes .nvim/ftplugin/<filetype>.vim in the current working directory
-    local local_ftplugin_path = vim.fn.getcwd() .. "/.nvim/ftplugin/" .. ft .. ".vim"
-
-    -- Check if the file exists and source it
-    if vim.fn.filereadable(local_ftplugin_path) == 1 then
-      vim.cmd("source " .. local_ftplugin_path)
-      -- Optional: Notify user that a local ftplugin was loaded
-      -- vim.notify("Loaded project-local ftplugin: " .. ft .. ".vim", vim.log.levels.INFO, { title = "KORA Neovim" })
-    end
-  end,
-})
-
--- ═════════════════════════════════════════════════════════════════════════
---  STARTUP OPTIMIZATION
--- ═════════════════════════════════════════════════════════════════════════
-
--- Disable some autocommands during startup for faster boot
-local startup = augroup("startup_optimizations", { clear = true })
-
--- Re-enable features after startup
-autocmd("VimEnter", {
-	group = startup,
-	callback = function()
-		-- Re-enable normal notification behavior after startup
-		vim.defer_fn(function()
-			-- System ready - only show this one startup notification
-			vim.notify("󰓩 KORA Neural Matrix Online", vim.log.levels.INFO, {
-				title = "KORA System",
-				timeout = 1500,
-			})
-		end, 500)
+		local view = fn.winsaveview()
+		cmd([[%s/\%u200B\|\%u200C\|\%u200D\|\%uFEFF//ge]])
+		fn.winrestview(view)
 	end,
 })
-
--- ══════════════════════════════════════════════════════════════════════════
--- USAGE EXAMPLES - OPTIMIZED AUTOCMDS.LUA
--- ══════════════════════════════════════════════════════════════════════════
--- This file now includes intelligent notification filtering to reduce spam:
---
--- NOTIFICATION FILTERING:
--- - Suppresses common spam patterns (starting, loading, etc.) at INFO level
--- - Allows WARN and ERROR levels through
--- - Debounces similar messages (2 second window)
--- - Automatically cleans old notification history
---
--- PERFORMANCE OPTIMIZATIONS:
--- - Large file detection and optimization (>1MB)
--- - Automatic LSP disable for very large files
--- - Memory cleanup for notification history
--- - Startup optimization with deferred notifications
---
--- SPAM REDUCTION:
--- - LSP attach notifications removed
--- - Plugin initialization messages filtered
--- - Only critical notifications shown during startup
--- - Timer-based cleanup prevents memory bloat
---
--- MANUAL NOTIFICATION CONTROL:
--- To completely disable notifications temporarily:
--- vim.notify = function() end
---
--- To re-enable:
--- vim.notify = original_notify
---
--- All other functionality remains the same as before.
--- ══════════════════════════════════════════════════════════════════════════

@@ -1,38 +1,40 @@
--- ~/.config/nvim/lua/kora/plugins/which-key.lua
--- Which-key: descoberta de atalhos e grupos <leader>
 return {
   "folke/which-key.nvim",
   event = "VeryLazy",
-  opts = {
-    preset = "classic",
-    plugins = { spelling = true, registers = true, presets = true },
-    window = { border = "rounded" },
-    icons = { mappings = false },
-  },
-  config = function(_, opts)
-    local ok, wk = pcall(require, "which-key")
-    if not ok then return end
-    wk.setup(opts)
-
-    -- Grupos de navegação (não cria mapeamentos, só nomeia prefixos)
-    local groups = {
-      ["<leader>e"] = { name = "NvimTree" },
-      ["<leader>r"] = { name = "Run" },
-      ["<leader>b"] = { name = "Build" },
-      ["<leader>t"] = { name = "Test/Tabs" }, -- Tabs já usam <leader>t*, coexistem
-      ["<leader>l"] = { name = "LSP" },
-      ["<leader>f"] = { name = "Format/Files" },
-      ["<leader>s"] = { name = "Search/Replace" },
+  config = function()
+    local wk = require "which-key"
+    wk.setup {
+      preset = "helix",
+      icons = { separator = "➜", group = "", mappings = false, rules = false },
+      show = { help = true, keys = true },
+      layout = { height = { min = 4, max = 25 }, width = { min = 20, max = 50 }, spacing = 3, align = "center" },
+      win = {
+        border = "rounded",
+        title = " KORA COMMAND MATRIX ",
+        title_pos = "center",
+        padding = { 1, 2 },
+        no_overlap = true,
+      },
     }
 
-    -- v3 (add) ou v2 (register)
-    if wk.add then
-      local spec = {}
-      for k, v in pairs(groups) do spec[#spec+1] = { k, v } end
-      wk.add(spec)
-    else
-      wk.register(groups)
-    end
+    wk.add {
+      { "<leader>b", group = " 󰈔  Buffer" },
+      { "<leader>c", group = "   Code" },
+      { "<leader>d", group = "   Debug" },
+      { "<leader>e", group = " 󰙅  Explorer" },
+      { "<leader>f", group = " 󰍉  Find" },
+      { "<leader>g", group = " 󰊢  Git" },
+      { "<leader>h", group = "   Hunk" },
+      { "<leader>j", group = "   Java" },
+      { "<leader>l", group = " 󰛡  LSP" },
+      { "<leader>n", group = " 󰍫  Noice" },
+      { "<leader>o", group = " 󰒓  Options" },
+      { "<leader>p", group = "   Pane" },
+      { "<leader>s", group = "   Split" },
+      { "<leader>t", group = "   Terminal/Tab" },
+      { "<leader>u", group = " 󰚀  Utils" },
+      { "<leader>r", group = " 󰜎  Run/Build" }, -- << novo prefixo
+      -- nada em <leader>x: Trouble já ocupa
+    }
   end,
 }
-

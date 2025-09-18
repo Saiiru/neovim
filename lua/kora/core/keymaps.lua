@@ -1,144 +1,208 @@
--- lua/kora/core/keymaps.lua
--- Consolidated keymaps. Keep mappings small and memorable.
--- Intent: no removals, only dedupe and organization.
-local map_opts = { noremap = true, silent = true }
-
--- tiny helper to attach desc cleanly
-local function mset(mode, lhs, rhs, desc)
-  local o = vim.tbl_extend("force", map_opts, (desc and { desc = desc } or {}))
-  vim.keymap.set(mode, lhs, rhs, o)
+local o = { noremap = true, silent = true }
+local function map(mode, lhs, rhs, desc)
+	vim.keymap.set(mode, lhs, rhs, vim.tbl_extend("force", o, { desc = desc }))
 end
+
+-- Desativa mapeamentos automáticos do vim-tmux-navigator; usamos os nossos.
+vim.g.tmux_navigator_no_mappings = 1
 
 -- Leaders
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
--- Basic remaps
-mset("v", "J", ":m '>+1<CR>gv=gv", "Move selected lines down")
-mset("v", "K", ":m '<-2<CR>gv=gv", "Move selected lines up")
-mset("n", "J", "mzJ`z", "Join line, keep cursor position")
-
-mset("n", "<C-d>", "<C-d>zz", "Scroll half page down, center cursor")
-mset("n", "<C-u>", "<C-u>zz", "Scroll half page up, center cursor")
-mset("n", "n", "nzzzv", "Next search result, center cursor")
-mset("n", "N", "Nzzzv", "Prev search result, center cursor")
-
-mset("v", "<", "<gv", "Unindent selection and keep visual")
-mset("v", ">", ">gv", "Indent selection and keep visual")
-
--- Paste without clobbering unnamed register
-mset("x", "<leader>p", [["_dP]], "Paste without yanking selection")
-mset("v", "p", '"_dp', "Replace selection without yanking")
-
--- Clipboard
-mset({ "n", "v" }, "<leader>y", [["+y]], "Yank to system clipboard")
-mset("n", "<leader>Y", [["+Y]], "Yank line to system clipboard")
-
--- Delete without yanking
-mset({ "n", "v" }, "<leader>d", [["_d]], "Delete without yanking")
-
--- Convenience
-mset("i", "<C-c>", "<Esc>", "Exit Insert mode (Ctrl-C)")
-mset("n", "<C-c>", ":nohlsearch<CR>", "Clear search highlights")
-mset("n", "Q", "<nop>", "Disable Ex mode")
-mset("n", "<leader><leader>", function() vim.cmd("so") end, "Source current file")
-mset("n", "<leader>x", "<cmd>!chmod +x %<CR>", "Make file executable")
-
--- Search/replace current word under cursor
-mset("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
-  "Search & replace word under cursor")
-
--- Format / LSP helpers
-mset("n", "<leader>f", function()
-  if vim.fn.exists(":ConformFormat") == 2 or pcall(require, "conform") then
-    require("conform").format({ bufnr = 0 })
-  else
-    vim.lsp.buf.format()
-  end
-end, "Format buffer (Conform or LSP)")
-
-mset("n", "<leader>zig", "<cmd>LspRestart<cr>", "Restart LSP")
-
--- Quickfix / Location list navigation
-mset("n", "<C-k>", "<cmd>cnext<CR>zz", "Next Quickfix item")
-mset("n", "<C-j>", "<cmd>cprev<CR>zz", "Prev Quickfix item")
-mset("n", "<leader>k", "<cmd>lnext<CR>zz", "Next Location-list item")
-mset("n", "<leader>j", "<cmd>lprev<CR>zz", "Prev Location-list item")
-
--- Tmux Pane/Window Navigation: Integrates with vim-tmux-navigator for seamless movement.
--- Requires 'christoomey/vim-tmux-navigator' plugin in Neovim and corresponding Tmux configuration.
-mset("n", "<C-h>", "<cmd>TmuxNavigateLeft<CR>", "Navigate left (tmux/vim)")
-mset("n", "<C-j>", "<cmd>TmuxNavigateDown<CR>", "Navigate down (tmux/vim)")
-mset("n", "<C-k>", "<cmd>TmuxNavigateUp<CR>", "Navigate up (tmux/vim)")
-mset("n", "<C-l>", "<cmd>TmuxNavigateRight<CR>", "Navigate right (tmux/vim)")
-mset("n", "<C-\\>", "<cmd>TmuxNavigatePrevious<CR>", "Navigate previous (tmux/vim)")
-
--- File explorer
-mset("n", "<leader>pv", vim.cmd.Ex, "Open file explorer (netrw)")
-
--- Paragraph auto-indent
-mset("n", "=ap", "ma=ap'a", "Auto-indent paragraph")
-
--- Start new tmux session or attach to existing one using sesh.
-mset("n", "<C-f>", "<cmd>silent !tmux neww sesh connect --choose<CR>", "Start/Attach tmux session (sesh)")
-
--- Prevent x register from clobbering when deleting single char
-mset("n", "x", '"_x', "Delete char without yanking")
-
--- Tab management
-mset("n", "<leader>to", "<cmd>tabnew<CR>", "Open new tab")
-mset("n", "<leader>tx", "<cmd>tabclose<CR>", "Close current tab")
-mset("n", "<leader>tn", "<cmd>tabn<CR>", "Next tab")
-mset("n", "<leader>tp", "<cmd>tabp<CR>", "Previous tab")
-mset("n", "<leader>tf", "<cmd>tabnew %<CR>", "Open current buffer in new tab")
-
--- Split management
-mset("n", "<leader>sv", "<C-w>v", "Split vertically")
-mset("n", "<leader>sh", "<C-w>s", "Split horizontally")
-mset("n", "<leader>se", "<C-w>=", "Make splits equal")
-mset("n", "<leader>sx", "<cmd>close<CR>", "Close current split")
-
--- Copy file path to clipboard
-mset("n", "<leader>fp", function()
-  local path = vim.fn.expand("%:~")
-  vim.fn.setreg("+", path)
-  vim.notify("File path copied: " .. path, vim.log.levels.INFO)
-end, "Copy file path to clipboard")
-
--- Toggle LSP diagnostics
-do
-  local diagnostics_shown = true
-  mset("n", "<leader>lx", function()
-    diagnostics_shown = not diagnostics_shown
-    vim.diagnostic.config({ virtual_text = diagnostics_shown, underline = diagnostics_shown })
-  end, "Toggle LSP diagnostics")
+local function has_tmux_nav()
+	return vim.fn.exists(":TmuxNavigateLeft") == 2
 end
 
--- Plugin-specific mappings (kept, but dependent on plugin availability)
--- Plenary test (uses Plug mapping)
-mset("n", "<leader>tF", "<Plug>PlenaryTestFile", "Run Plenary test file")
--- VimWithMe plugin
-mset("n", "<leader>vwm", function()
-  if pcall(require, "vim-with-me") then require("vim-with-me").StartVimWithMe() end
-end, "Start VimWithMe session")
-mset("n", "<leader>svwm", function()
-  if pcall(require, "vim-with-me") then require("vim-with-me").StopVimWithMe() end
-end, "Stop VimWithMe session")
+local function to_normal_from_term()
+	if vim.api.nvim_get_mode().mode:sub(1, 1) == "t" then
+		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-n>", true, false, true), "n", false)
+	end
+end
 
--- Cellular Automaton
-mset("n", "<leader>ca", function()
-  if pcall(require, "cellular-automaton") then
-    require("cellular-automaton").start_animation("make_it_rain")
-  end
-end, "Start cellular-automaton animation")
+local function nav(dir)
+	to_normal_from_term()
+	if has_tmux_nav() then
+		local cmd = ({
+			h = "TmuxNavigateLeft",
+			j = "TmuxNavigateDown",
+			k = "TmuxNavigateUp",
+			l = "TmuxNavigateRight",
+			p = "TmuxNavigatePrevious",
+		})[dir]
+		if cmd then
+			vim.cmd(cmd)
+		end
+	else
+		local cmd = ({ h = "h", j = "j", k = "k", l = "l" })[dir]
+		if cmd then
+			vim.cmd("wincmd " .. cmd)
+		end
+	end
+end
 
--- Hightlight yank
+-- Normal mode
+map("n", "<C-h>", function()
+	nav("h")
+end, "Focus left window")
+map("n", "<C-j>", function()
+	nav("j")
+end, "Focus down window")
+map("n", "<C-k>", function()
+	nav("k")
+end, "Focus up window")
+map("n", "<C-l>", function()
+	nav("l")
+end, "Focus right window")
+map("n", "<C-\\>", function()
+	nav("p")
+end, "Focus previous window")
+
+-- Insert/Terminal: mesmas teclas
+map("i", "<C-h>", function()
+	nav("h")
+end, "Focus left window")
+map("i", "<C-j>", function()
+	nav("j")
+end, "Focus down window")
+map("i", "<C-k>", function()
+	nav("k")
+end, "Focus up window")
+map("i", "<C-l>", function()
+	nav("l")
+end, "Focus right window")
+map("t", "<C-h>", function()
+	nav("h")
+end, "Focus left window")
+map("t", "<C-j>", function()
+	nav("j")
+end, "Focus down window")
+map("t", "<C-k>", function()
+	nav("k")
+end, "Focus up window")
+map("t", "<C-l>", function()
+	nav("l")
+end, "Focus right window")
+map("t", "<C-\\>", function()
+	nav("p")
+end, "Focus previous window")
+
+-- ========= Redimensionamento rápido =========
+-- Alt+h/j/k/l ajusta 5 col/linhas (funciona em N/I/T).
+local function resize(which)
+	to_normal_from_term()
+	local cmd = ({ h = "vertical resize -5", l = "vertical resize +5", j = "resize +5", k = "resize -5" })[which]
+	if cmd then
+		vim.cmd(cmd)
+	end
+end
+for _, m in ipairs({ "n", "i", "t" }) do
+	map(m, "<A-h>", function()
+		resize("h")
+	end, "Resize -5 cols")
+	map(m, "<A-l>", function()
+		resize("l")
+	end, "Resize +5 cols")
+	map(m, "<A-j>", function()
+		resize("j")
+	end, "Resize +5 rows")
+	map(m, "<A-k>", function()
+		resize("k")
+	end, "Resize -5 rows")
+end
+
+-- ========= Organização de janelas =========
+map("n", "<leader>sv", "<C-w>v", "Split vertical")
+map("n", "<leader>sh>", "<C-w>s", "Split horizontal")
+map("n", "<leader>se", "<C-w>=", "Splits equalize")
+map("n", "<leader>sx", "<cmd>close<CR>", "Split close")
+map("n", "<leader>sH", "<C-w>H", "Move pane far left")
+map("n", "<leader>sJ", "<C-w>J", "Move pane far down")
+map("n", "<leader>sK", "<C-w>K", "Move pane far up")
+map("n", "<leader>sL", "<C-w>L", "Move pane far right")
+
+-- ========= Movimento/edição suave =========
+map("v", "J", ":m '>+1<CR>gv=gv", "Move sel ↓")
+map("v", "K", ":m '<-2<CR>gv=gv", "Move sel ↑")
+map("n", "J", "mzJ`z", "Join keep cursor")
+map("n", "<C-d>", "<C-d>zz", "Half ↓ center")
+map("n", "<C-u>", "<C-u>zz", "Half ↑ center")
+map("n", "n", "nzzzv", "Next centered")
+map("n", "N", "Nzzzv", "Prev centered")
+map("v", "<", "<gv", "Unindent keep sel")
+map("v", ">", ">gv", "Indent keep sel")
+
+-- Clipboard / Paste seguro
+map({ "n", "v" }, "<leader>y", [["+y]], "Yank → system")
+map("n", "<leader>Y", [["+Y]], "Yank line → system")
+map("x", "<leader>P", [["_dP]], "Paste no-yank") -- evita colisão com <leader>p de outros plugins
+map("v", "p", '"_dp', "Replace sel no-yank")
+map({ "n", "v" }, "<leader>_", [["_d]], "Delete no-yank")
+map("n", "x", '"_x', "Del char no-yank")
+
+-- Conveniência
+map("i", "<C-c>", "<Esc>", "Exit Insert")
+map("n", "<C-c>", ":nohlsearch<CR>", "Clear hl")
+map("n", "Q", "<nop>", "Disable Ex")
+map("n", "<leader><leader>", function()
+	vim.cmd("so")
+end, "Source file")
+map("n", "<leader>x", "<cmd>!chmod +x %<CR>", "Chmod +x")
+
+-- Busca/Substituição
+map("n", "<leader>fr", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], "Replace word under cursor")
+
+-- Format (Conform → LSP fallback)
+map("n", "<leader>lf", function()
+	if pcall(require, "conform") then
+		require("conform").format({ bufnr = 0 })
+	else
+		vim.lsp.buf.format()
+	end
+end, "Format buffer")
+
+-- LSP toggles
+do
+	local on = true
+	map("n", "<leader>lx", function()
+		on = not on
+		vim.diagnostic.config({ virtual_text = on, underline = on })
+	end, "Toggle diagnostics")
+end
+
+-- Quickfix / Location list (sem conflitar com <C-j>/<C-k>)
+map("n", "]q", "<cmd>cnext<CR>zz", "Quickfix next")
+map("n", "[q", "<cmd>cprev<CR>zz", "Quickfix prev")
+map("n", "]l", "<cmd>lnext<CR>zz", "Loclist next")
+map("n", "[l", "<cmd>lprev<CR>zz", "Loclist prev")
+map("n", "<leader>qo", "<cmd>copen<CR>", "Quickfix open")
+map("n", "<leader>qc", "<cmd>cclose<CR>", "Quickfix close")
+
+-- Tabs
+map("n", "<leader>to", "<cmd>tabnew<CR>", "Tab new")
+map("n", "<leader>tx", "<cmd>tabclose<CR>", "Tab close")
+map("n", "<leader>tn", "<cmd>tabn<CR>", "Tab next")
+map("n", "<leader>tp", "<cmd>tabp<CR>", "Tab prev")
+map("n", "<leader>tf", "<cmd>tabnew %<CR>", "Tab current file")
+
+-- Path util
+map("n", "<leader>fp", function()
+	local p = vim.fn.expand("%:~")
+	vim.fn.setreg("+", p)
+	vim.notify("Path: " .. p)
+end, "Copy file path")
+
+-- Integração tmux extra (opcional)
+map("n", "<C-f>", "<cmd>silent !tmux neww sesh connect --choose<CR>", "Tmux sesh picker")
+
+-- Parágrafo auto-indent
+map("n", "=ap", "ma=ap'a", "Reindent paragraph")
+
+-- Highlight yank
 vim.api.nvim_create_autocmd("TextYankPost", {
-  desc = "Highlight on yank",
-  group = vim.api.nvim_create_augroup("kora-highlight-yank", { clear = true }),
-  callback = function() vim.highlight.on_yank() end,
+	group = vim.api.nvim_create_augroup("kora-highlight-yank", { clear = true }),
+	callback = function()
+		vim.highlight.on_yank()
+	end,
+	desc = "Highlight yank",
 })
-
--- Keep compatibility: if user wants more terse or different leader keys, change at top.
--- End of file.
-

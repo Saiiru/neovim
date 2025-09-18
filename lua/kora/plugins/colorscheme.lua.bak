@@ -1,0 +1,130 @@
+-- ~/.config/nvim/lua/kora/plugins/colorscheme.lua
+-- CyberSynth transparente: fundo NONE para Kitty mostrar o wallpaper.
+local Cyber = {}
+
+Cyber.palette = {
+  bg = "#0B0A12",
+  surf = "#141127",
+  neon_pink = "#FF2D95",
+  neon_mag = "#FF6EC7",
+  neon_cyan = "#00F0FF",
+  neon_blue = "#00CFFF",
+  neon_purple = "#9A6CFF",
+  neon_yellow = "#FFD166",
+  neon_green = "#7CFF00",
+  text = "#F8F8F2",
+  muted = "#6C7086",
+  dim = "#262533",
+}
+
+local function HL(n, o)
+  vim.api.nvim_set_hl(0, n, o)
+end
+
+local function apply_transparent(p)
+  -- Base UI transparente
+  HL("Normal", { fg = p.text, bg = "NONE" })
+  HL("NormalFloat", { fg = p.text, bg = "NONE" })
+  HL("FloatBorder", { fg = p.neon_purple, bg = "NONE", bold = true })
+  HL("SignColumn", { fg = p.text, bg = "NONE" })
+  HL("StatusLine", { fg = p.text, bg = "NONE" })
+  HL("StatusLineNC", { fg = p.muted, bg = "NONE" })
+  HL("WinBar", { fg = p.neon_cyan, bg = "NONE", bold = true })
+  HL("TabLine", { fg = p.muted, bg = "NONE" })
+  HL("TabLineSel", { fg = p.text, bg = "NONE", bold = true })
+  HL("TabLineFill", { fg = p.muted, bg = "NONE" })
+  HL("CursorLine", { bg = "NONE" })
+  HL("CursorColumn", { bg = "NONE" })
+  HL("ColorColumn", { bg = "NONE" })
+  HL("EndOfBuffer", { fg = "NONE", bg = "NONE" })
+
+  -- Sintaxe
+  HL("Comment", { fg = p.neon_purple, italic = true })
+  HL("@comment", { fg = p.neon_purple, italic = true })
+  HL("Keyword", { fg = p.neon_pink, italic = true, bold = true })
+  HL("@keyword", { fg = p.neon_pink, italic = true, bold = true })
+  HL("@keyword.function", { fg = p.neon_pink, italic = true })
+  HL("String", { fg = p.neon_green })
+  HL("@string", { fg = p.neon_green, bold = true })
+  HL("@string.escape", { fg = p.neon_yellow, bold = true })
+  HL("Function", { fg = p.neon_cyan, bold = true })
+  HL("@function", { fg = p.neon_cyan })
+  HL("Type", { fg = p.neon_yellow, italic = true })
+  HL("Constant", { fg = p.neon_purple, bold = true })
+  HL("@variable", { fg = p.text })
+
+  -- Pmenu transparente
+  HL("Pmenu", { bg = "NONE", fg = p.text })
+  HL("PmenuSel", { bg = p.neon_purple, fg = "#000000", bold = true })
+  HL("PmenuThumb", { bg = p.neon_cyan })
+  HL("PmenuSbar", { bg = "NONE" })
+
+  -- Telescope
+  HL("TelescopeBorder", { fg = p.neon_purple, bg = "NONE" })
+  HL("TelescopePromptBorder", { fg = p.neon_pink, bg = "NONE" })
+  HL("TelescopePromptTitle", { fg = p.neon_pink, bg = "NONE", bold = true })
+  HL("TelescopeResultsTitle", { fg = p.neon_purple, bg = "NONE" })
+  HL("TelescopePreviewTitle", { fg = p.neon_green, bg = "NONE" })
+  HL("TelescopeSelection", { bg = p.neon_blue, fg = "#000000", bold = true })
+
+  -- Diagnósticos
+  HL("DiagnosticError", { fg = p.neon_pink })
+  HL("DiagnosticWarn", { fg = p.neon_yellow })
+  HL("DiagnosticInfo", { fg = p.neon_cyan })
+  HL("DiagnosticHint", { fg = p.neon_purple })
+
+  -- Terminal paleta
+  vim.g.terminal_color_0 = p.bg
+  vim.g.terminal_color_1 = p.neon_pink
+  vim.g.terminal_color_2 = p.neon_green
+  vim.g.terminal_color_3 = p.neon_yellow
+  vim.g.terminal_color_4 = p.neon_cyan
+  vim.g.terminal_color_5 = p.neon_blue
+  vim.g.terminal_color_6 = p.neon_purple
+  vim.g.terminal_color_7 = p.text
+  vim.g.terminal_color_8 = p.dim
+  vim.g.terminal_color_9 = p.neon_pink
+  vim.g.terminal_color_10 = p.neon_green
+  vim.g.terminal_color_11 = p.neon_yellow
+  vim.g.terminal_color_12 = p.neon_cyan
+  vim.g.terminal_color_13 = p.neon_blue
+  vim.g.terminal_color_14 = p.neon_purple
+  vim.g.terminal_color_15 = "#FFFFFF"
+
+  -- Blend para flutuações suaves
+  vim.o.termguicolors = true
+  vim.o.winblend = 10
+  vim.o.pumblend = 10
+end
+
+function Cyber.apply()
+  apply_transparent(Cyber.palette)
+end
+
+-- Comando rápido
+vim.api.nvim_create_user_command("KoraTransparent", function()
+  Cyber.apply()
+end, {})
+
+-- Plugin loader: aplica theme base e depois sobrescreve p/ transparente
+return {
+  {
+    "scottmckendry/cyberdream.nvim",
+    name = "cyberdream",
+    lazy = false,
+    priority = 1000,
+    opts = {
+      transparent = true,
+      italic_comments = true,
+      borderless_telescope = false,
+      terminal_colors = true,
+      cache = true,
+      theme = { variant = "default", saturation = 1.0 },
+    },
+    config = function(_, opts)
+      require("cyberdream").setup(opts)
+      vim.cmd.colorscheme "cyberdream"
+      Cyber.apply() -- força transparência total
+    end,
+  },
+}

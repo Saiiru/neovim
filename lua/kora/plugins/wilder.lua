@@ -1,41 +1,44 @@
 return {
 	"gelguy/wilder.nvim",
-	-- "nvim-telescope/telescope.nvim",
+	build = function()
+		vim.cmd("UpdateRemotePlugins") -- registra o host Python do Wilder
+	end,
 	dependencies = {
+		"romgrk/fzy-lua-native", -- para lua_fzy_highlighter
 		"nvim-tree/nvim-web-devicons",
-		"romgrk/fzy-lua-native",
 	},
 	config = function()
-		local wilder = require("wilder")
+		-- Verifica Python3 provider antes de ligar
+		if vim.fn.has("python3") ~= 1 then
+			vim.notify("Wilder desativado: provider python3 ausente (instale 'pynvim')", vim.log.levels.WARN)
+			return
+		end
+
+		local ok, wilder = pcall(require, "wilder")
+		if not ok then
+			return
+		end
 
 		wilder.setup({ modes = { ":", "/", "?" } })
 
-		-- Define custom highlight groups
+		-- highlighters opcionais (só usa os disponíveis)
+		local highlighters = {}
+		if wilder.lua_fzy_highlighter then
+			table.insert(highlighters, wilder.lua_fzy_highlighter())
+		end
+		if wilder.lua_pcre2_highlighter then
+			pcall(function()
+				table.insert(highlighters, wilder.lua_pcre2_highlighter())
+			end)
+		end
 
 		wilder.set_option(
 			"renderer",
 			wilder.popupmenu_renderer(wilder.popupmenu_border_theme({
-				min_width = "20%", -- minimum height of the popupmenu, can also be a number
-				max_height = "15%", -- to set a fixed height, set max_height to the same value
-				reverse = 0, -- if 1, shows the candidates from bottom to top
-				highlighter = {
-					wilder.lua_pcre2_highlighter(), -- Requires luarocks install pcre2
-					wilder.lua_fzy_highlighter(), -- Requires fzy-lua-native
-				},
-				highlights = {
-					default = wilder.make_hl(
-						"WilderPopupMenu",
-						"Pmenu",
-						{ { a = 1 }, { a = 1 }, { background = "#1E212B" } } -- Adjust background color
-					),
-					accent = wilder.make_hl(
-						"WilderAccent",
-						"Pmenu",
-						{ { a = 1 }, { a = 1 }, { foreground = "#58FFD6", background = "#1e1e2e" } }
-					),
-				},
-				-- 'single', 'double', 'rounded' or 'solid'
-				-- can also be a list of 8 characters, see :h wilder#popupmenu_border_theme() for more details
+				min_width = "20%",
+				max_height = "15%",
+				reverse = 0,
+				highlighter = highlighters,
 				border = "single",
 			}))
 		)
