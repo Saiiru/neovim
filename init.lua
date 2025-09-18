@@ -1,39 +1,48 @@
-vim.g.base46_cache = vim.fn.stdpath "data" .. "/base46/"
-vim.g.mapleader = " "
+require "config.options"
 
--- bootstrap lazy and all plugins
-local lazypath = vim.fn.stdpath "data" .. "/lazy/lazy.nvim"
-
-if not vim.uv.fs_stat(lazypath) then
-  local repo = "https://github.com/folke/lazy.nvim.git"
-  vim.fn.system { "git", "clone", "--filter=blob:none", repo, "--branch=stable", lazypath }
+-- Load project setting if available, e.g: .nvim-config.lua
+-- This file is not tracked by git
+-- It can be used to set project specific settings
+local project_setting = vim.fn.getcwd() .. "/.nvim-config.lua"
+-- Check if the file exists and load it
+if vim.loop.fs_stat(project_setting) then
+    -- Read the file and run it with pcall to catch any errors
+    local ok, err = pcall(dofile, project_setting)
+    if not ok then
+        vim.notify("Error loading project setting: " .. err, vim.log.levels.ERROR)
+    end
 end
 
-vim.opt.rtp:prepend(lazypath)
+require "config.autocmds"
+require "config.lazy"
+require "config.keymaps"
+require "config.project"
 
-local lazy_config = require "configs.lazy"
--- load plugins
-require("lazy").setup({
-  {
-    "NvChad/NvChad",
-    lazy = false,
-    branch = "v2.5",
-    import = "nvchad.plugins",
-  },
-  { import = "nvchad.blink.lazyspec" },
-  { import = "plugins" },
+-- Only load the theme if not in VSCode
+if vim.g.vscode then
+    -- Trigger vscode keymap
+    local pattern = "NvimIdeKeymaps"
+    vim.api.nvim_exec_autocmds("User", { pattern = pattern, modeline = false })
+else
+    -- Load the theme
+    require("kanagawa").load "wave"
 
-  { import = "kora.plugins" },
-}, lazy_config)
+    local ts_server = vim.g.lsp_typescript_server or "ts_ls" -- "ts_ls" or "vtsls" for TypeScript
 
--- load theme
-dofile(vim.g.base46_cache .. "defaults")
-dofile(vim.g.base46_cache .. "statusline")
+    -- Enable LSP servers for Neovim 0.11+
+    vim.lsp.enable {
+        ts_server,
+        "lua_ls",      -- Lua
+        "biome",       -- Biome = Eslint + Prettier
+        "json",        -- JSON
+        "pyright",     -- Python
+        "gopls",       -- Go
+        "tailwindcss", -- Tailwind CSS
+    }
 
-require "options"
-require "autocmds"
-
--- require "kora.core.execute"
-vim.schedule(function()
-  require "mappings"
-end)
+    -- Load Lsp on-demand, e.g: eslint is disable by default
+    -- e.g: We could enable eslint by set vim.g.lsp_on_demands = {"eslint"}
+    if vim.g.lsp_on_demands then
+        vim.lsp.enable(vim.g.lsp_on_demands)
+    end
+end
