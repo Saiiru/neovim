@@ -55,8 +55,7 @@ overseer.register_template({
       if p.task == "run" then
         -- tenta Spring Boot se presente; senão exec:java
         local spring = exists("pom.xml") and (vim.fn.readfile("pom.xml") or {}) or {}
-        local is_spring = table.concat(spring, "\n"):
-match("spring%-boot")
+        local is_spring = table.concat(spring, "\n"):match("spring%-boot")
         args = is_spring and { "-q", "spring-boot:run" } or { "-q", "exec:java" }
         if not is_spring and p.args ~= "" then table.insert(args, "-Dexec.args=" .. p.args) end
       elseif p.task == "test" then
@@ -73,10 +72,8 @@ match("spring%-boot")
 
     elseif tool == "gradle" then
       local cmd = exists("./gradlew") and "./gradlew" or "gradle"
-      local is_spring = (exists("build.gradle") and table.concat(vim.fn.readfile("build.gradle"), "\n"):
-match("org%.springframework%.boot"))
-        or (exists("build.gradle.kts") and table.concat(vim.fn.readfile("build.gradle.kts"), "\n"):
-match("org%.springframework%.boot"))
+      local is_spring = (exists("build.gradle") and table.concat(vim.fn.readfile("build.gradle"), "\n"):match("org%.springframework%.boot"))
+        or (exists("build.gradle.kts") and table.concat(vim.fn.readfile("build.gradle.kts"), "\n"):match("org%.springframework%.boot"))
       local args
       if p.task == "run" then
         args = { is_spring and "bootRun" or "run" }
@@ -328,5 +325,3 @@ overseer.register_template({
     return run_spec(cmd, args, use_tmux, ("run:%s"):format(vim.fn.fnamemodify(file, ":t")))
   end,
 })
-
--- (sem return no fim deste arquivo)

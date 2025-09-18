@@ -1,3 +1,4 @@
+-- lua/plugins/overseer.lua
 return {
   {
     "stevearc/overseer.nvim",
