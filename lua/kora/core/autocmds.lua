@@ -162,25 +162,8 @@ auc("LspAttach", {
 	end,
 })
 
--- 10) format on save (skip em RO/!modifiable/large/generated)
-auc("BufWritePre", {
-	group = g_format,
-	callback = function(args)
-		if not can_edit() or vim.b.large_file or vim.b.format_on_save == false then
-			return
-		end
-		local name = args.match:lower()
-		if name:find("/node_modules/") or name:find("/vendor/") then
-			return
-		end
-		local ok, conform = pcall(require, "conform")
-		if ok then
-			conform.format({ bufnr = args.buf, lsp_fallback = true, quiet = true })
-		else
-			pcall(vim.lsp.buf.format, { bufnr = args.buf, async = false, timeout_ms = 1500 })
-		end
-	end,
-})
+-- 10) format on save (REMOVED - handled by conform.lua with manual trigger)
+
 
 -- 11) restaurar cursor ao reabrir
 auc("BufReadPost", {
