@@ -1,4 +1,64 @@
 return {
+     {
+    "scottmckendry/cyberdream.nvim",
+    name = "cyberdream",
+    lazy = false,
+    priority = 1000,
+    opts = {
+      transparent = true,
+      italic_comments = true,
+      borderless_telescope = true,
+      theme = { variant = "default", highlights = {} },
+    },
+    config = function(_, opts)
+      require("cyberdream").setup(opts)
+      require("util.colors").setup()
+      require("util.colors").set(vim.g.neosairu_theme or "cyberdream")
+    end,
+  },
+
+  -- Alternativa: Rose Pine
+  {
+    "rose-pine/neovim",
+    name = "rose-pine",
+    lazy = true,
+    opts = {
+      disable_background = true,
+      styles = { italic = true },
+      highlight_groups = {}, -- overrides ficam no util.colors
+    },
+  },
+
+  -- Fallback dark legível
+  {
+    "jesseleite/nvim-noirbuddy",
+    name = "noirbuddy",
+    lazy = true,
+    dependencies = { "tjdevries/colorbuddy.nvim" },
+    opts = {
+      preset = "slate",
+      use_cterm = false,
+    },
+  },
+
+  -- (Opcional) Kanagawa com gutter limpo
+  {
+    "rebelot/kanagawa.nvim",
+    lazy = true,
+    opts = {
+      dimInactive = true,
+      colors = { theme = { all = { ui = { bg_gutter = "none" } } } },
+      overrides = function(colors)
+        local theme = colors.theme
+        return {
+          NormalFloat = { bg = "none" },
+          FloatBorder = { bg = "none" },
+          FloatTitle  = { bg = "none" },
+          WinSeparator= { fg = theme.ui.bg_m3, bg = "none" },
+        }
+      end,
+    },
+  },
     -- NOTE: Rose pine
     {
         "rose-pine/neovim",
