@@ -12,8 +12,8 @@ return {
     },
     config = function(_, opts)
       require("cyberdream").setup(opts)
-      require("util.colors").setup()
-      require("util.colors").set(vim.g.neosairu_theme or "cyberdream")
+      require("lua.utils.colors").setup()
+      require("lua.utils.colors").set(vim.g.neosairu_theme or "cyberdream")
     end,
   },
 

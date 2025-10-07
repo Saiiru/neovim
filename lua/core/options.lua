@@ -1,48 +1,79 @@
--- vim.g.loaded_netrw = 0
--- vim.g.loaded_netrwPlugin = 0
--- vim.cmd("let g:netrw_liststyle = 3")
--- Disable netrw banner
+-- lua/core/options.lua
+local o, g = vim.opt, vim.g
+
+-- Líder
+g.mapleader = " "
+g.maplocalleader = " "
+
+-- Desabilita netrw (use NvimTree/Oil/etc.)
+g.loaded_netrw = 1
+g.loaded_netrwPlugin = 1
 vim.cmd("let g:netrw_banner = 0")
 
--- line numbers
-vim.opt.nu = true
-vim.opt.relativenumber = true
+-- UI / Aparência
+o.termguicolors = true
+o.background = "dark"
+o.number = true
+o.relativenumber = true
+o.numberwidth = 2
+o.cursorline = true
+o.signcolumn = "yes"
+o.colorcolumn = "80"
+o.pumheight = 12
+o.showmode = false
+o.cmdheight = 0
 
--- indentation
-vim.opt.tabstop = 4
-vim.opt.softtabstop = 4
-vim.opt.shiftwidth = 4
-vim.opt.expandtab = true
-vim.opt.smartindent = true
-vim.opt.wrap = false
+-- Janelas e rolagem
+o.splitright = true
+o.splitbelow = true
+o.scrolloff = 10
+o.sidescrolloff = 8
 
--- backup and undo
-vim.opt.swapfile = false
-vim.opt.backup = false
-vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
-vim.opt.undofile = true
+-- Busca
+o.ignorecase = true
+o.smartcase = true
+o.hlsearch = true
+o.incsearch = true
+o.inccommand = "split"
+o.wrapscan = false
 
--- search
-vim.opt.inccommand = "split"
+-- Clipboard / Mouse
+o.clipboard = "unnamedplus"
+o.mouse = "a"
 
--- UI
-vim.opt.background = "dark"
-vim.opt.scrolloff = 8
-vim.opt.signcolumn = "yes"
+-- Edição (4 espaços)
+o.expandtab = true
+o.shiftwidth = 4
+o.tabstop = 4
+o.softtabstop = 4
+o.smartindent = true
+o.breakindent = true
+o.wrap = false
 
--- folding (for nvim-ufo)
-vim.o.foldenable = true
-vim.o.foldmethod = "manual"
-vim.o.foldlevel = 99
-vim.o.foldcolumn = "0"
+-- Arquivos / Undo
+o.swapfile = false
+o.backup = false
+o.writebackup = false
+o.undofile = true
+o.undodir = vim.fn.stdpath("state") .. "/undo"
 
--- window splits
-vim.opt.splitright = true
-vim.opt.splitbelow = true
+-- Performance
+o.updatetime = 100
+o.timeoutlen = 500
 
--- misc
-vim.opt.isfname:append("@-@")
-vim.opt.updatetime = 50
-vim.opt.colorcolumn = "80"
-vim.opt.clipboard:append("unnamedplus")
-vim.opt.mouse = "a"
+-- Listas / preenchimentos
+o.list = true
+o.listchars = { tab = "→ ", trail = "·", extends = "…", precedes = "…", nbsp = "␣" }
+o.fillchars = { eob = " ", fold = " ", foldopen = "", foldclose = "", foldsep = " " }
+
+-- Folding (ufo-friendly)
+o.foldenable = true
+o.foldmethod = "manual"
+o.foldlevel = 99
+o.foldcolumn = "0"
+
+-- Miscelânea
+o.isfname:append("@-@")
+o.iskeyword:append("-,_")
+o.virtualedit = "block"
+o.whichwrap = "b,s,<,>,[,],h,l"

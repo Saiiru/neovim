@@ -30,7 +30,7 @@ require("lazy").setup({
 })
 
 pcall(function()
-	local C = require("util.colors")
+	local C = require("lua.utils.colors")
 	C.setup()
 	C.set(vim.g.neosairu_theme or "cyberdream")
 	C.transparent(true)

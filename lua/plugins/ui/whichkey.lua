@@ -1,40 +1,34 @@
--- lua/plugins/which-key.lua
 return {
   "folke/which-key.nvim",
   event = "VeryLazy",
   opts = {
-    icons = { rules = false, separator = "➜", group = "" },
-    show_help = false, show_keys = false,
+    preset = "modern",
+    delay = 200,
+    win = { border = "rounded" },
     layout = { align = "center" },
-    win = { border = "rounded", title = false, padding = {1,1}, no_overlap = true },
+    icons = {
+      group = " ",
+      separator = "  ",
+      rules = false,
+    },
   },
   config = function(_, opts)
     local wk = require("which-key")
     wk.setup(opts)
+
     wk.add({
-      { "<leader>f", group = "Telescope" },
-      { "<leader>s", group = "Sessions" },
-      { "<leader>e", group = "File Tree" },
-      { "<leader>u", group = "Undotree" },
-      { "<leader>l", group = "LSP" },
-      { "<leader>o", group = "Options" },
-      { "<leader>b", group = "Buffer" },
-      { "<leader>p", group = "Pane" },
-      { "<leader>t", group = "Terminal" },
-      { "<leader>g", group = "Git" },
-      { "<leader>c", group = "Snacks" },
-      { "<leader>n", group = "Noice" },
-      -- Java
-      { "<leader>j", group = "Java" },
-      { "<leader>jo", hidden = true, desc = "Organize Imports" },
-      { "<leader>jt", hidden = true, desc = "Test Nearest" },
-      { "<leader>jT", hidden = true, desc = "Test Class" },
-      { "<leader>jr", hidden = true, desc = "Rename" },
-      { "<leader>je", hidden = true, desc = "Extract Var" },
-      { "<leader>jE", hidden = true, desc = "Extract Const" },
-      { "<leader>jM", hidden = true, desc = "Extract Method" },
-      -- DAP
-      { "<leader>d", group = "Debug" },
+      { "<leader>f", group = "Find " },
+      { "<leader>c", group = "Code 󰅩" },
+      { "<leader>d", group = "Diagnostics 󰒡" },
+      { "<leader>x", group = "Trouble 󱇧" },
+      { "<leader>g", group = "Git 󰊢" },
+      { "<leader>t", group = "Test/DAP 󰙨" },
+      { "<leader>m", group = "Format 󰉢" },
+      { "<leader>u", group = "UI 󱎕" },
+      { "<leader>w", group = "Worktree 󰘬" },
+      { "<leader>p", group = "Project 󰂺" },
+      { "<leader>a", group = "AI 󰚩" },
+      { "<leader>e", group = "Explorer 󰙅" },
     })
   end,
 }

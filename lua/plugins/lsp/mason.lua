@@ -1,56 +1,47 @@
--- lua/plugins/lsp/mason.lua
+-- Mason + Tool Installer + DAP (sem servers inválidos no ensure_installed)
 return {
-  "williamboman/mason.nvim",
-  lazy = false,
-  dependencies = {
-    "williamboman/mason-lspconfig.nvim",
-    "WhoIsSethDaniel/mason-tool-installer.nvim",
+  {
+    "williamboman/mason.nvim",
+    event = "VeryLazy",
+    opts = {
+      ui = {
+        border = "rounded",
+        icons = {
+          package_installed = "",
+          package_pending = "",
+          package_uninstalled = "",
+        },
+        width = 0.8,
+        height = 0.8,
+      },
+    },
   },
-  config = function()
-    local mason = require("mason")
-    local mason_lspconfig = require("mason-lspconfig")
-    local mason_tools = require("mason-tool-installer")
-
-    mason.setup({
-      ui = { icons = { package_installed = "✓", package_pending = "➜", package_uninstalled = "✗" } },
-    })
-
-    mason_lspconfig.setup({
+  {
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+    event = "VeryLazy",
+    opts = {
       ensure_installed = {
-        -- Core
-        "lua_ls", "jsonls", "yamlls", "bashls", "marksman", "lemminx", "taplo",
-        -- Web
-        "vtsls", "html", "cssls", "tailwindcss", "emmet_language_server", "eslint", "graphql",
-        -- DevOps
-        "dockerls", "docker_compose_language_service",
-        -- BE
-        "gopls", "clangd", "basedpyright", "rust_analyzer", "intelephense", "sqls",
-        -- Java (apenas LSP aqui)
-        "jdtls",
-      },
-    })
-
-    mason_tools.setup({
-      ensure_installed = {
-        -- Java (tools)
-        "java-debug-adapter", "java-test", "google-java-format",
-        -- DAPs
-        "js-debug-adapter", "debugpy", "codelldb", "delve",
+        -- DAP/Debug
+        "js-debug-adapter", "java-debug-adapter", "java-test", "codelldb",
         -- Formatters/Linters
-        "stylua", "prettierd", "eslint_d", "stylelint",
-        "shfmt", "shellcheck",
-        "black", "isort", "ruff",
-        "gofumpt", "goimports", "golangci-lint",
-        "clang-format",
-        "phpcs", "phpcbf",
-        "hadolint",
-        "markdownlint",
-        "yamllint",
-        "sql-formatter",
+        "prettierd", "prettier", "biome", "stylua", "black", "isort",
+        "clang-format", "golangci-lint", "gofumpt", "goimports",
+        "shellcheck", "shfmt", "markdownlint", "yamllint", "sql-formatter",
+        "google-java-format", "eslint_d",
       },
-      auto_update = false,
+      auto_update = true,
       run_on_start = true,
-    })
-  end,
+      start_delay = 3000,
+      debounce_hours = 6,
+    },
+  },
+  {
+    "jay-babu/mason-nvim-dap.nvim",
+    event = "VeryLazy",
+    opts = {
+      ensure_installed = { "codelldb", "js" }, -- java debug vem via nvim-jdtls bundles
+      automatic_setup = true,
+    },
+  },
 }
 
