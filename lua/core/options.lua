@@ -1,79 +1,60 @@
--- lua/core/options.lua
-local o, g = vim.opt, vim.g
+-- lua/core/options.lua :: Opções fundamentais do Neovim
+local opt = vim.opt
 
--- Líder
-g.mapleader = " "
-g.maplocalleader = " "
+--  interfaz e UI
+opt.termguicolors = true -- cores 24-bit
+opt.number = true -- numero de linhas
+opt.relativenumber = true -- numero relativo de linhas
+opt.numberwidth = 2 -- espaço para os numeros
+opt.signcolumn = "yes" -- coluna de sinais sempre visivel
+opt.cursorline = true -- destaca a linha atual
+opt.wrap = false -- sem quebra de linha
+opt.scrolloff = 10 -- margem para scroll
+opt.sidescrolloff = 8 -- margem para scroll lateral
+opt.splitright = true -- split vertical a direita
+opt.splitbelow = true -- split horizontal abaixo
+opt.pumheight = 10 -- altura do popup de complete
+opt.showmode = false -- nao mostrar o modo atual
+opt.inccommand = "split" -- preview de comandos
+opt.clipboard = "unnamedplus" -- clipboard com o sistema
+opt.mouse = "a" -- suporte ao mouse
+opt.colorcolumn = "80" -- coluna de 80 caracteres
+opt.fillchars = { eob = " " } -- sem "~" no fim do buffer
+opt.updatetime = 200 -- tempo para swap/cursorhold
+opt.timeoutlen = 500 -- tempo para mapeamentos
+opt.confirm = true -- confirmar antes de sair
 
--- Desabilita netrw (use NvimTree/Oil/etc.)
-g.loaded_netrw = 1
-g.loaded_netrwPlugin = 1
-vim.cmd("let g:netrw_banner = 0")
+-- Pesquisa
+opt.hlsearch = true -- destacar resultados
+opt.ignorecase = true -- ignorar case
+opt.smartcase = true -- case-sensitive se tiver maiuscula
 
--- UI / Aparência
-o.termguicolors = true
-o.background = "dark"
-o.number = true
-o.relativenumber = true
-o.numberwidth = 2
-o.cursorline = true
-o.signcolumn = "yes"
-o.colorcolumn = "80"
-o.pumheight = 12
-o.showmode = false
-o.cmdheight = 0
+-- Arquivos e persistencia
+opt.swapfile = false -- sem swap file
+opt.backup = false -- sem backup file
+opt.undofile = true -- persistencia de undo
+opt.fileencoding = "utf-8" -- encoding padrao
+opt.hidden = true -- esconder buffers ao inves de fechar
 
--- Janelas e rolagem
-o.splitright = true
-o.splitbelow = true
-o.scrolloff = 10
-o.sidescrolloff = 8
+-- Indentação
+opt.expandtab = true -- usar espaços ao inves de tabs
+opt.shiftwidth = 4 -- tamanho do shift
+opt.tabstop = 4 -- tamanho do tab
+opt.softtabstop = 4 -- tamanho do soft tab
+opt.smartindent = true -- indentação inteligente
+opt.breakindent = true -- manter indentação em quebras de linha
 
--- Busca
-o.ignorecase = true
-o.smartcase = true
-o.hlsearch = true
-o.incsearch = true
-o.inccommand = "split"
-o.wrapscan = false
+-- Folding (compatível com nvim-ufo)
+vim.o.foldenable = true
+vim.o.foldmethod = "manual" -- ufo gerencia o fold
+vim.o.foldlevel = 99 -- previne auto-folding
+vim.o.foldcolumn = "0" -- sem coluna de fold
 
--- Clipboard / Mouse
-o.clipboard = "unnamedplus"
-o.mouse = "a"
+-- Grep (usando ripgrep)
+opt.grepprg = "rg --vimgrep --hidden --glob !**/.git/*"
+opt.grepformat = "%f:%l:%c:%m"
 
--- Edição (4 espaços)
-o.expandtab = true
-o.shiftwidth = 4
-o.tabstop = 4
-o.softtabstop = 4
-o.smartindent = true
-o.breakindent = true
-o.wrap = false
+-- Completion (para nvim-cmp)
+opt.completeopt = { "menu", "menuone", "noselect" } -- comportamento do complete
+opt.shortmess:append("c") -- nao mostrar mensagens de complete
 
--- Arquivos / Undo
-o.swapfile = false
-o.backup = false
-o.writebackup = false
-o.undofile = true
-o.undodir = vim.fn.stdpath("state") .. "/undo"
-
--- Performance
-o.updatetime = 100
-o.timeoutlen = 500
-
--- Listas / preenchimentos
-o.list = true
-o.listchars = { tab = "→ ", trail = "·", extends = "…", precedes = "…", nbsp = "␣" }
-o.fillchars = { eob = " ", fold = " ", foldopen = "", foldclose = "", foldsep = " " }
-
--- Folding (ufo-friendly)
-o.foldenable = true
-o.foldmethod = "manual"
-o.foldlevel = 99
-o.foldcolumn = "0"
-
--- Miscelânea
-o.isfname:append("@-@")
-o.iskeyword:append("-,_")
-o.virtualedit = "block"
-o.whichwrap = "b,s,<,>,[,],h,l"

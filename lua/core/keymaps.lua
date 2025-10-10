@@ -1,93 +1,164 @@
-local opts = { noremap = true, silent = true }
+-- lua/core/keymaps.lua :: Keymaps essenciais e independentes de plugins.
 
-vim.g.mapleader = " "
-vim.g.maplocalleader = " "
+-- Garante que o leader seja espaço, mas não sobrescreve se já definido.
+vim.g.mapleader = vim.g.mapleader or " "
+vim.g.maplocalleader = vim.g.maplocalleader or ","
 
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "moves lines down in visual selection" })
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "moves lines up in visual selection" })
+-- Função utilitária para criar keymaps com opções padrão.
+local map = function(mode, lhs, rhs, desc, opts)
+	local o = { noremap = true, silent = true, desc = desc }
+	if opts then
+		o = vim.tbl_extend("force", o, opts)
+	end
+	vim.keymap.set(mode, lhs, rhs, o)
+end
 
-vim.keymap.set("n", "J", "mzJ`z")
-vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "move down in buffer with cursor centered" })
-vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "move up in buffer with cursor centered" })
-vim.keymap.set("n", "n", "nzzzv")
-vim.keymap.set("n", "N", "Nzzzv")
+-- =============================================================================
+--  MODO NORMAL (n)
+-- =============================================================================
 
-vim.keymap.set("v", "<", "<gv", opts)
-vim.keymap.set("v", ">", ">gv", opts)
+-- Movimentação e Edição
+map("n", "<C-d>", "<C-d>zz", "Scroll down (center)")
+map("n", "<C-u>", "<C-u>zz", "Scroll up (center)")
+map("n", "n", "nzzzv", "Next search (center)")
+map("n", "N", "Nzzzv", "Prev search (center)")
+map("n", "J", "mzJ`z", "Join lines (keep cursor)")
+map("n", "x", '"_x', "Delete char (blackhole)")
 
--- the how it be paste
-vim.keymap.set("x", "<leader>p", [["_dP]])
+-- Sair do modo insert com Ctrl-c
+map("i", "<C-c>", "<Esc>", "Leave insert")
 
--- remember yanked
-vim.keymap.set("v", "p", '"_dp', opts)
+-- Limpar highlight de busca
+map("n", "<Esc>", "<cmd>nohlsearch<CR>", "Clear search highlight")
+map("n", "<C-c>", "<cmd>nohlsearch<CR>", "Clear search highlight")
 
--- Copies or Yank to system clipboard
-vim.keymap.set("n", "<leader>Y", [["+Y]], opts)
+-- Salvar
+map({ "n", "i", "v", "x" }, "<C-s>", "<cmd>update<CR>", "Save buffer")
 
--- leader d delete wont remember as yanked/clipboard when delete pasting
-vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
+-- =============================================================================
+--  MODO VISUAL (v)
+-- =============================================================================
 
--- ctrl c as escape cuz Im lazy to reach up to the esc key
-vim.keymap.set("i", "<C-c>", "<Esc>")
-vim.keymap.set("n", "<C-c>", ":nohl<CR>", { desc = "Clear search hl", silent = true })
--- format without prettier using the built in
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
+-- Mover linhas selecionadas
+map("v", "J", ":m '>+1<CR>gv=gv", "Move selection down")
+map("v", "K", ":m '<-2<CR>gv=gv", "Move selection up")
 
--- Unmaps Q in normal mode
-vim.keymap.set("n", "Q", "<nop>")
+-- Indentação
+map("v", "<", "<gv", "Indent left (keep selection)")
+map("v", ">", ">gv", "Indent right (keep selection)")
 
---Stars new tmux session from in here
-vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
+-- Colar sem perder o que está no registro
+map("v", "p", '"_dp', "Paste (keep default register)")
 
--- prevent x delete from registering when next paste
-vim.keymap.set("n", "x", '"_x', opts)
+-- =============================================================================
+--  LEADER KEYMAPS
+-- =============================================================================
 
--- Replace the word cursor is on globally
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
-    { desc = "Replace word cursor is on globally" })
+-- Buffers
+map("n", "<leader>bn", "<cmd>bnext<CR>", "Buffer next")
+map("n", "<leader>bp", "<cmd>bprevious<CR>", "Buffer prev")
+map("n", "<leader>bd", "<cmd>bdelete<CR>", "Buffer delete (close)")
+map("n", "<leader>bD", "<cmd>bufdo bdelete<CR>", "Buffer delete all")
 
--- Executes shell command from in here making file executable
-vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true, desc = "makes file executable" })
+-- Tabs
+map("n", "<leader>to", "<cmd>tabnew<CR>", "Tab new")
+map("n", "<leader>tx", "<cmd>tabclose<CR>", "Tab close")
+map("n", "<leader>tn", "<cmd>tabnext<CR>", "Tab next")
+map("n", "<leader>tp", "<cmd>tabprevious<CR>", "Tab prev")
+map("n", "<leader>tf", "<cmd>tabnew %<CR>", "Tab from current file")
 
--- Hightlight yanking
-vim.api.nvim_create_autocmd("TextYankPost", {
-    desc = "Highlight when yanking (copying) text",
-    group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
-    callback = function()
-        vim.hl.on_yank()
-    end,
-})
+-- Splits
+map("n", "<leader>wv", "<C-w>v", "Split vertical")
+map("n", "<leader>wh", "<C-w>s", "Split horizontal")
+map("n", "<leader>we", "<C-w>=", "Make splits equal")
+map("n", "<leader>wc", "<cmd>close<CR>", "Close split")
+map("n", "<leader>wo", "<C-w>o", "Only this window")
 
--- tab stuff
-vim.keymap.set("n", "<leader>to", "<cmd>tabnew<CR>")   --open new tab
-vim.keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>") --close current tab
-vim.keymap.set("n", "<leader>tn", "<cmd>tabn<CR>")     --go to next
-vim.keymap.set("n", "<leader>tp", "<cmd>tabp<CR>")     --go to pre
-vim.keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>") --open current tab in new tab
+-- Movimentação entre splits
+map("n", "<C-h>", "<C-w>h", "Go to left split")
+map("n", "<C-j>", "<C-w>j", "Go to below split")
+map("n", "<C-k>", "<C-w>k", "Go to above split")
+map("n", "<C-l>", "<C-w>l", "Go to right split")
 
---split management
-vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
--- split window vertically
-vim.keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
--- split window horizontally
-vim.keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" }) -- make split windows equal width & height
--- close current split window
-vim.keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" })
+-- Redimensionar splits
+map("n", "<A-h>", "<cmd>vertical resize -5<CR>", "Resize ←")
+map("n", "<A-l>", "<cmd>vertical resize +5<CR>", "Resize →")
+map("n", "<A-k>", "<cmd>resize -3<CR>", "Resize ↑")
+map("n", "<A-j>", "<cmd>resize +3<CR>", "Resize ↓")
 
--- Copy filepath to the clipboard
-vim.keymap.set("n", "<leader>fp", function()
-  local filePath = vim.fn.expand("%:~") -- Gets the file path relative to the home directory
-  vim.fn.setreg("+", filePath) -- Copy the file path to the clipboard register
-  print("File path copied to clipboard: " .. filePath) -- Optional: print message to confirm
-end, { desc = "Copy file path to clipboard" })
+-- Clipboard
+map({ "n", "v" }, "<leader>y", '"+y', "Yank to system clipboard")
+map("n", "<leader>Y", '"+Y', "Yank line to system clipboard")
+map({ "n", "v" }, "<leader>d", '"_d', "Delete (blackhole)")
 
--- Toggle LSP diagnostics visibility
-local isLspDiagnosticsVisible = true
-vim.keymap.set("n", "<leader>lx", function()
-    isLspDiagnosticsVisible = not isLspDiagnosticsVisible
-    vim.diagnostic.config({
-        virtual_text = isLspDiagnosticsVisible,
-        underline = isLspDiagnosticsVisible
-    })
-end, { desc = "Toggle LSP diagnostics" })
+-- Arquivos
+map("n", "<leader>fp", function()
+	local path = vim.fn.expand("%:p")
+	if path == "" then
+		vim.notify("Sem arquivo associado ao buffer", vim.log.levels.WARN)
+		return
+	end
+	vim.fn.setreg("+", path)
+	vim.notify("Copiado para clipboard: " .. path)
+end, "Copy file path")
+map("n", "<leader>mx", "<cmd>!chmod +x %<CR>", "Make file executable")
+
+-- Config
+map("n", "<leader>ve", ":e $MYVIMRC<CR>", "Edit init.lua")
+map("n", "<leader>vs", ":source $MYVIMRC<CR>", "Source init.lua")
+
+-- Diagnostics
+map("n", "<leader>xe", vim.diagnostic.open_float, "Diagnostics: line float")
+map("n", "<leader>xq", function() vim.diagnostic.setqflist({ open = true }) end, "Diagnostics: quickfix")
+map("n", "<leader>xl", function() vim.diagnostic.setloclist({ open = true }) end, "Diagnostics: loclist")
+map("n", "[d", vim.diagnostic.goto_prev, "Prev diagnostic")
+map("n", "]d", vim.diagnostic.goto_next, "Next diagnostic")
+map("n", "[D", function() vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR }) end, "Prev ERROR")
+map("n", "]D", function() vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR }) end, "Next ERROR")
+
+-- Toggle diagnostics
+local _diag_state = { vt = true, signs = true }
+map("n", "<leader>lx", function()
+	_diag_state.vt = not _diag_state.vt
+	_diag_state.signs = not _diag_state.signs
+	vim.diagnostic.config({ virtual_text = _diag_state.vt, signs = _diag_state.signs })
+	vim.notify("Diagnostics: virtual_text=" .. tostring(_diag_state.vt) .. ", signs=" .. tostring(_diag_state.signs))
+end, "Toggle diagnostics (vt/signs)")
+
+-- Formatação (Conform/LSP)
+local function smart_format(range)
+	local ok, conform = pcall(require, "conform")
+	if ok then
+		conform.format({
+			lsp_fallback = true,
+			async = false,
+			timeout_ms = 1500,
+			range = range,
+		})
+	else
+		vim.lsp.buf.format({ async = false })
+	end
+end
+map({ "n", "v" }, "<leader>cf", function() smart_format(nil) end, "Format (Conform/LSP)")
+map("v", "<leader>cF", function()
+	local srow, scol = unpack(vim.api.nvim_buf_get_mark(0, "<"))
+	local erow, ecol = unpack(vim.api.nvim_buf_get_mark(0, ">"))
+	smart_format({ start = { srow, scol }, ["end"] = { erow, ecol } })
+end, "Format range (Conform/LSP)")
+
+-- Terminal
+map("t", "<Esc><Esc>", "<C-\\><C-n>", "Terminal → Normal")
+
+-- Desabilitar Ex-mode
+map("n", "Q", "<nop>", "Disable Ex-mode")
+
+-- Toggles
+map("n", "<leader>us", function() vim.wo.spell = not vim.wo.spell end, "Toggle spell")
+map("n", "<leader>uw", function() vim.wo.wrap = not vim.wo.wrap end, "Toggle wrap")
+map("n", "<leader>ur", function() vim.wo.relativenumber = not vim.wo.relativenumber end, "Toggle relativenumber")
+map("n", "<leader>uc", function() vim.o.cursorline = not vim.o.cursorline end, "Toggle cursorline")
+map("n", "<leader>un", function() vim.wo.number = not vim.wo.number end, "Toggle number")
+
+
+
 

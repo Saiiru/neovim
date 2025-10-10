@@ -1,167 +1,221 @@
--- lua/plugins/lsp/lspconfig.lua
+-- Neovim LSP (API nova) + integrações (glance, actions-preview, trouble, telescope, lsp-lens)
 return {
-  "neovim/nvim-lspconfig",
-  event = { "BufReadPre", "BufNewFile" },
-  dependencies = {
-    "hrsh7th/cmp-nvim-lsp",
-    { "antosha417/nvim-lsp-file-operations", config = true },
+  -- Code actions com preview (usa Telescope)
+  {
     "aznhe21/actions-preview.nvim",
-    "dnlhc/glance.nvim",
-    "VidocqH/lsp-lens.nvim",
-    "j-hui/fidget.nvim",
-    "ray-x/lsp_signature.nvim",
-    "folke/trouble.nvim",
-  },
-  config = function()
-    local lspconfig = require("lspconfig")
-    local caps = require("cmp_nvim_lsp").default_capabilities()
-
-    -- UI / extras
-    require("fidget").setup({})
-    require("actions-preview").setup({})
-    require("glance").setup({})
-    require("trouble").setup({})
-    require("lsp_signature").setup({
-      bind = true,
-      handler_opts = { border = "rounded" },
-      hint_enable = true,
-    })
-    require("lsp-lens").setup({
-      enable = true,
-      include_declaration = true,
-      sections = {
-        definition = true,
-        references = true,
-        implements = true,
-        typedefs = true,
+    event = "LspAttach",
+    opts = {
+      telescope = {
+        sorting_strategy = "ascending",
+        layout_strategy = "vertical",
+        layout_config = { width = 0.6, height = 0.7, prompt_position = "top", preview_cutoff = 20 },
       },
+    },
+  },
+
+  -- Peek de refs/impl/typedef
+  {
+    "dnlhc/glance.nvim",
+    cmd = { "Glance" },
+    opts = {
+      theme = { enable = true },
+      hooks = {
+        before_open = function(results, open, jump)
+          if #results == 1 then jump(results[1]) else open(results) end
+        end,
+      },
+    },
+  },
+
+  -- LSP Lens (contadores de refs, def, impl) – sem chamar .refresh()
+  {
+    "VidocqH/lsp-lens.nvim",
+    event = "LspAttach",
+    opts = {
+      enable = true,
+      include_declaration = false,
+      sections = { definition = true, references = true, implements = true },
       ignore_filetype = { "markdown", "gitcommit" },
-    })
+      targets = { immediate = false, filetype_subdirs = false },
+    },
+  },
 
-    -- sinais / diagnósticos
-    local signs = {
-      { name = "DiagnosticSignError", text = "" },
-      { name = "DiagnosticSignWarn",  text = "" },
-      { name = "DiagnosticSignHint",  text = "󰠠" },
-      { name = "DiagnosticSignInfo",  text = "" },
-    }
-    for _, s in ipairs(signs) do
-      vim.fn.sign_define(s.name, { text = s.text, texthl = s.name, numhl = "" })
-    end
-    vim.diagnostic.config({
-      virtual_text = true,
-      underline = true,
-      update_in_insert = false,
-      severity_sort = true,
-      float = { border = "rounded", source = "always" },
-    })
+  -- LSP core
+  {
+    "neovim/nvim-lspconfig",
+    event = { "BufReadPre", "BufNewFile" },
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+      "folke/trouble.nvim",
+      "nvim-telescope/telescope.nvim",
+      "b0o/schemastore.nvim",
+    },
+    config = function()
+      local ok_utils, UL = pcall(require, "utils.lsp")
+      local cmp_caps = require("cmp_nvim_lsp").default_capabilities()
+      cmp_caps.textDocument.completion.completionItem.snippetSupport = true
 
-    -- Keymaps por buffer
-    vim.api.nvim_create_autocmd("LspAttach", {
-      group = vim.api.nvim_create_augroup("UserLspConfig", {}),
-      callback = function(ev)
-        local map = function(mode, lhs, rhs, desc)
-          vim.keymap.set(mode, lhs, rhs, { buffer = ev.buf, silent = true, desc = desc })
+      -- ===== Diagnostics (JetBrains style) =====
+      local diagnostic_signs = {
+        Error = "", Warn = "", Info = "", Hint = "󰌶"
+      }
+      for type, icon in pairs(diagnostic_signs) do
+        local name = "DiagnosticSign" .. type
+        vim.fn.sign_define(name, { text = icon, texthl = name, numhl = "" })
+      end
+      vim.diagnostic.config({
+        virtual_text = { spacing = 2, prefix = "●" },
+        underline = true,
+        severity_sort = true,
+        update_in_insert = false,
+        float = { border = "rounded", source = "always" },
+        signs = true,
+      })
+
+      -- ===== on_attach: keymaps + QoL =====
+      local function on_attach(client, bufnr)
+        if ok_utils and UL.on_attach_extra then pcall(UL.on_attach_extra, client, bufnr) end
+
+        if vim.lsp.inlay_hint and client.server_capabilities.inlayHintProvider then
+          pcall(vim.lsp.inlay_hint.enable, true, { bufnr = bufnr })
         end
 
-        -- Navegação (Glance)
-        map("n", "gr", "<cmd>Glance references<cr>",        "Goto References")
-        map("n", "gd", "<cmd>Glance definitions<cr>",       "Goto Definitions")
-        map("n", "gI", "<cmd>Glance implementations<cr>",   "Goto Implementations")
-        map("n", "gy", "<cmd>Glance type_definitions<cr>",  "Goto Type Definitions")
-        map("n", "gD", vim.lsp.buf.declaration,             "Goto Declaration")
+        local telescope = require("telescope.builtin")
+        local has_actions, actions_preview = pcall(require, "actions-preview")
+        local code_action = has_actions and actions_preview.code_actions or vim.lsp.buf.code_action
 
-        -- Telescope fallback (mantém teu hábito)
-        map("n", "gR", "<cmd>Telescope lsp_references<CR>", "LSP References (Telescope)")
+        local keymaps = {
+          -- Navigation
+          { "n", "gd", telescope.lsp_definitions,         "Goto Definitions" },
+          { "n", "gD", vim.lsp.buf.declaration,           "Goto Declaration" },
+          { "n", "gi", telescope.lsp_implementations,     "Goto Implementations" },
+          { "n", "gt", telescope.lsp_type_definitions,    "Goto Type Definitions" },
+          { "n", "gr", "<cmd>Glance references<CR>",      "Peek References" },
+          { "n", "gI", "<cmd>Glance implementations<CR>", "Peek Implementations" },
+          { "n", "gy", "<cmd>Glance type_definitions<CR>","Peek Type Defs" },
+          -- Actions/rename/hover
+          { { "n", "v" }, "<leader>ca", code_action,      "Code Action (preview)" },
+          { "n", "<leader>rn", vim.lsp.buf.rename,        "Rename Symbol" },
+          { "n", "K", vim.lsp.buf.hover,                  "Hover Docs" },
+          { "i", "<C-h>", vim.lsp.buf.signature_help,     "Signature Help" },
+          -- Diagnostics
+          { "n", "]d", vim.diagnostic.goto_next,          "Next Diagnostic" },
+          { "n", "[d", vim.diagnostic.goto_prev,          "Prev Diagnostic" },
+          { "n", "<leader>dd", vim.diagnostic.open_float, "Line Diagnostics" },
+          { "n", "<leader>dw", "<cmd>Trouble diagnostics toggle focus=false<CR>", "Diagnostics (workspace)" },
+          { "n", "<leader>db", "<cmd>Trouble diagnostics toggle filter.buf=0<CR>", "Diagnostics (buffer)" },
+          -- Toggle Inlay Hints
+          { "n", "<leader>lx", function()
+              if vim.lsp.inlay_hint then
+                local enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr })
+                vim.lsp.inlay_hint.enable(not enabled, { bufnr = bufnr })
+              end
+            end, "Toggle Inlay Hints" },
+        }
+        for _, km in ipairs(keymaps) do
+          vim.keymap.set(km[1], km[2], km[3], { buffer = bufnr, silent = true, desc = km[4] })
+        end
+      end
 
-        -- Ações / Hover / Rename / Symbols
-        map({ "n","v" }, "<leader>ca", function() require("actions-preview").code_actions() end, "Code Action (Preview)")
-        map("n", "K",          vim.lsp.buf.hover,                "Hover")
-        map("n", "<leader>rn", vim.lsp.buf.rename,               "Rename")
-        map("n", "<leader>cs", vim.lsp.buf.document_symbol,      "Document Symbols")
-        map("n", "<leader>cS", vim.lsp.buf.workspace_symbol,     "Workspace Symbols")
+      -- ===== Server Setup =====
+      local function enable(server, cfg)
+        cfg = cfg or {}
+        cfg.capabilities = vim.tbl_extend("force", {}, cmp_caps, cfg.capabilities or {})
+        cfg.on_attach = UL and UL.wrap_on_attach and UL.wrap_on_attach(on_attach) or on_attach
+        vim.lsp.config(server, cfg)
+        vim.lsp.enable(server)
+      end
 
-        -- Diags / Trouble
-        map("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", "Buffer Diagnostics")
-        map("n", "<leader>d", vim.diagnostic.open_float,               "Line Diagnostics")
-        map("n", "]d",        vim.diagnostic.goto_next,                "Next Diagnostic")
-        map("n", "[d",        vim.diagnostic.goto_prev,                "Prev Diagnostic")
-        map("n", "<leader>cq","<cmd>Trouble diagnostics toggle<cr>",   "Toggle Trouble")
-
-        -- Signature help (Insert)
-        map("i", "<C-h>", function() vim.lsp.buf.signature_help() end, "Signature Help")
-
-        -- LSP Lens toggles
-        map("n", "<leader>lL", function() require("lsp-lens").toggle() end,  "LSP Lens Toggle")
-        map("n", "<leader>lR", function() require("lsp-lens").refresh() end, "LSP Lens Refresh")
-
-        -- Restart
-        map("n", "<leader>rs", ":LspRestart<CR>", "Restart LSP")
-      end,
-    })
-
-    -- Servidores
-    local servers = {
-      -- Lua
-      lua_ls = {
+      -- Language servers
+      enable("lua_ls", {
         settings = {
           Lua = {
-            diagnostics = { globals = { "vim" } },
-            completion  = { callSnippet = "Replace" },
-            workspace   = {
-              library = {
-                [vim.fn.expand("$VIMRUNTIME/lua")] = true,
-                [vim.fn.stdpath("config") .. "/lua"] = true,
-              },
-            },
+            workspace = { checkThirdParty = false },
+            telemetry = { enable = false },
+            diagnostics = { globals = { "vim", "Snacks", "require" } },
+            completion = { callSnippet = "Replace" },
           },
         },
-      },
+      })
 
-      -- Web
-      vtsls = {}, -- (se preferir tsserver, troque por tsserver = {})
-      eslint = {},
-      html = {},
-      cssls = {
+      enable("vtsls", {
         settings = {
-          css  = { validate = true, lint = { unknownAtRules = "ignore" } },
-          scss = { validate = true, lint = { unknownAtRules = "ignore" } },
-          less = { validate = true, lint = { unknownAtRules = "ignore" } },
+          vtsls = {
+            tsserver = { globalPlugins = {} },
+            experimental = { maxInlayHintLength = 30 },
+          },
+          typescript = {
+            inlayHints = {
+              includeInlayParameterNameHints = "all",
+              includeInlayEnumMemberValueHints = true,
+              includeInlayFunctionLikeReturnTypeHints = true,
+              includeInlayVariableTypeHints = true,
+            },
+            preferences = { importModuleSpecifier = "non-relative" },
+          },
+          javascript = { inlayHints = { includeInlayParameterNameHints = "all" } },
         },
-      },
-      tailwindcss = {},
-      jsonls = {},
-      yamlls = {},
-      emmet_ls = {
-        filetypes = { "html","typescriptreact","javascriptreact","css","sass","scss","less","svelte" },
-      },
-      graphql = {},
+      })
 
-      -- DevOps
-      dockerls = {},
-      docker_compose_language_service = {},
-      bashls = {},
-      lemminx = {},  -- XML
-      taplo = {},    -- TOML
+      for _, srv in ipairs({
+        { "html", {} },
+        { "cssls", { settings = { css = { validate = true }, scss = { validate = true }, less = { validate = true } } } },
+        { "tailwindcss", { settings = { tailwindCSS = { experimental = { classRegex = { "tw`([^`]*)", 'tw="([^"]*)' } } } } } },
+        { "emmet_language_server", { filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less", "svelte" } } },
+        { "intelephense", {} },
+        { "graphql", {} },
+        { "dockerls", {} },
+        { "docker_compose_language_service", {} },
+        { "lemminx", {} },
+        { "taplo", {} },
+        { "marksman", {} },
+        { "sqls", {} },
+        { "ltex", { settings = { ltex = { language = "en-US" } } } },
+      }) do
+        enable(srv[1], srv[2])
+      end
 
-      -- Backends
-      gopls = {
+      local schemastore = require("schemastore")
+      enable("jsonls", {
         settings = {
-          gopls = { analyses = { unusedparams = true }, staticcheck = true, gofumpt = true },
+          json = {
+            schemas = schemastore.json.schemas(),
+            validate = { enable = true },
+          },
         },
-      },
-      clangd = {},
-      intelephense = {},
-      basedpyright = {}, -- (ou pyright)
-      sqls = {},
-      marksman = {}, -- Markdown
-      -- jdtls -> subir via ftplugin/java.lua (nvim-jdtls)
-    }
+      })
+      enable("yamlls", {
+        settings = {
+          yaml = {
+            schemaStore = { enable = false, url = "" },
+            schemas = schemastore.yaml.schemas(),
+            keyOrdering = false,
+          },
+        },
+      })
 
-    for name, cfg in pairs(servers) do
-      cfg.capabilities = caps
-      lspconfig[name].setup(cfg)
-    end
-  end,
+      enable("basedpyright", {
+        settings = {
+          python = { analysis = { typeCheckingMode = "standard", autoImportCompletions = true } },
+        },
+      })
+
+      enable("gopls", {
+        settings = {
+          gopls = {
+            gofumpt = true,
+            staticcheck = true,
+            analyses = { unusedparams = true },
+          },
+        },
+      })
+
+      enable("clangd", {
+        cmd = { "clangd", "--background-index", "--fallback-style=LLVM", "--header-insertion=never", "--offset-encoding=utf-16" },
+      })
+
+      -- Java: see ftplugin/java.lua (jdtls.start_or_attach)
+    end,
+  },
 }
 

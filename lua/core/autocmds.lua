@@ -1,193 +1,575 @@
--- lua/core/autocmds.lua
-local api, fn = vim.api, vim.fn
+-- lua/core/autocmds.lua :: Autocomandos para automação e QoL
 
--- ========= Helpers =========
-local function term_run(cmd, opts)
-  opts = opts or {}
-  local height = opts.height or 12
-  vim.cmd("w") -- salva antes de rodar
-  vim.cmd("botright " .. height .. "split")
-  vim.cmd("terminal bash -lc " .. fn.fnameescape(cmd))
-  vim.cmd("resize " .. height)
-  vim.cmd("startinsert")
+-- Prefixo para augroups, para evitar conflitos.
+local function aug(name)
+	return vim.api.nvim_create_augroup("SAIRU_" .. name, { clear = true })
 end
 
-local function has_file(root, names)
-  local r = vim.fs.root(0, names)
-  return r ~= nil
+-- =============== Helpers =================
+-- Encontra o diretório raiz do projeto (git, etc.)
+local function root_dir(buf)
+	local fname = vim.api.nvim_buf_get_name(buf or 0)
+	local base = vim.fs.dirname(fname ~= "" and fname or vim.loop.cwd())
+	local markers = {
+		"gradlew",
+		"mvnw",
+		"pom.xml",
+		"build.gradle",
+		"build.gradle.kts",
+		"go.mod",
+		"Cargo.toml",
+		"pyproject.toml",
+		"poetry.lock",
+		"requirements.txt",
+		"package.json",
+		"deno.json",
+		"deno.jsonc",
+		"bun.lockb",
+		"composer.json",
+		".git",
+	}
+	local found = vim.fs.find(markers, { upward = true, path = base })[1]
+	return found and vim.fs.dirname(found) or base
 end
 
--- ========= Code Runners (buffer-local <leader>R) =========
-local runners = {
-  javascript = function() return "node " .. fn.shellescape(fn.expand("%:p")) end,
-  typescript = function()
-    if fn.executable("tsx") == 1 then
-      return "tsx " .. fn.shellescape(fn.expand("%:p"))
-    elseif fn.executable("ts-node") == 1 then
-      return "ts-node " .. fn.shellescape(fn.expand("%:p"))
-    else
-      return "node --loader ts-node/esm " .. fn.shellescape(fn.expand("%:p"))
-    end
-  end,
-  lua = function() return "lua " .. fn.shellescape(fn.expand("%:p")) end,
-  python = function() return (fn.executable("python3")==1 and "python3 " or "python ") .. fn.shellescape(fn.expand("%:p")) end,
-  sh = function() return "bash " .. fn.shellescape(fn.expand("%:p")) end,
-  c = function()
-    local src = fn.expand("%:p")
-    local out = fn.expand("%:r")
-    return ("gcc %s -O2 -Wall -Wextra -o %s && %s"):format(fn.shellescape(src), fn.shellescape(out), fn.shellescape(out))
-  end,
-  cpp = function()
-    local src = fn.expand("%:p")
-    local out = fn.expand("%:r")
-    return ("g++ %s -std=c++20 -O2 -Wall -Wextra -o %s && %s"):format(fn.shellescape(src), fn.shellescape(out), fn.shellescape(out))
-  end,
-  go = function() return "go run " .. fn.shellescape(fn.expand("%:p")) end,
-  rust = function()
-    if has_file({ "Cargo.toml" }) then
-      return "cargo run"
-    else
-      local src = fn.expand("%:p")
-      local out = fn.expand("%:r")
-      return ("rustc %s -O -o %s && %s"):format(fn.shellescape(src), fn.shellescape(out), fn.shellescape(out))
-    end
-  end,
-  java = function()
-    -- Preferir JDTLS se quiser depurar; aqui é runner simples para arquivos únicos.
-    local file = fn.expand("%:p")
-    local dir = fn.expand("%:h")
-    local main = fn.expand("%:t:r")
-    return ("javac %s && java -cp %s %s"):format(fn.shellescape(file), fn.shellescape(dir), fn.shellescape(main))
-  end,
-}
+-- Roda um comando em um terminal splitado.
+local function termrun(cmd, opts)
+	opts = opts or {}
+	local cwd = opts.cwd or root_dir(0)
+	vim.cmd("belowright split")
+	vim.cmd("resize " .. (opts.height or 12))
+	vim.cmd("terminal")
+	local chan = vim.b.terminal_job_id
+	if cwd and cwd ~= "" then
+		vim.fn.chansend(chan, "cd " .. vim.fn.fnameescape(cwd) .. "\r")
+	end
+	for _, c in ipairs(type(cmd) == "table" and cmd or { cmd }) do
+		vim.fn.chansend(chan, c .. "\r")
+	end
+end
+-- Mapeia uma tecla no buffer atual.
+local function map_buf(lhs, rhs, desc)
+	vim.keymap.set("n", lhs, rhs, { buffer = 0, silent = true, desc = desc })
+end
+-- Verifica se um arquivo existe na raiz do projeto.
+local function has_file(root, files)
+	for _, f in ipairs(files) do
+		if vim.loop.fs_stat(root .. "/" .. f) then
+			return true
+		end
+	end
+end
 
-api.nvim_create_augroup("CodeRunnerMap", { clear = true })
-api.nvim_create_autocmd("FileType", {
-  group = "CodeRunnerMap",
-  pattern = vim.tbl_keys(runners),
-  callback = function(ev)
-    local ft = vim.bo[ev.buf].filetype
-    local make = runners[ft]
-    if not make then return end
-    vim.keymap.set("n", "<leader>R", function()
-      local cmd = make()
-      term_run(cmd, { height = 12 })
-    end, { buffer = ev.buf, silent = true, desc = "Run current file" })
-  end,
+-- =============== QoL gerais =================
+
+-- Restaura a posição do cursor ao abrir um buffer.
+-- Util para voltar onde parou.
+vim.api.nvim_create_autocmd("BufReadPost", {
+	group = aug("RestoreCursor"),
+	callback = function(args)
+		local m = vim.api.nvim_buf_get_mark(args.buf, '"')
+		local lcount = vim.api.nvim_buf_line_count(args.buf)
+		if m[1] > 0 and m[1] <= lcount then
+			pcall(vim.api.nvim_win_set_cursor, 0, m)
+		end
+	end,
 })
 
--- ========= Markdown options =========
-api.nvim_create_augroup("MarkdownOpts", { clear = true })
-api.nvim_create_autocmd("FileType", {
-  group = "MarkdownOpts",
-  pattern = { "markdown" },
-  callback = function(ev)
-    vim.bo[ev.buf].expandtab = true
-    vim.bo[ev.buf].tabstop = 2
-    vim.bo[ev.buf].shiftwidth = 2
-    vim.bo[ev.buf].softtabstop = 2
-    vim.opt_local.wrap = true
-    vim.opt_local.linebreak = true
-    vim.opt_local.conceallevel = 0
-  end,
+-- Highlight na linha ao dar yank.
+vim.api.nvim_create_autocmd("TextYankPost", {
+	group = aug("YankHL"),
+	callback = function()
+		vim.highlight.on_yank({ higroup = "IncSearch", timeout = 120 })
+	end,
 })
 
--- ========= Desabilitar continuação automática de comentário =========
-api.nvim_create_augroup("NoAutoComment", { clear = true })
-api.nvim_create_autocmd("FileType", {
-  group = "NoAutoComment",
-  pattern = "*",
-  callback = function()
-    vim.opt_local.formatoptions:remove({ "r", "o" })
-  end,
+-- Ajusta o tamanho dos splits ao redimensionar a janela.
+vim.api.nvim_create_autocmd("VimResized", { group = aug("Resize"), command = "tabdo wincmd =" })
+
+-- Impede que o Neovim continue comentários automaticamente.
+vim.api.nvim_create_autocmd({ "BufEnter", "FileType" }, {
+	group = aug("NoCommentCont"),
+	callback = function()
+		vim.opt_local.formatoptions:remove({ "c", "r", "o" })
+	end,
 })
 
--- ========= Conceal baixo em json/jsonc/markdown =========
-api.nvim_create_augroup("LowConceal", { clear = true })
-api.nvim_create_autocmd("FileType", {
-  group = "LowConceal",
-  pattern = { "json", "jsonc", "markdown" },
-  callback = function()
-    vim.opt_local.conceallevel = 0
-  end,
+-- Mostra números relativos apenas no modo Normal.
+vim.api.nvim_create_autocmd("InsertEnter", {
+	group = aug("RelNumToggle"),
+	callback = function()
+		vim.wo.relativenumber = false
+	end,
+})
+vim.api.nvim_create_autocmd("InsertLeave", {
+	group = aug("RelNumToggle"),
+	callback = function()
+		vim.wo.relativenumber = true
+	end,
 })
 
--- ========= Restaurar posição do cursor =========
-api.nvim_create_augroup("RestoreCursor", { clear = true })
-api.nvim_create_autocmd("BufReadPost", {
-  group = "RestoreCursor",
-  callback = function()
-    local mark = api.nvim_buf_get_mark(0, '"')
-    local lcount = api.nvim_buf_line_count(0)
-    if mark[1] > 0 and mark[1] <= lcount then
-      pcall(api.nvim_win_set_cursor, 0, mark)
-    end
-  end,
+-- Verifica se o arquivo foi modificado no disco quando o Neovim ganha foco.
+vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
+	group = aug("CheckTime"),
+	command = "checktime",
 })
 
--- ========= Janelas auxiliares fecham com 'q' =========
-api.nvim_create_augroup("QuickClose", { clear = true })
-api.nvim_create_autocmd("FileType", {
-  group = "QuickClose",
-  pattern = { "help", "man", "lspinfo", "qf", "startuptime", "checkhealth" },
-  callback = function(ev)
-    vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = ev.buf, silent = true })
-    vim.bo[ev.buf].buflisted = false
-  end,
+-- Cria diretórios automaticamente ao salvar um arquivo.
+vim.api.nvim_create_autocmd("BufWritePre", {
+	group = aug("MkDirs"),
+	callback = function(args)
+		local dir = vim.fn.fnamemodify(args.match, ":p:h")
+		if vim.fn.isdirectory(dir) == 0 then
+			vim.fn.mkdir(dir, "p")
+		end
+	end,
 })
 
--- ========= Terminal UX =========
-api.nvim_create_augroup("TermUX", { clear = true })
-api.nvim_create_autocmd("TermOpen", {
-  group = "TermUX",
-  callback = function()
-    vim.opt_local.number = false
-    vim.opt_local.relativenumber = false
-    vim.opt_local.signcolumn = "no"
-    vim.cmd("startinsert")
-  end,
+-- Remove espaços em branco no final da linha ao salvar.
+-- Ignora arquivos markdown, diff e binários.
+vim.api.nvim_create_autocmd("BufWritePre", {
+	group = aug("TrimWS"),
+	callback = function(args)
+		if
+			vim.bo[args.buf].buftype ~= ""
+			or vim.bo[args.buf].binary
+			or vim.bo[args.buf].filetype == "markdown"
+			or vim.wo.diff
+		then
+			return
+		end
+		local view = vim.fn.winsaveview()
+		vim.cmd([[%s/\s\+$//e]])
+		vim.fn.winrestview(view)
+	end,
 })
 
--- ========= Cursor shape ao sair / Snacks dashboard =========
-api.nvim_create_augroup("CursorShape", { clear = true })
-api.nvim_create_autocmd("ExitPre", {
-  group = "CursorShape",
-  command = "set guicursor=a:ver90",
-  desc = "Beam cursor when leaving Neovim",
-})
-api.nvim_create_autocmd("User", {
-  group = "CursorShape",
-  pattern = "SnacksDashboardOpened",
-  callback = function()
-    pcall(vim.cmd, "hi Cursor blend=100")
-    pcall(vim.cmd, "set guicursor+=a:Cursor/lCursor")
-  end,
-})
-api.nvim_create_autocmd("User", {
-  group = "CursorShape",
-  pattern = "SnacksDashboardClosed",
-  callback = function()
-    pcall(vim.cmd, "hi Cursor blend=0")
-    pcall(vim.cmd, "set guicursor+=a:Cursor/lCursor")
-  end,
+-- Salva automaticamente ao modificar o texto (se g:auto_save = 1).
+vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
+	group = aug("AutoSave"),
+	callback = function()
+		if vim.g.auto_save == 1 and vim.bo.modifiable and vim.bo.buftype == "" then
+			pcall(vim.cmd, "silent write")
+		end
+	end,
 })
 
--- ========= Auto-save (opcional, seguro) =========
--- Toggle com :AutoSaveToggle (default: off)
-vim.g.auto_save = vim.g.auto_save or false
-api.nvim_create_user_command("AutoSaveToggle", function()
-  vim.g.auto_save = not vim.g.auto_save
-  vim.notify("AutoSave: " .. (vim.g.auto_save and "ON" or "OFF"))
-end, {})
-
-api.nvim_create_augroup("AutoSave", { clear = true })
-api.nvim_create_autocmd({ "InsertLeave", "TextChanged" }, {
-  group = "AutoSave",
-  callback = function()
-    if not vim.g.auto_save then return end
-    if vim.bo.buftype ~= "" or vim.bo.readonly or not vim.bo.modifiable then return end
-    if vim.api.nvim_buf_get_name(0) == "" then return end
-    vim.cmd("silent! write")
-  end,
+-- Mostra diagnostics em um float ao parar o cursor.
+vim.api.nvim_create_autocmd("CursorHold", {
+	group = aug("DiagFloat"),
+	callback = function()
+		if not vim.b.__diag_open then
+			vim.diagnostic.open_float(nil, { focus = false, scope = "cursor", border = "rounded" })
+			vim.b.__diag_open = true
+			vim.defer_fn(function()
+				vim.b.__diag_open = false
+			end, 250)
+		end
+	end,
 })
 
+-- Roda o linter ao salvar (se nvim-lint estiver presente).
+vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+	group = aug("LintOnSave"),
+	callback = function(args)
+		local ok, lint = pcall(require, "lint")
+		if ok then
+			lint.try_lint()
+		end
+	end,
+})
+
+-- Formata ao salvar (se g:format_on_save = 1).
+vim.g.format_on_save = vim.g.format_on_save ~= 1 and 0 or 0
+vim.api.nvim_create_autocmd("BufWritePre", {
+	group = aug("FormatOnSave"),
+	callback = function(args)
+		if vim.g.format_on_save == 1 then
+			local ok, conform = pcall(require, "conform")
+			if ok then
+				conform.format({ bufnr = args.buf, lsp_fallback = true, timeout_ms = 1200 })
+			end
+		end
+	end,
+})
+
+-- Fecha janelas auxiliares com `q`.
+vim.api.nvim_create_autocmd("FileType", {
+	group = aug("QuickClose"),
+	pattern = {
+		"help",
+		"qf",
+		"lspinfo",
+		"man",
+		"checkhealth",
+		"startuptime",
+		"oil",
+		"neotest-output",
+		"neotest-summary",
+		"mason",
+		"dap-float",
+	},
+	callback = function()
+		vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = 0, silent = true })
+	end,
+})
+
+-- Configurações para arquivos de documentação.
+vim.api.nvim_create_autocmd("FileType", {
+	group = aug("DocsUX"),
+	pattern = { "markdown", "gitcommit", "gitrebase" },
+	callback = function()
+		vim.opt_local.wrap = true
+		vim.opt_local.linebreak = true
+		vim.opt_local.conceallevel = 0
+		vim.opt_local.spell = true
+		vim.opt_local.spelllang = "en_us,pt_br"
+		vim.opt_local.textwidth = 100
+		vim.opt_local.colorcolumn = "+1"
+	end,
+})
+-- Indentação de 2 espaços para alguns filetypes.
+vim.api.nvim_create_autocmd("FileType", {
+	group = aug("Indent2"),
+	pattern = { "markdown", "yaml", "json", "jsonc", "toml", "lua", "html", "css" },
+	callback = function()
+		vim.opt_local.tabstop = 2
+		vim.opt_local.shiftwidth = 2
+		vim.opt_local.softtabstop = 2
+	end,
+})
+
+-- Configurações para o terminal.
+vim.api.nvim_create_autocmd("TermOpen", {
+	group = aug("TermUX"),
+	callback = function()
+		vim.opt_local.number = false
+		vim.opt_local.relativenumber = false
+		vim.opt_local.signcolumn = "no"
+		vim.cmd.startinsert()
+		-- Mapeia Esc Esc para sair do modo terminal.
+		if vim.fn.maparg("<Esc><Esc>", "t") == "" then
+			vim.keymap.set("t", "<Esc><Esc>", [[<C-\><C-n>]], { buffer = 0, silent = true })
+		end
+	end,
+})
+
+-- Desliga o modo paste ao sair do modo de inserção.
+vim.api.nvim_create_autocmd("InsertLeave", {
+	group = aug("NoPaste"),
+	callback = function()
+		vim.opt.paste = false
+	end,
+})
+
+-- Abre a quickfix list automaticamente após :grep.
+vim.api.nvim_create_autocmd("QuickFixCmdPost", {
+	group = aug("QuickfixAutoOpen"),
+	pattern = { "grep", "vimgrep", "helpgrep" },
+	command = "cwindow",
+})
+
+-- Liga/desliga o highlight da busca.
+vim.api.nvim_create_autocmd(
+	"CmdlineEnter",
+	{ group = aug("HLSearch"), pattern = { "/", "?" }, command = "set hlsearch" }
+)
+vim.api.nvim_create_autocmd(
+	"CmdlineLeave",
+	{ group = aug("HLSearch"), pattern = { "/", "?" }, command = "set nohlsearch" }
+)
+
+-- Salva/carrega a view (folds, cursor) ao sair/entrar em um buffer.
+vim.api.nvim_create_autocmd("BufWinLeave", {
+	group = aug("ViewSave"),
+	callback = function()
+		pcall(vim.cmd, "silent! mkview")
+	end,
+})
+vim.api.nvim_create_autocmd("BufWinEnter", {
+	group = aug("ViewLoad"),
+	callback = function()
+		pcall(vim.cmd, "silent! loadview")
+	end,
+})
+
+-- Ativa inlay hints automaticamente quando o LSP atacha.
+vim.api.nvim_create_autocmd("LspAttach", {
+	group = aug("InlayHints"),
+	callback = function(args)
+		if vim.lsp.inlay_hint and vim.lsp.get_clients({ bufnr = args.buf })[1] then
+			pcall(vim.lsp.inlay_hint.enable, true, { bufnr = args.buf })
+		end
+	end,
+})
+
+-- =============== Runners ==================
+-- Runners para diferentes linguagens, inspirados no JetBrains.
+-- Build: <leader>B | Run: <leader>R | Test: <leader>T
+
+-- Java (Gradle/Maven/JDTLS+DAP)
+vim.api.nvim_create_autocmd("FileType", {
+	group = aug("Java"),
+	pattern = "java",
+	callback = function()
+		local root = root_dir(0)
+		local use_gradle = has_file(root, { "gradlew", "build.gradle", "build.gradle.kts" })
+		local use_maven = has_file(root, { "mvnw", "pom.xml" })
+		local has_dap, dap = pcall(require, "dap")
+		local has_jdtls, jdtls = pcall(require, "jdtls")
+
+		map_buf("<leader>B", function()
+			vim.cmd.write()
+			if use_gradle then
+				termrun({ "./gradlew build -x test || gradle build -x test" }, { cwd = root })
+			elseif use_maven then
+				termrun({ "./mvnw -q -DskipTests package || mvn -q -DskipTests package" }, { cwd = root })
+			else
+				vim.notify("Java: configure Gradle/Maven para build.", vim.log.levels.WARN)
+			end
+		end, "Build project")
+
+		map_buf("<leader>T", function()
+			if use_gradle then
+				termrun({ "./gradlew test || gradle test" }, { cwd = root })
+			elseif use_maven then
+				termrun({ "./mvnw -q test || mvn -q test" }, { cwd = root })
+			elseif has_jdtls then
+				jdtls.test_class()
+			else
+				vim.notify("Java: sem runner de testes detectado.", vim.log.levels.WARN)
+			end
+		end, "Test project/class")
+
+		map_buf("<leader>R", function()
+			vim.cmd.write()
+			if has_jdtls and has_dap then
+				pcall(function()
+					require("jdtls.dap").setup_dap_main_class_configs()
+				end)
+				dap.continue()
+			elseif use_gradle then
+				termrun({ "./gradlew run || gradle run" }, { cwd = root })
+			elseif use_maven then
+				termrun({ "./mvnw -q exec:java || mvn -q exec:java" }, { cwd = root })
+			else
+				vim.notify("Java: não foi possível detectar main.", vim.log.levels.WARN)
+			end
+		end, "Run main (DAP/Gradle/Maven)")
+	end,
+})
+
+-- JS/TS
+vim.api.nvim_create_autocmd("FileType", {
+	group = aug("JS_TS"),
+	pattern = { "javascript", "typescript", "javascriptreact", "typescriptreact", "vue", "svelte" },
+	callback = function()
+		local root = root_dir(0)
+		local pkg = root .. "/package.json"
+		local use_deno = has_file(root, { "deno.json", "deno.jsonc" })
+		local runner = has_file(root, { "bun.lockb" }) and "bun"
+			or (has_file(root, { "pnpm-lock.yaml" }) and "pnpm")
+			or (has_file(root, { "yarn.lock" }) and "yarn")
+			or "npm"
+		local function script_exists(name)
+			if vim.loop.fs_stat(pkg) then
+				local ok, json = pcall(vim.json.decode, table.concat(vim.fn.readfile(pkg), "\n"))
+				return ok and json.scripts and json.scripts[name] ~= nil
+			end
+			return false
+		end
+		map_buf("<leader>B", function()
+			vim.cmd.write()
+			if use_deno then
+				termrun({ "deno task build" }, { cwd = root })
+			elseif script_exists("build") then
+				termrun({ runner .. " run build" }, { cwd = root })
+			else
+				vim.notify("JS/TS: script build não encontrado.", vim.log.levels.INFO)
+			end
+		end, "Build")
+		map_buf("<leader>T", function()
+			if use_deno then
+				termrun({ "deno test -A" }, { cwd = root })
+			elseif script_exists("test") then
+				termrun({ runner .. " test" }, { cwd = root })
+			else
+				termrun({ "node --test" }, { cwd = root })
+			end
+		end, "Test")
+		map_buf("<leader>R", function()
+			vim.cmd.write()
+			if use_deno then
+				termrun({ "deno task start" }, { cwd = root })
+			elseif script_exists("dev") then
+				termrun({ runner .. " run dev" }, { cwd = root })
+			elseif script_exists("start") then
+				termrun({ runner .. " start" }, { cwd = root })
+			else
+				termrun({ "node %" }, { cwd = root })
+			end
+		end, "Run")
+	end,
+})
+
+-- Python
+vim.api.nvim_create_autocmd("FileType", {
+	group = aug("Python"),
+	pattern = "python",
+	callback = function()
+		local root = root_dir(0)
+		local use_uv = vim.fn.executable("uv") == 1
+		local use_poetry = has_file(root, { "poetry.lock" })
+		local use_venv = has_file(root, { ".venv" }) or os.getenv("VIRTUAL_ENV")
+		local py = (use_uv and "uv run python")
+			or (use_poetry and "poetry run python")
+			or (use_venv and "python")
+			or "python3"
+		local pytest = (use_uv and "uv run pytest") or (use_poetry and "poetry run pytest") or "pytest"
+		map_buf("<leader>B", function()
+			vim.cmd.write()
+			termrun({ "true # python: noop build" }, { cwd = root })
+		end, "Build (noop)")
+		map_buf("<leader>T", function()
+			if vim.fn.executable("pytest") == 1 or use_uv or use_poetry then
+				termrun({ pytest }, { cwd = root })
+			else
+				termrun({ py .. " -m unittest" }, { cwd = root })
+			end
+		end, "Test")
+		map_buf("<leader>R", function()
+			vim.cmd.write()
+			termrun({ py .. " %" }, { cwd = root })
+		end, "Run current file")
+	end,
+})
+
+-- Go
+vim.api.nvim_create_autocmd("FileType", {
+	group = aug("Go"),
+	pattern = "go",
+	callback = function()
+		local root = root_dir(0)
+		map_buf("<leader>B", function()
+			termrun({ "go build ./..." }, { cwd = root })
+		end, "Build")
+		map_buf("<leader>T", function()
+			termrun({ "go test ./..." }, { cwd = root })
+		end, "Test")
+		map_buf("<leader>R", function()
+			termrun({ "go run ." }, { cwd = root })
+		end, "Run")
+	end,
+})
+
+-- Rust
+vim.api.nvim_create_autocmd("FileType", {
+	group = aug("Rust"),
+	pattern = "rust",
+	callback = function()
+		local root = root_dir(0)
+		map_buf("<leader>B", function()
+			termrun({ "cargo build" }, { cwd = root })
+		end, "Build")
+		map_buf("<leader>T", function()
+			termrun({ "cargo test" }, { cwd = root })
+		end, "Test")
+		map_buf("<leader>R", function()
+			termrun({ "cargo run" }, { cwd = root })
+		end, "Run")
+	end,
+})
+
+-- PHP
+vim.api.nvim_create_autocmd("FileType", {
+	group = aug("PHP"),
+	pattern = "php",
+	callback = function()
+		local root = root_dir(0)
+		map_buf("<leader>B", function()
+			if has_file(root, { "composer.json" }) then
+				termrun({ "composer install" }, { cwd = root })
+			else
+				vim.notify("PHP: composer.json não encontrado.", vim.log.levels.INFO)
+			end
+		end, "Build (composer install)")
+		map_buf("<leader>T", function()
+			if has_file(root, { "vendor/bin/phpunit", "phpunit.xml", "phpunit.xml.dist" }) then
+				termrun({ "vendor/bin/phpunit || phpunit" }, { cwd = root })
+			else
+				vim.notify("PHP: PHPUnit não detectado.", vim.log.levels.INFO)
+			end
+		end, "Test")
+		map_buf("<leader>R", function()
+			termrun({ "php %" })
+		end, "Run current file")
+	end,
+})
+
+-- Ruby
+vim.api.nvim_create_autocmd("FileType", {
+	group = aug("Ruby"),
+	pattern = "ruby",
+	callback = function()
+		local root = root_dir(0)
+		map_buf("<leader>B", function()
+			if has_file(root, { "Gemfile" }) then
+				termrun({ "bundle install" }, { cwd = root })
+			end
+		end, "Build")
+		map_buf("<leader>T", function()
+			termrun({ "bundle exec rake test || rake test || rspec" }, { cwd = root })
+		end, "Test")
+		map_buf("<leader>R", function()
+			termrun({ "ruby %" })
+		end, "Run current file")
+	end,
+})
+
+-- Shell & Lua
+vim.api.nvim_create_autocmd("FileType", {
+	group = aug("ShellLua"),
+	pattern = { "sh", "bash", "zsh", "lua" },
+	callback = function()
+		map_buf("<leader>R", function()
+			vim.cmd.write()
+			termrun({ (vim.bo.filetype == "lua") and "lua %" or "bash %" })
+		end, "Run")
+	end,
+})
+
+-- C/C++
+vim.api.nvim_create_autocmd("FileType", {
+	group = aug("C_CPP"),
+	pattern = { "c", "cpp" },
+	callback = function()
+		map_buf("<leader>B", function()
+			vim.cmd.write()
+			local base = vim.fn.expand("%:r")
+			local cmd = (vim.bo.filetype == "c") and string.format("gcc %% -O2 -Wall -o %s", base)
+				or string.format("g++ %% -O2 -std=c++20 -Wall -o %s", base)
+			termrun({ "sh -c " .. vim.fn.shellescape(cmd) })
+		end, "Build current file")
+		map_buf("<leader>R", function()
+			vim.cmd.write()
+			local base = vim.fn.expand("%:r")
+			local cmd = (vim.bo.filetype == "c") and string.format("gcc %% -O2 -Wall -o %s && ./%s", base, base)
+				or string.format("g++ %% -O2 -std=c++20 -Wall -o %s && ./%s", base, base)
+			termrun({ "sh -c " .. vim.fn.shellescape(cmd) })
+		end, "Compile & run")
+	end,
+})
+
+-- Fallback: se não houver runner para o filetype
+vim.api.nvim_create_autocmd("FileType", {
+	group = aug("GenericRun"),
+	pattern = "*",
+	callback = function()
+		if vim.fn.maparg("<leader>R", "n") == "" then
+			map_buf("<leader>R", function()
+				vim.cmd.write()
+				termrun({ "echo 'No runner for this filetype.'" })
+			end, "No runner")
+		end
+	end,
+})
