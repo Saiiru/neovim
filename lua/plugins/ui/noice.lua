@@ -1,10 +1,11 @@
+-- lua/plugins/ui/noice.lua :: UI para mensagens, cmdline e popups.
+
 return {
     {
 		"folke/noice.nvim",
         event = "VeryLazy",
         enabled = true,
 		dependencies = {
-			-- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
 			"MunifTanjim/nui.nvim",
 		},
         config = function ()
@@ -25,7 +26,7 @@ return {
 							icon = "  :",
 							lang = "lua",
 						},
-						input = { view = "cmdline_input", icon = " 󰥻 :" }, -- Used by input()
+						input = { view = "cmdline_input", icon = " 󰥻 :" },
 					},
 				},
                 views = {
@@ -55,14 +56,14 @@ return {
 					progress = {
 						enabled = true,
 					},
-					-- override markdown rendering so that **cmp** and other plugins use **Treesitter**
+					-- Sobrescreve a renderização de markdown para usar Treesitter.
 					override = {
 						["vim.lsp.util.convert_input_to_markdown_lines"] = true,
 						["vim.lsp.util.stylize_markdown"] = true,
-						["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
+						["cmp.entry.get_documentation"] = true,
 					},
                     signature = {
-                        auto_open = { enabled = false }, -- disable auto signature help on insert mode
+                        auto_open = { enabled = false }, -- Desativa a ajuda de assinatura automática.
                     },
 				},
                 routes = {

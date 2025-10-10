@@ -1,5 +1,7 @@
+-- lua/plugins/lsp/diagnostics_trouble.lua :: UI para diagnósticos e listas.
+
 return {
-  -- UI de problemas
+  -- UI para exibir diagnósticos, referências, etc.
   {
     "folke/trouble.nvim",
     version = "*",
@@ -44,13 +46,13 @@ return {
     end,
   },
 
-  -- Virtually show diagnostics em linhas (toggle)
+  -- Mostra diagnósticos virtualmente nas linhas.
   {
     "https://git.sr.ht/~whynothugo/lsp_lines.nvim",
     event = "LspAttach",
     config = function()
       require("lsp_lines").setup()
-      vim.diagnostic.config({ virtual_text = false }) -- prefer lsp_lines
+      vim.diagnostic.config({ virtual_text = false }) -- Prefere lsp_lines
 
       local on = true
       vim.keymap.set("n", "<leader>lv", function()

@@ -1,14 +1,15 @@
--- lua/util/colors.lua
+-- lua/utils/colors.lua :: Módulo central para gerenciamento de cores e temas.
+
 local M = {}
 
--- ===== PALETA BASE (neon legível, fundo escuro) =============================
+-- Paleta de cores base, inspirada em um visual "cyberpunk" com alto contraste.
 local P = {
   bg   = "#0B0A12",
   surf = "#141127",
   base = "#1A1A2E",
   float= "#1E1E2E",
   text = "#F8F8F2",
-  mut  = "#6C7086",
+  mut  = "#6C7086", -- Cor "muted" para elementos de baixa prioridade.
   dim  = "#262533",
 
   pink = "#FF2D95",
@@ -21,19 +22,21 @@ local P = {
   red  = "#FF5555",
 }
 
+-- Estado do módulo, controla a transparência e o "boost" de neon.
 local state = {
   transparent = true,
-  boost = 1,            -- 0,1,2  (2 = mais neon)
+  boost = 1, -- Níveis: 0 (sutil), 1 (normal), 2 (neon intenso)
 }
 
 local function hl(g, o) vim.api.nvim_set_hl(0, g, o) end
 
--- ====== OVERRIDES GENÉRICOS (aplicados sobre qualquer colorscheme) =========
+-- Aplica overrides de highlights sobre o tema carregado.
+-- A ideia é ter uma base consistente, independente do colorscheme.
 local function apply_core()
   local bg_float = state.transparent and "NONE" or P.float
   local bg_norm  = state.transparent and "NONE" or P.base
 
-  -- Base / Float / Separadores
+  -- UI base: Normal, Float, Separadores, etc.
   hl("Normal",       { fg = P.text, bg = bg_norm })
   hl("NormalFloat",  { fg = P.text, bg = bg_float })
   hl("FloatBorder",  { fg = P.purp, bg = "NONE" })
@@ -43,13 +46,13 @@ local function apply_core()
   hl("CursorLineNr", { fg = P.pink, bold = true })
   hl("ColorColumn",  { bg = "#17152b" })
 
-  -- Pmenu / Completion
+  -- Menus de autocompletar
   hl("Pmenu",        { bg = "#1a1830", fg = P.text })
   hl("PmenuSel",     { bg = state.boost == 2 and P.mag or P.purp, fg = P.bg, bold = true })
   hl("PmenuSbar",    { bg = P.dim })
   hl("PmenuThumb",   { bg = P.cyan })
 
-  -- Sintaxe (Treesitter)
+  -- Sintaxe via Treesitter
   hl("@comment",           { fg = P.purp, italic = true })
   hl("@keyword",           { fg = P.pink, italic = true })
   hl("@keyword.function",  { fg = P.pink, italic = true })
@@ -64,7 +67,7 @@ local function apply_core()
   hl("@parameter",         { fg = P.yel, italic = true })
   hl("@operator",          { fg = P.pink })
 
-  -- LSP semantic
+  -- Tokens semânticos do LSP
   hl("@lsp.type.namespace", { fg = P.yel, italic = true })
   hl("@lsp.type.class",     { fg = P.yel, italic = true })
   hl("@lsp.type.interface", { fg = P.yel, italic = true })
@@ -87,18 +90,18 @@ local function apply_core()
   hl("TelescopeSelection",    { bg = P.blue, fg = P.bg, bold = true })
   hl("TelescopeMatching",     { fg = P.grn, bold = true })
 
-  -- Snacks / Noice / Notify (se existirem)
+  -- Outros plugins
   hl("SnacksNotifierBorderInfo", { fg = P.cyan })
   hl("SnacksNotifierIconInfo",   { fg = P.cyan })
   hl("NoiceCmdlinePopupBorder",  { fg = P.purp })
   hl("NotifyBackground",         { bg = "NONE" })
 
-  -- GitSigns
+  -- Git
   hl("GitSignsAdd",    { fg = P.grn })
   hl("GitSignsChange", { fg = P.yel })
   hl("GitSignsDelete", { fg = P.red })
 
-  -- Terminal palette
+  -- Paleta do terminal integrado
   vim.g.terminal_color_0  = P.bg
   vim.g.terminal_color_1  = P.pink
   vim.g.terminal_color_2  = P.grn
@@ -116,11 +119,13 @@ local function apply_core()
   vim.g.terminal_color_14 = P.purp
   vim.g.terminal_color_15 = "#FFFFFF"
 
-  -- Limpeza visual
+  -- Remove o "~" no final do buffer.
   hl("EndOfBuffer", { fg = state.transparent and "NONE" or P.bg })
 end
 
--- ===== API ================================================================
+-- API pública do módulo
+
+-- Define o colorscheme e aplica os overrides.
 function M.set(theme)
   theme = theme or (vim.g.neosairu_theme or "cyberdream")
   vim.schedule(function()
@@ -129,25 +134,28 @@ function M.set(theme)
   end)
 end
 
-function M.transparent(mode)   -- true/false/"toggle"
+-- Ativa/desativa a transparência.
+function M.transparent(mode)
   if mode == "toggle" then state.transparent = not state.transparent
   else state.transparent = not not mode end
   apply_core()
 end
 
-function M.boost(level)        -- 0/1/2
+-- Ajusta o nível de "boost" das cores.
+function M.boost(level)
   state.boost = math.max(0, math.min(2, tonumber(level) or 1))
   apply_core()
 end
 
+-- Ponto de entrada da configuração.
 function M.setup()
-  -- compat com tua função ColorMyPencils
+  -- Comando global para trocar de tema.
   _G.ColorMyPencils = function(color)
     M.set(color or "rose-pine")
     M.transparent(true)
   end
 
-  -- comandos
+  -- Comandos de usuário para interagir com o módulo.
   vim.api.nvim_create_user_command("NeoTheme", function(o) M.set(o.args ~= "" and o.args or nil) end, { nargs = "?" })
   vim.api.nvim_create_user_command("NeoTransparent", function(o)
     local arg = o.args
@@ -157,7 +165,7 @@ function M.setup()
   end, { nargs = "?" })
   vim.api.nvim_create_user_command("NeoBoost", function(o) M.boost(o.args) end, { nargs = "?" })
 
-  -- re-aplica quando ColorScheme mudar
+  -- Garante que os overrides sejam reaplicados ao mudar de tema.
   vim.api.nvim_create_autocmd("ColorScheme", {
     group = vim.api.nvim_create_augroup("neosairu_colors", { clear = true }),
     callback = function() apply_core() end,

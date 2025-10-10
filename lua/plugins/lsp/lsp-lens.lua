@@ -1,3 +1,7 @@
+-- lua/plugins/lsp/lsp-lens.lua :: Mostra informações de referências e implementações como "Code Lens".
+
+-- lua/plugins/lsp/lsp-lens.lua :: Mostra informações de referências e implementações como "Code Lens".
+
 return {
   "VidocqH/lsp-lens.nvim",
   event = "LspAttach",
@@ -7,24 +11,24 @@ return {
   },
   opts = {
     enable = true,
-    include_declaration = true,     -- mostra contagem considerando declarações
+    include_declaration = true,
     sections = {
-      definition   = true,          -- exibe “def” (defs)
-      references   = true,          -- exibe “ref” (referências)
-      implements   = true,          -- exibe “impl” (implementações)
-      git_authors  = false,         -- pode habilitar se quiser autor por linha
+      definition   = true,
+      references   = true,
+      implements   = true,
+      git_authors  = true, -- Habilitado para emular o JetBrains.
     },
     ignore_filetype = {
       "TelescopePrompt", "snacks_dashboard", "oil", "NvimTree", "Trouble",
     },
   },
-  config = function(_, opts)
+  config = function(_, opts) 
     local lens = require("lsp-lens")
     lens.setup(opts)
 
-    -- Refresh ao mexer no buffer (bom para Java, Python, TS/JS, Go, C/C++)
+    -- Atualiza as lentes de forma mais sutil, como no JetBrains.
     local grp = vim.api.nvim_create_augroup("LspLensRefresh", { clear = true })
-    vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave", "TextChanged", "LspAttach" }, {
+    vim.api.nvim_create_autocmd({ "CursorHold", "BufWritePost" }, {
       group = grp,
       callback = function()
         pcall(lens.refresh)
@@ -32,4 +36,3 @@ return {
     })
   end,
 }
-

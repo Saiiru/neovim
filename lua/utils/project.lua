@@ -1,5 +1,8 @@
+-- lua/utils/project.lua :: Utilitário para configurações por projeto.
+
 local M = {}
 
+-- Escaneia um diretório por arquivos .lua
 local function scan_directory(directory)
   local files = {}
   local handle = io.popen(string.format("ls -1 %s/*.lua 2>/dev/null", directory))
@@ -15,11 +18,13 @@ local function scan_directory(directory)
   return files
 end
 
+-- Retorna os plugins extras disponíveis.
 local function get_available_plugins()
   local plugins_dir = vim.fn.stdpath "config" .. "/lua/plugins/extra"
   return scan_directory(plugins_dir)
 end
 
+-- Retorna os LSPs extras disponíveis.
 local function get_available_lsp()
   local lsp_dir = vim.fn.stdpath "config" .. "/lsp"
   return scan_directory(lsp_dir)
@@ -28,6 +33,7 @@ end
 local available_plugins = get_available_plugins()
 local available_lsp = get_available_lsp()
 
+-- Mostra uma janela de ajuda com as opções disponíveis.
 local function show_help()
   local help_text = [[
 Setup plugins and LSP servers for project-specific settings.
@@ -93,6 +99,7 @@ vim.g.enable_extra_plugins = {
   }
 end
 
+-- Cria o arquivo .nvim-config.lua com base na seleção do usuário.
 local function create_nvim_config()
   -- Get plugin selection
   vim.ui.input({

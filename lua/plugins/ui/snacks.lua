@@ -1,10 +1,10 @@
+-- lua/plugins/ui/snacks.lua :: UI para notificações, dashboard, etc.
+
 return {
-    -- HACK: docs @ https://github.com/folke/snacks.nvim/blob/main/docs
     {
         "folke/snacks.nvim",
         priority = 1000,
         lazy = false,
-        -- NOTE: Options
         opts = {
             styles = {
                 input = {
@@ -14,7 +14,6 @@ return {
                     },
                 }
             },
-            -- Snacks Modules
             input = {
                 enabled = true,
             },
@@ -22,7 +21,6 @@ return {
                 enabled = true,
                 exclude = { "latex" },
             },
-            -- HACK: read picker docs @ https://github.com/folke/snacks.nvim/blob/main/docs/picker.md
             picker = {
                 enabled = true,
                 matchers = {
@@ -37,9 +35,7 @@ return {
                     },
                 },
                 layout = {
-                    -- presets options : "default" , "ivy" , "ivy-split" , "telescope" , "vscode", "select" , "sidebar"
-                    -- override picker layout in keymaps function as a param below
-                    preset = "telescope", -- defaults to this layout unless overidden
+                    preset = "telescope",
                     cycle = false,
                 },
                 layouts = {
@@ -61,7 +57,7 @@ return {
                         }
                     },
                     telescope = {
-                        reverse = true, -- set to false for search bar to be on top 
+                        reverse = true,
                         layout = {
                             box = "horizontal",
                             backdrop = false,
@@ -105,8 +101,8 @@ return {
             image = {
                 enabled = true,
                 doc = {
-                    float = true, -- show image on cursor hover
-                    inline = false, -- show image inline
+                    float = true,
+                    inline = false,
                     max_width = 50,
                     max_height = 30,
                     wo = {
@@ -136,7 +132,6 @@ return {
                 },
             },
         },
-        -- NOTE: Keymaps
         keys = {
             { "<leader>lg", function() require("snacks").lazygit() end, desc = "Lazygit" },
             { "<leader>gl", function() require("snacks").lazygit.log() end, desc = "Lazygit Logs" },
@@ -158,7 +153,7 @@ return {
             { "<leader>vh", function() require("snacks").picker.help() end, desc = "Help Pages" },
         }
     },
-    -- NOTE: todo comments w/ snacks
+    -- Integração com todo-comments.
     {
         "folke/todo-comments.nvim",
         event = { "BufReadPre", "BufNewFile" },

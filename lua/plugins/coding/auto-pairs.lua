@@ -1,3 +1,5 @@
+-- lua/plugins/coding/auto-pairs.lua :: Fechamento automático de pares ([], (), {}, etc.)
+
 return {
     "windwp/nvim-autopairs",
     event = { "InsertEnter" },
@@ -5,22 +7,19 @@ return {
         "hrsh7th/nvim-cmp",
     },
     config = function()
-        local autopairs = require("nvim-autopairs") -- import nvim-autopairs
+        local autopairs = require("nvim-autopairs")
 
-        -- setup autopairs
         autopairs.setup({
-            check_ts = true, -- treesitter enabled
+            check_ts = true, -- Usa o Treesitter para ser mais inteligente.
             ts_config = {
-                lua = { "string" }, -- dont add pairs in lua string treesitter nodes
-                -- javascript = { "template_string" }, -- dont add pairs in javscript template_string treesitter nodes
-                java = false, -- dont check treesitter on java
+                lua = { "string" }, -- Não adiciona pares dentro de strings em Lua.
+                java = false, -- Desativa o check do Treesitter para Java.
             },
         })
-        -- import nvim-autopairs completion functionality
+
+        -- Integração com o nvim-cmp para que o autopairs funcione bem com o autocompletar.
         local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-        -- import nvim-cmp plugin (completions plugin)
         local cmp = require("cmp")
-        -- make autopairs and completion work together
         cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
     end,
 }

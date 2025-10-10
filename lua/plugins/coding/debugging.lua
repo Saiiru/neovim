@@ -1,3 +1,5 @@
+-- lua/plugins/coding/debugging.lua :: Configuração para debugging com nvim-dap.
+
 return {
 	{
 		"mfussenegger/nvim-dap",
@@ -14,6 +16,7 @@ return {
 			require("dap-go").setup()
 			require("dapui").setup()
 
+			-- Abre a UI do DAP automaticamente ao iniciar uma sessão de debug.
 			dap.listeners.before.attach.dapui_config = function()
 				dapui.open()
 			end

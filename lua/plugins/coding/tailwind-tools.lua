@@ -1,4 +1,7 @@
+-- lua/plugins/coding/tailwind-tools.lua :: Ferramentas para desenvolvimento com TailwindCSS.
+
 return {
+    -- Mostra as cores do Tailwind no autocompletar.
     "roobert/tailwindcss-colorizer-cmp.nvim",
     {
         "NvChad/nvim-colorizer.lua",

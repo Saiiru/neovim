@@ -1,21 +1,22 @@
+-- lua/plugins/coding/treesitter.lua :: Configuração do Treesitter para syntax highlighting e mais.
+
 return {
     {
         "nvim-treesitter/nvim-treesitter",
         event = { "BufReadPre", "BufNewFile" },
         build = ":TSUpdate",
         config = function()
-            -- import nvim-treesitter plugin
             local treesitter = require("nvim-treesitter.configs")
 
-            -- configure treesitter
-            treesitter.setup({ -- enable syntax highlighting
+            treesitter.setup({ 
+                -- Ativa o syntax highlighting.
                 highlight = {
                     enable = true,
                 },
-                -- enable indentation
+                -- Ativa a indentação baseada no Treesitter.
                 indent = { enable = true },
 
-                -- ensure these languages parsers are installed
+                -- Lista de parsers a serem instalados.
                 ensure_installed = {
                     "json",
                     "javascript",
@@ -44,6 +45,7 @@ return {
                     "rust",
                     "ron",
                 },
+                -- Seleção incremental de nós da árvore de sintaxe.
                 incremental_selection = {
                     enable = true,
                     keymaps = {
@@ -56,25 +58,24 @@ return {
             })
         end,
     },
-    -- NOTE: js,ts,jsx,tsx Auto Close Tags
+    -- Auto-fechamento de tags HTML/XML.
     {
         "windwp/nvim-ts-autotag",
         enabled = true,
         ft = { "html", "xml", "javascript", "typescript", "javascriptreact", "typescriptreact", "svelte" },
         config = function()
-            -- Independent nvim-ts-autotag setup
             require("nvim-ts-autotag").setup({
                 opts = {
-                    enable_close = true,           -- Auto-close tags
-                    enable_rename = true,          -- Auto-rename pairs
-                    enable_close_on_slash = false, -- Disable auto-close on trailing `</`
+                    enable_close = true,
+                    enable_rename = true,
+                    enable_close_on_slash = false,
                 },
                 per_filetype = {
                     ["html"] = {
-                        enable_close = true, -- Disable auto-closing for HTML
+                        enable_close = true,
                     },
                     ["typescriptreact"] = {
-                        enable_close = true, -- Explicitly enable auto-closing (optional, defaults to `true`)
+                        enable_close = true,
                     },
                 },
             })

@@ -1,3 +1,5 @@
+-- lua/plugins/coding/formatting.lua :: Configuração de formatação com conform.nvim.
+
 return {
 	"stevearc/conform.nvim",
 	event = { "BufReadPre", "BufNewFile" },
@@ -5,6 +7,7 @@ return {
 		local conform = require("conform")
 
 		conform.setup({
+			-- Define formatters condicionais.
 			formatters = {
 				["markdown-toc"] = {
 					condition = function(_, ctx)
@@ -24,6 +27,7 @@ return {
 					end,
 				},
 			},
+			-- Associa formatters a filetypes.
 			formatters_by_ft = {
 				javascript = { "biome-check" },
 				typescript = { "biome-check" },
@@ -38,18 +42,11 @@ return {
 				graphql = { "prettier" },
 				liquid = { "prettier" },
 				lua = { "stylua" },
-				-- python = { "black" },
 				markdown = { "prettier", "markdown-toc" },
-				-- ["markdown.mdx"] = { "prettier", "markdownlint", "markdown-toc" },
 			},
-			-- format_on_save = {
-			-- 	lsp_fallback = true,
-			-- 	async = false,
-			-- 	timeout_ms = 1000,
-			-- },
 		})
 
-		-- Configure individual formatters
+		-- Configurações específicas para alguns formatters.
 		conform.formatters.prettier = {
 			args = {
 				"--stdin-filepath",
@@ -63,17 +60,16 @@ return {
 		conform.formatters.shfmt = {
 			prepend_args = { "-i", "4" },
 		}
-		conform.formatters = {
-			google_java_format = {
-				prepend_args = { "--aosp" }, -- opcional (estilo AOSP)
-			},
+		conform.formatters.google_java_format = {
+			prepend_args = { "--aosp" }, -- Estilo AOSP
 		}
+
 		vim.keymap.set({ "n", "v" }, "<leader>mp", function()
 			conform.format({
 				lsp_fallback = true,
 				async = false,
 				timeout_ms = 1000,
 			})
-		end, { desc = "Format whole file or range (in visual mode) with" })
+		end, { desc = "Format file or range" })
 	end,
 }

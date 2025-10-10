@@ -1,7 +1,10 @@
+-- lua/plugins/coding/actions-preview.lua :: Preview de code actions com Telescope.
+
 return {
   "aznhe21/actions-preview.nvim",
   event = "LspAttach",
   opts = {
+    -- Configura a aparência do Telescope para o preview.
     telescope = {
       sorting_strategy = "ascending",
       layout_strategy = "vertical",
@@ -16,6 +19,7 @@ return {
   },
   config = function(_, opts)
     require("actions-preview").setup(opts)
+    -- Mapeia a tecla para acionar o preview de code actions.
     vim.keymap.set({ "n", "v" }, "<leader>ca", function()
       require("actions-preview").code_actions()
     end, { desc = "Code Actions (preview)" })

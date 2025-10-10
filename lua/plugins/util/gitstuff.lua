@@ -1,5 +1,7 @@
+-- lua/plugins/util/gitstuff.lua :: Integração com Git.
+
 return {
-    -- for all git plugins 
+	-- Interface para o Git.
 	{
 		"tpope/vim-fugitive",
         config = function()
@@ -23,17 +25,18 @@ return {
                         vim.cmd.Git('push')
                     end, opts)
 
-                    -- NOTE: rebase always
+                    -- Pull com rebase.
                     vim.keymap.set("n", "<leader>p", function()
                         vim.cmd.Git({'pull',  '--rebase'})
                     end, opts)
 
-                    -- NOTE: easy set up branch that wasn't setup properly
+                    -- Faz o push para uma branch que não está configurada.
                     vim.keymap.set("n", "<leader>t", ":Git push -u origin ", opts);
                 end,
             })
         end,
     },
+	-- Mostra informações do Git na signcolumn.
 	{
 		"lewis6991/gitsigns.nvim",
 		event = { "BufReadPre", "BufNewFile" },
@@ -45,23 +48,23 @@ return {
 					vim.keymap.set(mode, l, r, { buffer = bufnr, desc = desc })
 				end
 
-				-- Navigation
+				-- Navegação entre hunks.
 				map("n", "]h", gs.next_hunk, "Next Hunk")
 				map("n", "[h", gs.prev_hunk, "Prev Hunk")
 
-				-- Actions
+				-- Ações.
 				map("n", "<leader>gs", gs.stage_hunk, "Stage hunk")
 				map("n", "<leader>gr", gs.reset_hunk, "Reset hunk")
 
-				map("v", "<leader>gs", function() -- stage selected hunk
+				map("v", "<leader>gs", function() -- Stage do hunk selecionado.
 					gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
 				end, "Stage hunk")
-				map("v", "<leader>gr", function() -- reset selected hunk
+				map("v", "<leader>gr", function() -- Reset do hunk selecionado.
 					gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
 				end, "Reset hunk")
 
-				map("n", "<leader>gS", gs.stage_buffer, "Stage buffer") -- stage whole buffer
-				map("n", "<leader>gR", gs.reset_buffer, "Reset buffer") -- unstage whole buffer
+				map("n", "<leader>gS", gs.stage_buffer, "Stage buffer")
+				map("n", "<leader>gR", gs.reset_buffer, "Reset buffer")
 				map("n", "<leader>gu", gs.undo_stage_hunk, "Undo stage hunk")
 				map("n", "<leader>gp", gs.preview_hunk, "Preview hunk")
 				map("n", "<leader>gbl", function() gs.blame_line({ full = true }) end, "Blame line")
@@ -74,10 +77,9 @@ return {
 			end,
 		},
 	},
-    -- Lazy git 
+    -- Interface para o lazygit.
     {
         "kdheepak/lazygit.nvim",
-        --NOTE: Trying out lazygit in Snacks nvim
         enabled = false,
         cmd = {
             "LazyGit",
@@ -86,11 +88,9 @@ return {
             "LazyGitFilter",
             "LazyGitFilterCurrentFile",
         },
-        -- window border thing
         dependencies = {
             "nvim-lua/plenary.nvim",
         },
-        -- setting up with keys={} allows plugin to load when command runs at the start
         keys = {
             { "<leader>lg", "<cmd>LazyGit<cr>", desc = "Open lazy git" },
         },

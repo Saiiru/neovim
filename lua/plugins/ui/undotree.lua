@@ -1,3 +1,5 @@
+-- lua/plugins/ui/undotree.lua :: Visualizador de histórico de "undo".
+
 return {
     "mbbill/undotree",
     config = function()

@@ -1,9 +1,10 @@
+-- lua/plugins/ui/showkeys.lua :: Mostra as teclas pressionadas em tempo real.
+
 return {
     {
         "nvzone/showkeys",
         cmd = "ShowkeysToggle",
         opts = {
-            -- position = "bottom-right",
             maxkeys = 3,
             show_count = true,
             winopts = {

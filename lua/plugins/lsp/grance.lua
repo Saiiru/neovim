@@ -1,3 +1,5 @@
+-- lua/plugins/lsp/grance.lua :: UI para definições, referências e implementações.
+
 return {
   "dnlhc/glance.nvim",
   cmd = "Glance",

@@ -1,4 +1,5 @@
--- Terminal Float State (taught by tj)
+-- lua/terminalpop.lua :: Terminal flutuante.
+
 vim.keymap.set("t", "<esc><esc>", "<c-\\><c-n>")
 
 local state = {
@@ -45,13 +46,13 @@ local pop_terminal = function()
             vim.cmd.terminal()
         end
 
-        -- Start float terminal in insert mode
+        -- Inicia o terminal flutuante no modo de inserção.
         vim.api.nvim_set_current_win(state.floating.win)
         vim.cmd("startinsert!")
 
     else
         vim.api.nvim_win_hide(state.floating.win)
-    end
+    }
 end
 
 vim.api.nvim_create_user_command("Terminalpop", pop_terminal, {})

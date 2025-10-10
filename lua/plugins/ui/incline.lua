@@ -1,5 +1,6 @@
+-- lua/plugins/ui/incline.lua :: Exibe o nome do arquivo no canto superior direito.
+
 return {
-    -- Adding a filename to the Top Right
     {
         "b0o/incline.nvim",
         enabled = true,
@@ -24,7 +25,7 @@ return {
                     return {
                         { " ", icon, " ", guifg = icon_color },
                         { filename, gui = modified and "bold" or "none" },
-                        modified and { " [+]", guifg = "#ff9e64" } or "",
+                        modified and { " [+]=", guifg = "#ff9e64" } or "",
                         " ",
                     }
                 end,

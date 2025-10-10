@@ -1,3 +1,5 @@
+-- lua/plugins/ui/vim-maximizer.lua :: Maximiza e minimiza splits.
+
 return {
 	"szw/vim-maximizer",
 	keys = {

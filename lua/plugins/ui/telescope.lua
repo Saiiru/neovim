@@ -1,31 +1,23 @@
--- =============================================================================
---  Telescope — busca poderosa com integrações cuidadosas
---  -----------------------------------------------------------------------------
---  Decisões:
---   - Carrega extensões com pcall, evitando erro caso não estejam instaladas.
---   - Defaults ajustados p/ performance e UX (fzf-native, live grep com args).
---   - Keymaps ficam aqui (keys = {}), não no core, p/ lazy-load correto.
--- =============================================================================
+-- lua/plugins/ui/telescope.lua :: Fuzzy finder com integrações.
+
 return {
   "nvim-telescope/telescope.nvim",
   event = "VeryLazy",
-  branch = "master", -- estável: '0.1.x'; master corrige avisos recentes do Neovim
+  branch = "master",
   dependencies = {
     "nvim-lua/plenary.nvim",
     { "nvim-telescope/telescope-fzf-native.nvim", build = "make", cond = function() return vim.fn.executable("make") == 1 end },
     "nvim-telescope/telescope-ui-select.nvim",
     "nvim-telescope/telescope-live-grep-args.nvim",
-    -- extensões opcionais (descomente se usar):
     "debugloop/telescope-undo.nvim",
     "nvim-telescope/telescope-file-browser.nvim",
-    -- "AckslD/nvim-neoclip.lua",
   },
 
-  -- Keymaps do líder (Find) — ficam aqui para lazy-load
   keys = (function()
     local builtin = require("telescope.builtin")
     local lga = function() return require("telescope").extensions.live_grep_args.live_grep_args() end
 
+    -- Busca arquivos do git ou todos os arquivos se não estiver em um repositório git.
     local function smart_files()
       local gitdir = vim.fn.finddir(".git", ".;")
       if gitdir ~= "" then
@@ -36,34 +28,25 @@ return {
     end
 
     return {
-      -- Arquivos / Projetos
-      { "<leader>ff", smart_files,                                         desc = "Find files (smart git)" },
-      { "<leader>fF", function() builtin.find_files({ hidden = true }) end,desc = "Find files (hidden)" },
-      { "<leader>fr", builtin.oldfiles,                                    desc = "Recent files" },
-      { "<leader>fm", builtin.marks,                                       desc = "Marks" },
-      { "<leader>fR", builtin.registers,                                   desc = "Registers" },
-
-      -- Grep
-      { "<leader>fg", lga,                                                 desc = "Live grep (args)" },
+      { "<leader>ff", smart_files, desc = "Find files (smart git)" },
+      { "<leader>fF", function() builtin.find_files({ hidden = true }) end, desc = "Find files (hidden)" },
+      { "<leader>fr", builtin.oldfiles, desc = "Recent files" },
+      { "<leader>fm", builtin.marks, desc = "Marks" },
+      { "<leader>fR", builtin.registers, desc = "Registers" },
+      { "<leader>fg", lga, desc = "Live grep (args)" },
       { "<leader>f/", function()
           builtin.current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({ previewer = false }))
-        end,                                                               desc = "Fuzzy in current buffer" },
-
-      -- LSP (somente pickers; integra com LSP já carregado)
-      { "<leader>fs", builtin.lsp_document_symbols,                        desc = "LSP document symbols" },
-      { "<leader>fS", builtin.lsp_workspace_symbols,                       desc = "LSP workspace symbols" },
-
-      -- Git
-      { "<leader>gc", builtin.git_commits,                                 desc = "Git commits" },
-      { "<leader>gC", builtin.git_bcommits,                                desc = "Git commits (buffer)" },
-      { "<leader>gs", builtin.git_status,                                  desc = "Git status" },
-      { "<leader>gb", builtin.git_branches,                                desc = "Git branches" },
-
-      -- Diversos
-      { "<leader>fk", builtin.keymaps,                                     desc = "Keymaps" },
-      { "<leader>fh", builtin.help_tags,                                   desc = "Help tags" },
-      { "<leader>fp", builtin.pickers,                                     desc = "Previous pickers" },
-      { "<leader>f.", builtin.resume,                                      desc = "Resume last picker" },
+        end, desc = "Fuzzy in current buffer" },
+      { "<leader>fs", builtin.lsp_document_symbols, desc = "LSP document symbols" },
+      { "<leader>fS", builtin.lsp_workspace_symbols, desc = "LSP workspace symbols" },
+      { "<leader>gc", builtin.git_commits, desc = "Git commits" },
+      { "<leader>gC", builtin.git_bcommits, desc = "Git commits (buffer)" },
+      { "<leader>gs", builtin.git_status, desc = "Git status" },
+      { "<leader>gb", builtin.git_branches, desc = "Git branches" },
+      { "<leader>fk", builtin.keymaps, desc = "Keymaps" },
+      { "<leader>fh", builtin.help_tags, desc = "Help tags" },
+      { "<leader>fp", builtin.pickers, desc = "Previous pickers" },
+      { "<leader>f.", builtin.resume, desc = "Resume last picker" },
     }
   end)(),
 
@@ -72,14 +55,11 @@ return {
     local actions = require("telescope.actions")
     local conf = require("telescope.config")
 
-    -- Extend vimgrep arguments (ripgrep)
     local vimgrep_arguments = vim.deepcopy(conf.values.vimgrep_arguments)
-    -- incluímos ocultos, mas filtramos .git
     table.insert(vimgrep_arguments, "--hidden")
     table.insert(vimgrep_arguments, "--glob")
     table.insert(vimgrep_arguments, "!**/.git/*")
 
-    -- Integração opcional com Trouble (se instalado)
     local trouble_ok, trouble_actions = pcall(function()
       return require("trouble.providers.telescope")
     end)
@@ -116,12 +96,11 @@ return {
             ["<C-k>"] = actions.move_selection_previous,
             ["<C-n>"] = actions.cycle_history_next,
             ["<C-p>"] = actions.cycle_history_prev,
-            ["<C-u>"] = false,                   -- deixe <C-u> p/ limpador de linha do insert nativo
-            ["<C-d>"] = actions.delete_buffer,   -- em buffers picker
+            ["<C-u>"] = false,
+            ["<C-d>"] = actions.delete_buffer,
             ["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
-            ["<C-t>"] = with_trouble(actions.select_default), -- abre no Trouble se presente
+            ["<C-t>"] = with_trouble(actions.select_default),
             ["<Esc>"] = actions.close,
-            -- multiselect: <Tab> marca; <CR> abre todos marcados
             ["<Tab>"] = actions.toggle_selection + actions.move_selection_next,
             ["<S-Tab>"] = actions.toggle_selection + actions.move_selection_previous,
             ["<CR>"] = function(prompt_bufnr)
@@ -176,13 +155,11 @@ return {
       },
     })
 
-    -- Carrega extensões com pcall para evitar erro se ausentes
     pcall(telescope.load_extension, "fzf")
     pcall(telescope.load_extension, "ui-select")
     pcall(telescope.load_extension, "live_grep_args")
     pcall(telescope.load_extension, "undo")
     pcall(telescope.load_extension, "file_browser")
-    -- pcall(telescope.load_extension, "neoclip")
   end,
 }
 

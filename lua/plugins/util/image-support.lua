@@ -1,9 +1,9 @@
+-- lua/plugins/util/image-support.lua :: Suporte para colar imagens do clipboard.
+
 return {
-    -- requires pngpaste ( brew install pngpaste )
     "HakonHarnes/img-clip.nvim",
     event = "VeryLazy",
     keys = {
-        -- suggested keymap
         { "<leader>pi", "<cmd>PasteImage<cr>", desc = "Paste image from system clipboard" },
     },
     opts = {
@@ -24,7 +24,7 @@ return {
 
             dir_path = function()
                 local cwd = vim.fn.getcwd()
-                local vault_name = "sethVault"  -- obsidian vault dir 
+                local vault_name = "sethVault"  -- Diretório do vault do Obsidian.
                 local vault_images_path = "Archives/All-Vault-Images/"
 
                 if cwd:match(vault_name) then
@@ -41,7 +41,5 @@ return {
                 download_images = true,
             },
         },
-        -- add options here
-        -- or leave it empty to use the default settings
     },
 }

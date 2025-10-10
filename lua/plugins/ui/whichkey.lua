@@ -1,9 +1,5 @@
--- =============================================================================
---  Which-key — legendas e organização de líderes
---  -----------------------------------------------------------------------------
---  - Este arquivo só registra grupos (spec) e ajustes de janela/estética.
---  - As teclas “de verdade” de cada plugin devem ficar nos specs deles (via keys={}).
--- =============================================================================
+-- lua/plugins/ui/whichkey.lua :: Mostra um popup com os keymaps disponíveis.
+
 return {
 	"folke/which-key.nvim",
 	event = "VeryLazy",
@@ -23,7 +19,7 @@ return {
 		icons = {
 			breadcrumb = "»",
 			separator = "➜",
-			group = " ", -- ícone para grupos
+			group = " ",
 		},
 		win = {
 			border = "rounded",
@@ -31,7 +27,7 @@ return {
 			title = true,
 			title_pos = "center",
 			zindex = 60,
-			padding = { 1, 2 }, -- linhas, colunas
+			padding = { 1, 2 },
 		},
 		layout = {
 			height = { min = 4, max = 30 },
@@ -42,34 +38,21 @@ return {
 		show_help = true,
 		show_keys = true,
 
-		-- Grupos semânticos (apenas rótulos). As teclas reais vêm dos plugins/core.
+		-- Grupos semânticos para organizar os keymaps.
 		spec = {
-			-- Navegação/Busca (Telescope)
 			{ "<leader>f", group = "Find / Telescope  " },
-
 			{ "<leader>g", group = "Git  " },
-
 			{ "<leader>l", group = "LSP  " },
-
 			{ "<leader>x", group = "Diagnostics / Lists  " },
-
 			{ "<leader>b", group = "Buffers  " },
 			{ "<leader>t", group = "Tabs / Tests  " },
-
 			{ "<leader>w", group = "Windows / Splits  󰕮" },
-
 			{ "<leader>e", group = "Explorer / Files  " },
-
 			{ "<leader>d", group = "Debug  " },
-
 			{ "<leader>s", group = "Session / Workspace  " },
-
 			{ "<leader>;", group = "Terminal  " },
-
 			{ "<leader>c", group = "Code / Format  󰆴" },
-
 			{ "<leader>u", group = "UI Toggles  " },
-
 			{ "<leader>a", group = "AI  " },
 		},
 	},

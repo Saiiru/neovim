@@ -1,13 +1,9 @@
--- lua/plugins/coding/ai.lua
--- Copilot (ghost), CopilotChat (chat), CodeCompanion (orquestrador usando Copilot),
--- Avante (opcional). Tudo sem uso de tokens por requisição (Copilot assinatura).
+-- lua/plugins/coding/ai.lua :: Integração com assistentes de IA (Copilot, etc.)
 
 local mapping_key_prefix = vim.g.ai_prefix_key or "<leader>A"
 
 return {
-  ---------------------------------------------------------------------------
-  -- WHICH-KEY groups p/ AI
-  ---------------------------------------------------------------------------
+  -- Adiciona um grupo de keymaps para IA no which-key.
   {
     "folke/which-key.nvim",
     optional = true,
@@ -20,30 +16,25 @@ return {
     },
   },
 
-  ---------------------------------------------------------------------------
-  -- Render bonitinho o markdown das respostas
-  ---------------------------------------------------------------------------
+  -- Renderiza o markdown nas respostas da IA.
   {
     "MeanderingProgrammer/render-markdown.nvim",
     ft = { "markdown", "copilot-chat", "codecompanion" },
     opts = { file_types = { "markdown", "copilot-chat", "codecompanion" } },
   },
 
-  ---------------------------------------------------------------------------
-  -- Copilot (ghost text) via copilot.lua (não conflita com github/copilot.vim)
-  ---------------------------------------------------------------------------
+  -- Sugestões de código (ghost text) com Copilot.
   {
     "zbirenbaum/copilot.lua",
-    lazy = false, -- garante que carregue cedo (p/ Avante também enxergar)
+    lazy = false, -- Carrega cedo para que outros plugins de IA o encontrem.
     opts = {
       panel = { enabled = false },
       suggestion = {
         enabled = true,
         auto_trigger = true,
         debounce = 75,
-        -- Mudamos os mapas p/ evitar DUPLICATE KEYMAP no <M-CR>
         keymap = {
-          accept = "<C-l>",        -- antes era <M-CR>, gerava duplicado
+          accept = "<C-l>",
           accept_word = "<M-w>",
           accept_line = "<M-l>",
           next = "<M-]>",
@@ -60,15 +51,11 @@ return {
     },
   },
 
-
-
-  ---------------------------------------------------------------------------
-  -- CopilotChat (chat na lateral, aceita diff, etc.)
-  ---------------------------------------------------------------------------
+  -- Chat com Copilot.
   {
     "CopilotC-Nvim/CopilotChat.nvim",
     branch = "main",
-    build = "make tiktoken", -- mac/linux
+    build = "make tiktoken", -- Dependência para o tokenizer.
     dependencies = { "nvim-lua/plenary.nvim", "github/copilot.vim" },
     keys = {
       { "<leader>cv", "<cmd>CopilotChatToggle<cr>", desc = "Toggle chat" },
@@ -111,9 +98,7 @@ return {
     },
   },
 
-  ---------------------------------------------------------------------------
-  -- CodeCompanion (usando Copilot como provider) - SEM adapters.* deprecated
-  ---------------------------------------------------------------------------
+  -- Orquestrador de IA que usa Copilot como provider.
   {
     "olimorris/codecompanion.nvim",
     dependencies = {
@@ -132,7 +117,6 @@ return {
       { mapping_key_prefix .. "m", "<cmd>CodeCompanion /staged-commit<cr>",     desc = "CC: Commit (staged)" },
     },
     opts = function()
-      -- Sem adapters.* (deprecated). Deixa o provider "copilot" direto nas estratégias.
       local SYSTEM_PROMPT = string.format([[
 You are "GitHub Copilot" inside Neovim on a %s machine.
 Keep answers short, code-first, and use markdown fences with language.
@@ -209,9 +193,7 @@ Do not wrap whole response in triple backticks.
     end,
   },
 
-  ---------------------------------------------------------------------------
-  -- Avante (opcional) — UI estilo Cursor. Provider padrão = Copilot.
-  ---------------------------------------------------------------------------
+  -- UI alternativa para IA, estilo Cursor.
   {
     "yetone/avante.nvim",
     enabled = vim.g.use_avante == true, -- ative com: :lua vim.g.use_avante = true

@@ -1,3 +1,5 @@
+-- lua/plugins/coding/neotest.lua :: Framework de testes com suporte a múltiplos runners.
+
 return {
 	"nvim-neotest/neotest",
 	dependencies = { "rcasia/neotest-java", "nvim-neotest/nvim-nio" },

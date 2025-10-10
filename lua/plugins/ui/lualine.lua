@@ -1,9 +1,11 @@
+-- lua/plugins/ui/lualine.lua :: Barra de status customizável.
+
 return {
     "nvim-lualine/lualine.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
         local lualine = require("lualine")
-        local lazy_status = require("lazy.status") -- to configure lazy pending updates count
+        local lazy_status = require("lazy.status")
         local ok, navic = pcall(require, "nvim-navic")
         if ok then
             require("lualine").setup({
@@ -53,8 +55,6 @@ return {
         local mode = {
             'mode',
             fmt = function(str)
-                -- return ' '
-                -- displays only the first character of the mode
                 return ' ' .. str
             end,
         }
@@ -62,8 +62,7 @@ return {
         local diff = {
             'diff',
             colored = true,
-            symbols = { added = ' ', modified = ' ', removed = ' ' }, -- changes diff symbols
-            -- cond = hide_in_width,
+            symbols = { added = ' ', modified = ' ', removed = ' ' },
         }
 
         local filename = {
@@ -88,14 +87,10 @@ return {
                 lualine_c = { diff, filename },
                 lualine_x = {
                     {
-                        -- require("noice").api.statusline.mode.get,
-                        -- cond = require("noice").api.statusline.mode.has,
                         lazy_status.updates,
                         cond = lazy_status.has_updates,
                         color = { fg = "#ff9e64" },
                     },
-                    -- { "encoding",},
-                    -- { "fileformat" },
                     { "filetype" },
                 },
             },

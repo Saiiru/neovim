@@ -1,5 +1,6 @@
+-- lua/plugins/coding/todo-comments.lua :: Destaque para comentários como TODO, FIXME, etc.
+
 return {
-	-- Quickly Jump through the todo tags
 	"folke/todo-comments.nvim",
 	event = { "BufReadPre", "BufNewFile" },
 	dependencies = { "nvim-lua/plenary.nvim"},
@@ -7,12 +8,12 @@ return {
 		local todo_comments = require("todo-comments")
 
 		todo_comments.setup({
+			-- Palavras-chave para destacar.
 			keywords = {
 				FIX = {
-					icon = " ", -- icon used for the sign, and in search results
-					color = "error", -- can be a hex color, or a named color (see below)
-					alt = { "FIXME", "BUG", "FIXIT", "ISSUE" }, -- a set of other keywords that all map to this FIX keywords
-					-- signs = false, -- configure signs for some keywords individually
+					icon = " ",
+					color = "error",
+					alt = { "FIXME", "BUG", "FIXIT", "ISSUE" },
 				},
 				TODO = { icon = " ", color = "info" , alt = {"Personal"} },
 				HACK = { icon = " ", color = "warning", alt = { "DON SKIP" } },
@@ -22,7 +23,7 @@ return {
 				TEST = { icon = "⏲ ", color = "test", alt = { "TESTING", "PASSED", "FAILED" } },
 				FORGETNOT = { icon = " ", color = "hint" },
 			},
-            -- Patterns for hl markdown support
+            -- Configurações de highlight.
             highlight = {
                 multiline = true,
                 multiline_pattern = "^.",
@@ -31,12 +32,13 @@ return {
                 keyword = "wide",
                 after = "fg",
                 pattern = {
-                    [[.*<(KEYWORDS)\s*:]], -- default pattern
-                    [[<!--\s*(KEYWORDS)\s*:.*-->]], -- HTML comments with colon
-                    [[<!--\s*(KEYWORDS)\s*.*-->]], -- HTML comments without colon
+                    [[.*<(KEYWORDS)\s*:]], -- Padrão padrão
+                    [[<!--\s*(KEYWORDS)\s*:.*-->]], -- Comentários HTML com dois pontos
+                    [[<!--\s*(KEYWORDS)\s*.*-->]], -- Comentários HTML sem dois pontos
                 },
-                comments_only = false, -- highlighting outside of comments
+                comments_only = false,
             },
+            -- Configurações de busca.
             search = {
                 command = "rg",
                 args = {
@@ -46,11 +48,11 @@ return {
                     "--line-number",
                     "--column",
                 },
-                pattern = [[\b(KEYWORDS)\b]],
+                pattern = "\\b(KEYWORDS)\\b",
             },
 		})
 
-		-- keymaps
+		-- Keymaps para navegar entre os TODOs.
 		vim.keymap.set("n", "]t", function()
 			todo_comments.jump_next()
 		end, { desc = "Next todo comment" })
