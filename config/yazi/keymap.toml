@@ -20,8 +20,8 @@ desc = "Go to .config"
 
 [[manager.prepend_keymap]]
 on = ["g", "q"]
-run = "cd ~/.config/quickshell/niriha"
-desc = "Go to niriha quickshell"
+run = "cd ~/.config/quickshell"
+desc = "Go to quickshell"
 
 [[manager.prepend_keymap]]
 on = ["g", "n"]
@@ -120,13 +120,13 @@ desc = "Open via tmux popup"
 
 [[manager.prepend_keymap]]
 on = ["<C-q>"]
-run = 'shell "qs ipc -c niriha call launcher toggle"'
-desc = "Toggle niriha launcher"
+run = 'shell "qs ipc -p \"$HOME/.config/quickshell\" call launcher toggle"'
+desc = "Toggle quickshell launcher"
 
 [[manager.prepend_keymap]]
 on = ["<C-s>"]
-run = 'shell "qs ipc -c niriha call controlcenter toggle"'
-desc = "Toggle niriha control center"
+run = 'shell "qs ipc -p \"$HOME/.config/quickshell\" call controlcenter toggle"'
+desc = "Toggle quickshell control center"
 
 [[manager.prepend_keymap]]
 on = ["!"]

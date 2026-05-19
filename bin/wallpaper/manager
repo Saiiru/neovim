@@ -5,7 +5,6 @@ SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 
 library_dir="${DOTFILES_WALLPAPER_DIR:-${XDG_PICTURES_DIR:-$HOME/Pictures}/Wallpapers}"
 fallback_dir="${DOTFILES_REPO:-$HOME/dotfiles}/wallpapers"
-legacy_fallback_dir="$HOME/.config/quickshell/assets/wallpapers"
 state_dir="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/wallpaper"
 state_file="$state_dir/current"
 
@@ -67,9 +66,6 @@ pick_random() {
   if [[ ! -d "$source_dir" || -z "$(find "$source_dir" -maxdepth 1 -type f 2>/dev/null | head -n 1)" ]]; then
     source_dir="$fallback_dir"
   fi
-  if [[ ! -d "$source_dir" || -z "$(find "$source_dir" -maxdepth 1 -type f 2>/dev/null | head -n 1)" ]]; then
-    source_dir="$legacy_fallback_dir"
-  fi
 
   if [[ ! -d "$source_dir" ]]; then
     return 0
@@ -81,7 +77,7 @@ pick_random() {
 
 list_candidates() {
   local d
-  for d in "$library_dir" "$fallback_dir" "$legacy_fallback_dir"; do
+  for d in "$library_dir" "$fallback_dir"; do
     [[ -d "$d" ]] || continue
     find "$d" -maxdepth 1 -type f \
       \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \)
@@ -150,9 +146,6 @@ case "${1:-menu}" in
     fi
     if [[ -d "$fallback_dir" && "$fallback_dir" != "$library_dir" ]]; then
       find "$fallback_dir" -maxdepth 1 -type f | sort
-    fi
-    if [[ -d "$legacy_fallback_dir" && "$legacy_fallback_dir" != "$library_dir" && "$legacy_fallback_dir" != "$fallback_dir" ]]; then
-      find "$legacy_fallback_dir" -maxdepth 1 -type f | sort
     fi
     ;;
   *)

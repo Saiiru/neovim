@@ -47,6 +47,7 @@ return {
       "svelte",
       "graphql",
       "css",
+      "qmljs",
     },
     auto_install = true,
     incremental_selection = {

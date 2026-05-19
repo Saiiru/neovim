@@ -20,7 +20,7 @@ assets/   -> tracked lightweight assets
 
 * Arch Linux
 * Niri
-* Quickshell (external `niriha` config)
+* Quickshell (local `config/quickshell`)
 * Kitty
 * Zsh
 * Tmux
@@ -43,8 +43,8 @@ assets/   -> tracked lightweight assets
 
 * Legacy shell stack removed.
 * Hyprland and Waybar configs removed from the active tree.
-* Quickshell remains active at runtime via `~/.config/quickshell/niriha` symlink to a separately cloned repo.
-* Dotfiles repo does not vendor Quickshell shell code.
+* Quickshell remains active at runtime via `~/.config/quickshell` symlinked to this repo's `config/quickshell`.
+* Dotfiles repo tracks Quickshell shell code locally.
 * Launcher fallback remains `fuzzel` until external launcher is finalized.
 
 ## Rules

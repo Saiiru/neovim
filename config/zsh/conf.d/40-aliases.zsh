@@ -62,7 +62,7 @@ alias tmr='tmux source ~/.config/tmux/tmux.conf && echo "tmux reloaded"'
 # ── Apps ──────────────────────────────────────────────────────────────────────
 alias ff='firefox'
 alias browser='firefox'
-alias desktop='systemctl --user restart quickshell.service'
+alias desktop='qs -p "$HOME/.config/quickshell"'
 alias uireload='niri msg action reload-config'
 
 # ── Quality of life ───────────────────────────────────────────────────────────

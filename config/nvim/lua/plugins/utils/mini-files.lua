@@ -43,7 +43,7 @@ return {
       { "<leader>ec", open_path("~/.config/nvim"), desc = "Nvim Config" },
       { "<leader>et", open_path("~/.config/tmux"), desc = "Tmux Config" },
       { "<leader>ek", open_path("~/.config/kitty"), desc = "Kitty Config" },
-      { "<leader>eq", open_path("~/.config/quickshell/niriha"), desc = "Quickshell (niriha)" },
+      { "<leader>eq", open_path("~/.config/quickshell"), desc = "Quickshell" },
       { "<leader>ey", open_path("~/.config/yazi"), desc = "Yazi Config" },
 
       {
