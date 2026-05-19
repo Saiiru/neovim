@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+status="$(playerctl status 2>/dev/null || true)"
+
+if [[ -z "$status" ]]; then
+  jq -nc '{active:false, icon:"󰎈", title:"", subtitle:"", tooltip:"No media"}'
+  exit 0
+fi
+
+meta="$(playerctl metadata --format '{{playerName}}|{{title}}|{{artist}}' 2>/dev/null || true)"
+player="${meta%%|*}"
+rest="${meta#*|}"
+title="${rest%%|*}"
+artist="${rest#*|}"
+
+if [[ "$status" == "Playing" ]]; then
+  icon="󰎆"
+else
+  icon="󰏤"
+fi
+
+subtitle="$artist"
+[[ -n "$player" ]] && subtitle="${player}${artist:+ • ${artist}}"
+
+jq -nc \
+  --arg icon "$icon" \
+  --arg title "$title" \
+  --arg subtitle "$subtitle" \
+  --arg tooltip "${status}: ${title}${artist:+ — ${artist}}" \
+  '{active:true, icon:$icon, title:$title, subtitle:$subtitle, tooltip:$tooltip}'

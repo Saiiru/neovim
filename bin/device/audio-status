@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+line="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null || true)"
+
+if [[ -z "$line" ]]; then
+  jq -nc '{muted:true, volume:0, icon:"󰖁", text:"n/a", tooltip:"Audio unavailable"}'
+  exit 0
+fi
+
+volume="$(awk '{for (i=1;i<=NF;i++) if ($i ~ /^[0-9.]+$/) {print $i; exit}}' <<<"$line")"
+muted=false
+[[ "$line" == *"[MUTED]"* ]] && muted=true
+
+percent="$(python3 - <<'PY' "$volume"
+import sys
+value = float(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1] else 0.0
+print(round(value * 100))
+PY
+)"
+
+if [[ "$muted" == true || "$percent" -eq 0 ]]; then
+  icon="󰖁"
+  text="mute"
+elif [[ "$percent" -lt 35 ]]; then
+  icon="󰕿"
+  text="${percent}%"
+elif [[ "$percent" -lt 75 ]]; then
+  icon="󰖀"
+  text="${percent}%"
+else
+  icon="󰕾"
+  text="${percent}%"
+fi
+
+jq -nc \
+  --argjson muted "$muted" \
+  --argjson volume "$percent" \
+  --arg icon "$icon" \
+  --arg text "$text" \
+  --arg tooltip "$line" \
+  '{muted:$muted, volume:$volume, icon:$icon, text:$text, tooltip:$tooltip}'

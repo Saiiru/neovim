@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+device="/org/freedesktop/UPower/devices/DisplayDevice"
+info="$(upower -i "$device" 2>/dev/null || true)"
+
+if [[ -z "$info" || "$info" == *"no such object"* ]]; then
+  jq -nc '{present:false, percent:0, icon:"󰂎", text:"", tooltip:"No battery detected"}'
+  exit 0
+fi
+
+state="$(awk -F: '/state:/ {gsub(/^[ \t]+/, "", $2); print $2; exit}' <<<"$info")"
+percent_raw="$(awk -F: '/percentage:/ {gsub(/^[ \t]+/, "", $2); gsub(/%/, "", $2); print $2; exit}' <<<"$info")"
+time_to_empty="$(awk -F: '/time to empty:/ {gsub(/^[ \t]+/, "", $2); print $2; exit}' <<<"$info")"
+time_to_full="$(awk -F: '/time to full:/ {gsub(/^[ \t]+/, "", $2); print $2; exit}' <<<"$info")"
+
+percent="${percent_raw%%.*}"
+percent="${percent:-0}"
+
+if [[ "$state" == "charging" ]]; then
+  icon="󰂄"
+elif (( percent >= 95 )); then
+  icon="󰁹"
+elif (( percent >= 80 )); then
+  icon="󰂂"
+elif (( percent >= 60 )); then
+  icon="󰂀"
+elif (( percent >= 40 )); then
+  icon="󰁿"
+elif (( percent >= 20 )); then
+  icon="󰁾"
+else
+  icon="󰁺"
+fi
+
+tooltip="Battery ${percent}%"
+if [[ -n "$state" ]]; then
+  tooltip+=" • ${state}"
+fi
+if [[ -n "$time_to_empty" ]]; then
+  tooltip+=" • ${time_to_empty}"
+elif [[ -n "$time_to_full" ]]; then
+  tooltip+=" • ${time_to_full}"
+fi
+
+jq -nc \
+  --argjson percent "$percent" \
+  --arg icon "$icon" \
+  --arg text "${percent}%" \
+  --arg tooltip "$tooltip" \
+  '{present:true, percent:$percent, icon:$icon, text:$text, tooltip:$tooltip}'

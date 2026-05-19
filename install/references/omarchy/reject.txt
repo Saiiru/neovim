@@ -1,0 +1,14 @@
+# Rejected/default-off Omarchy packages for this Niri setup.
+hyprland                    # Reject: Niri is primary compositor.
+hypridle                    # Reject/default: use Niri-compatible idle path.
+hyprlock                    # Reject/default: use swaylock or chosen lock path.
+hyprsunset                  # Reject/default: wlsunset already present.
+hyprpicker                  # Reject/default: Hyprland-specific.
+hyprland-guiutils           # Reject: Hyprland-specific.
+hyprland-preview-share-picker # Reject: Hyprland-specific.
+xdg-desktop-portal-hyprland # Reject: compositor-specific conflict.
+omarchy-walker              # Reference only; do not depend on Omarchy launcher.
+omarchy-nvim                # Reject: keep local Neovim.
+1password-beta              # Personal/commercial default; optional only if wanted.
+spotify                     # App preference; Flatpak optional if desired.
+typora                      # Proprietary app preference.

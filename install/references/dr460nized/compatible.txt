@@ -1,0 +1,15 @@
+# Dr460nized-compatible ideas for Niri workstation.
+# Source: Garuda Dr460nized profile, adapted only as package audit.
+firewalld                   # Alternative firewall stack; choose profile explicitly.
+power-profiles-daemon       # Useful across DEs.
+ffmpegthumbs                # Thumbnails.
+ffmpeg                      # Media tooling.
+openh264                    # Media codec support.
+libdvdcss                   # Optional media playback; legal status varies by region.
+kimageformats               # Image format support; only if Qt/KDE apps use it.
+qt6-imageformats            # Useful for Qt applications.
+resvg                       # SVG rendering utility.
+sshfs                       # Remote filesystem mount.
+mpv                         # Media player.
+# mpv-uosc                  # Not in pacman here; review AUR/manual install.
+# libappindicator-gtk3      # Not in pacman here; review exact package name/AUR.

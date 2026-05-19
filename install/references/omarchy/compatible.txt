@@ -1,0 +1,24 @@
+# Omarchy-compatible ideas for Niri workstation.
+# Source: basecamp/omarchy, adapted only as package audit.
+gum                         # CLI UX for installer prompts/reports.
+fastfetch                   # System summary / post-install diagnostics.
+dust                        # Better disk usage inspection.
+# tldr                      # Conflicts with installed tealdeer; tealdeer covers this role.
+plocate                     # Fast local file search.
+whois                       # Network/dev utility.
+socat                       # Debug/network plumbing.
+xmlstarlet                  # XML scripting; useful for desktop metadata.
+libqalculate                # Calculator backend.
+ffmpegthumbnailer           # File manager thumbnails.
+webp-pixbuf-loader          # GTK image support.
+gvfs-mtp                    # Android/MTP file access.
+gvfs-smb                    # SMB shares.
+gvfs-nfs                    # NFS shares.
+gnome-disk-utility          # Practical disk GUI without full GNOME.
+gnome-calculator            # Small utility app.
+imv                         # Lightweight image viewer.
+mpv                         # Media player.
+power-profiles-daemon       # Power profile backend.
+swayosd                     # Optional OSD backend; test with Niri.
+wiremix                     # PipeWire mixer TUI; optional but useful.
+bluetui                     # Bluetooth TUI; optional but aligned with terminal workflow.

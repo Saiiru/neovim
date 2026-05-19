@@ -1,0 +1,18 @@
+// Local gaming rules. Keep machine-specific rules isolated from core modules.
+
+binds {
+    Mod+G hotkey-overlay-title="Open Steam Safe" {
+        spawn "sh" "-lc" "exec steam-safe";
+    }
+}
+
+window-rule {
+    match app-id=r#"^steam_app_\d+$"#
+    open-maximized-to-edges true
+    draw-border-with-background false
+}
+
+window-rule {
+    match app-id=r#"^steam$"#
+    draw-border-with-background false
+}

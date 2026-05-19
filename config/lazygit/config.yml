@@ -1,0 +1,61 @@
+gui:
+  theme:
+    activeBorderColor:
+      - "#2AC3FF"
+      - bold
+    inactiveBorderColor:
+      - "#22304A"
+    selectedLineBgColor:
+      - "#111826"
+    selectedRangeBgColor:
+      - "#182132"
+    cherryPickedCommitBgColor:
+      - "#182132"
+    cherryPickedCommitFgColor:
+      - "#56D4DD"
+    unstagedChangesColor:
+      - "#FF8F40"
+  border: rounded
+  showFileTree: true
+  showRandomTip: false
+  showCommandLog: false
+  nerdFontsVersion: "3"
+
+os:
+  editPreset: nvim
+  edit: 'nvim {{filename}}'
+  editAtLine: 'nvim +{{line}} {{filename}}'
+  editAtLineAndWait: 'nvim +{{line}} {{filename}}'
+  openDirInEditor: 'nvim {{dir}}'
+
+git:
+  paging:
+    colorArg: always
+    pager: delta --dark --paging=never
+  branchLogCmd: "git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium --oneline {{branchName}} --"
+  allBranchesLogCmd: "git log --graph --all --color=always --abbrev-commit --decorate --date=relative --pretty=medium"
+  log:
+    order: topo-order
+    showGraph: when-maximised
+    showWholeGraph: false
+  commit:
+    signOff: false
+  merging:
+    manualCommit: false
+    args: ""
+  skipHookPrefix: WIP
+  autoFetch: true
+  autoRefresh: true
+  overrideGpg: false
+  disableForcePushing: false
+  parseEmoji: false
+  diffContextSize: 3
+
+keybinding:
+  universal:
+    quit: q
+    return: <esc>
+    prevItem: k
+    nextItem: j
+    scrollUpMain: <c-u>
+    scrollDownMain: <c-d>

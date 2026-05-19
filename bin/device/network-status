@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+wifi_line="$(nmcli -t -f IN-USE,SSID,SIGNAL dev wifi list 2>/dev/null | awk -F: '$1=="*"{print $2 "|" $3; exit}')"
+wired_line="$(nmcli -t -f DEVICE,TYPE,STATE dev status 2>/dev/null | awk -F: '$2=="ethernet" && $3=="connected"{print $1; exit}')"
+
+if [[ -n "$wifi_line" ]]; then
+  ssid="${wifi_line%%|*}"
+  signal="${wifi_line##*|}"
+  signal="${signal:-0}"
+  if (( signal >= 75 )); then
+    icon="󰤨"
+  elif (( signal >= 50 )); then
+    icon="󰤥"
+  elif (( signal >= 25 )); then
+    icon="󰤢"
+  else
+    icon="󰤟"
+  fi
+  jq -nc \
+    --arg icon "$icon" \
+    --arg text "${ssid:-wifi}" \
+    --arg tooltip "Wi-Fi ${ssid:-unknown} • ${signal}%" \
+    '{connected:true, icon:$icon, text:$text, tooltip:$tooltip}'
+  exit 0
+fi
+
+if [[ -n "$wired_line" ]]; then
+  jq -nc \
+    --arg icon "󰈀" \
+    --arg text "$wired_line" \
+    --arg tooltip "Ethernet ${wired_line}" \
+    '{connected:true, icon:$icon, text:$text, tooltip:$tooltip}'
+  exit 0
+fi
+
+jq -nc '{connected:false, icon:"󰤮", text:"offline", tooltip:"Disconnected"}'

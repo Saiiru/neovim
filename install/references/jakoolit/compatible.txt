@@ -1,0 +1,27 @@
+# JaKooLit Arch-Hyprland ideas compatible with Arcane Niri workstation.
+# Source: https://github.com/JaKooLit/Arch-Hyprland
+# Policy: package audit only. Do not install Hyprland-specific defaults from this list.
+
+inxi                         # Hardware/system diagnostics used by installer reports.
+bc                           # Numeric scripting for monitors and shell widgets.
+gvfs                         # File manager virtual filesystem support.
+gvfs-mtp                     # Android/MTP access.
+network-manager-applet       # Practical NetworkManager tray/applet fallback.
+pamixer                      # Pulse/PipeWire volume CLI.
+python-requests              # Python HTTP helper used by desktop scripts.
+python-pyquery               # HTML/XML parsing helper for Python scripts.
+qt5ct                        # Qt5 appearance control.
+qt6ct                        # Qt6 appearance control.
+yad                          # Lightweight GUI prompts for utility scripts.
+cava                         # Audio visualizer; useful for terminal polish.
+loupe                        # GNOME image viewer.
+mpv-mpris                    # MPRIS integration for mpv.
+nwg-look                     # GTK theme manager for Wayland desktops.
+nwg-displays                 # Display layout GUI; optional but Niri-friendly enough.
+qalculate-gtk                # Calculator GUI.
+yt-dlp                       # Video/media utility.
+acpi                         # Battery/power status utility.
+lm_sensors                   # Temperature sensors; detection remains manual.
+sof-firmware                 # Audio firmware for common modern systems.
+libnewt                      # Terminal UI library used by some Arch tooling.
+pciutils                     # lspci and PCI hardware inspection.

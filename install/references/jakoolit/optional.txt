@@ -1,0 +1,10 @@
+# JaKooLit-inspired optional packages.
+# Install deliberately; these are not Arcane Niri defaults.
+
+swappy                       # Screenshot annotation; satty remains canonical if preferred.
+swaync                       # Notification center; keep disabled unless selected deliberately.
+gnome-system-monitor         # GUI system monitor.
+mousepad                     # Lightweight GUI text editor.
+thunar                       # File manager fallback.
+tumbler                      # Thumbnail service for Thunar.
+ffmpegthumbnailer            # Video thumbnails.

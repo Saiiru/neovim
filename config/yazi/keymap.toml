@@ -1,0 +1,149 @@
+[[manager.prepend_keymap]]
+on = ["g", "w"]
+run = "cd ~/workstation"
+desc = "Go to workstation"
+
+[[manager.prepend_keymap]]
+on = ["g", "p"]
+run = "cd ~/workspace"
+desc = "Go to workspace"
+
+[[manager.prepend_keymap]]
+on = ["g", "d"]
+run = "cd ~/Downloads"
+desc = "Go to Downloads"
+
+[[manager.prepend_keymap]]
+on = ["g", "c"]
+run = "cd ~/.config"
+desc = "Go to .config"
+
+[[manager.prepend_keymap]]
+on = ["g", "q"]
+run = "cd ~/.config/quickshell/niriha"
+desc = "Go to niriha quickshell"
+
+[[manager.prepend_keymap]]
+on = ["g", "n"]
+run = "cd ~/.config/nvim"
+desc = "Go to nvim"
+
+[[manager.prepend_keymap]]
+on = ["g", "t"]
+run = "cd ~/.config/tmux"
+desc = "Go to tmux"
+
+[[manager.prepend_keymap]]
+on = ["g", "k"]
+run = "cd ~/.config/kitty"
+desc = "Go to kitty"
+
+[[manager.prepend_keymap]]
+on = ["g", "y"]
+run = "cd ~/.config/yazi"
+desc = "Go to yazi"
+
+[[manager.prepend_keymap]]
+on = ["l"]
+run = "open"
+desc = "Open / enter"
+
+[[manager.prepend_keymap]]
+on = ["h"]
+run = "leave"
+desc = "Leave"
+
+[[manager.prepend_keymap]]
+on = ["<Enter>"]
+run = "open"
+desc = "Open"
+
+[[manager.prepend_keymap]]
+on = ["e"]
+run = "open --interactive"
+desc = "Choose opener"
+
+[[manager.prepend_keymap]]
+on = ["."]
+run = "open --interactive"
+desc = "Context actions"
+
+[[manager.prepend_keymap]]
+on = ["a"]
+run = "open --interactive"
+desc = "Open with..."
+
+[[manager.prepend_keymap]]
+on = ["v"]
+run = "open --interactive"
+desc = "Open with..."
+
+[[manager.prepend_keymap]]
+on = ["o", "n"]
+run = 'shell --block "${EDITOR:-nvim} \"$@\""'
+desc = "Open in nvim"
+
+[[manager.prepend_keymap]]
+on = ["o", "m"]
+run = 'shell "mpv \"$@\""'
+desc = "Open in mpv"
+
+[[manager.prepend_keymap]]
+on = ["o", "z"]
+run = 'shell "zathura \"$@\""'
+desc = "Open in zathura"
+
+[[manager.prepend_keymap]]
+on = ["o", "b"]
+run = 'shell "xdg-open \"$1\""'
+desc = "Open in browser/default"
+
+[[manager.prepend_keymap]]
+on = ["o", "w"]
+run = 'shell "$HOME/.local/bin/wallpaper-control set \"$1\""'
+desc = "Set as wallpaper"
+
+[[manager.prepend_keymap]]
+on = ["<C-g>"]
+run = 'shell --block "lazygit"'
+desc = "Open lazygit"
+
+[[manager.prepend_keymap]]
+on = ["<C-b>"]
+run = 'shell --block "btop"'
+desc = "Open btop"
+
+[[manager.prepend_keymap]]
+on = ["<C-t>"]
+run = 'shell --block "~/config/tmux/scripts/tmux-popup-actions.sh yazi"'
+desc = "Open via tmux popup"
+
+[[manager.prepend_keymap]]
+on = ["<C-q>"]
+run = 'shell "qs ipc -c niriha call launcher toggle"'
+desc = "Toggle niriha launcher"
+
+[[manager.prepend_keymap]]
+on = ["<C-s>"]
+run = 'shell "qs ipc -c niriha call controlcenter toggle"'
+desc = "Toggle niriha control center"
+
+[[manager.prepend_keymap]]
+on = ["!"]
+run = 'shell --block "$SHELL"'
+desc = "Open shell here"
+
+[[manager.prepend_keymap]]
+on = ["R"]
+run = "rename --cursor=before_ext"
+desc = "Rename before extension"
+
+[[manager.prepend_keymap]]
+on = ["J"]
+run = "arrow 5"
+desc = "Down 5"
+
+[[manager.prepend_keymap]]
+on = ["K"]
+run = "arrow -5"
+desc = "Up 5"

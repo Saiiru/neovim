@@ -1,0 +1,36 @@
+input {
+    focus-follows-mouse max-scroll-amount="0%"
+
+    keyboard {
+        xkb {
+            layout "br"
+            variant "abnt2"
+        }
+
+        numlock
+        repeat-delay 200
+        repeat-rate 35
+    }
+
+    touchpad {
+        tap
+        tap-button-map "left-right-middle"
+        // natural-scroll
+    }
+
+    mouse {
+        accel-profile "flat"
+    }
+
+    trackpoint {
+        middle-emulation
+    }
+
+    mod-key "Super"
+    mod-key-nested "Alt"
+}
+
+cursor {
+    xcursor-theme "Breeze_Hacked"
+    xcursor-size 24
+}

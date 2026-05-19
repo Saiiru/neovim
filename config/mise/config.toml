@@ -1,0 +1,30 @@
+[settings]
+jobs = 4
+experimental = true
+quiet = false
+
+[env]
+RUSTUP_TOOLCHAIN = "stable"
+
+[tools]
+node = "24.14.0"
+"rust" = "stable"
+"npm:@angular/cli" = "21.2.2"
+"npm:eslint" = "10.0.3"
+"npm:prettier" = "3.8.1"
+"npm:typescript" = "5.9.3"
+
+# ── Modern CLI Tools ─────────────────────────────────────────────────────────
+yazi = "latest"
+fzf = "latest"
+zoxide = "latest"
+atuin = "latest"
+eza = "latest"
+bat = "latest"
+ripgrep = "latest"
+fd = "latest"
+starship = "latest"
+direnv = "latest"
+lazygit = "latest"
+# btop stays in the pacman package list. The mise aqua backend can try a .tbz
+# asset for this package, while upstream publishes .tar.gz.

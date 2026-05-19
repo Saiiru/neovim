@@ -1,0 +1,97 @@
+# ~/.config/zsh/zshenv
+# Environment variables – sourced by every zsh invocation.
+# NO prompt, NO aliases, NO functions here.
+
+# ── XDG ────────────────────────────────────────────────────────────────────────
+export XDG_CONFIG_HOME="${HOME}/.config"
+export XDG_DATA_HOME="${HOME}/.local/share"
+export XDG_STATE_HOME="${HOME}/.local/state"
+export XDG_CACHE_HOME="${HOME}/.cache"
+export ZDOTDIR="${XDG_CONFIG_HOME}/zsh"
+
+# ── Dotfiles ───────────────────────────────────────────────────────────────────
+export DOTFILES_REPO="${DOTFILES_REPO:-$HOME/workstationdots/dotfiles}"
+
+# ── Core tools ─────────────────────────────────────────────────────────────────
+export EDITOR="nvim"
+export VISUAL="nvim"
+export TERMINAL="kitty"
+export BROWSER="firefox"
+export MOZ_ENABLE_WAYLAND="1"
+export READER="zathura"
+export TERMBROWSER="lynx"
+export PAGER="less"
+export MANPAGER="nvim +Man!"
+
+# ── Locale ─────────────────────────────────────────────────────────────────────
+export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"
+
+# ── History ────────────────────────────────────────────────────────────────────
+export HISTFILE="${XDG_STATE_HOME}/zsh/history"
+export HISTSIZE=200000
+export SAVEHIST=200000
+
+# ── Tool config ────────────────────────────────────────────────────────────────
+export BAT_THEME="base16"
+export RIPGREP_CONFIG_PATH="${HOME}/.ripgreprc"
+export XCURSOR_SIZE=24
+export COLORTERM="truecolor"
+export TERM="${TERM:-xterm-256color}"
+export LESSHISTFILE="-"
+export GREP_COLORS="ms=01;33"
+export WGETRC="${XDG_CONFIG_HOME}/wget/wgetrc"
+export INPUTRC="${XDG_CONFIG_HOME}/readline/inputrc"
+export NPM_CONFIG_USERCONFIG="${XDG_CONFIG_HOME}/npm/npmrc"
+export NODE_REPL_HISTORY="${XDG_DATA_HOME}/node_repl_history"
+export PYLINTHOME="${XDG_CACHE_HOME}/pylint"
+export CARGO_HOME="${XDG_DATA_HOME}/cargo"
+export RUSTUP_HOME="${XDG_DATA_HOME}/rustup"
+export GOPATH="${XDG_DATA_HOME}/go"
+export NPM_HOME="${XDG_DATA_HOME}/npm"
+export GRADLE_USER_HOME="${XDG_DATA_HOME}/gradle"
+export GEM_HOME="${XDG_DATA_HOME}/gem"
+export GEM_PATH="${GEM_HOME}"
+export GEM_SPEC_CACHE="${XDG_CACHE_HOME}/gem"
+export PASSWORD_STORE_DIR="${XDG_DATA_HOME}/password-store"
+export WINEPREFIX="${XDG_DATA_HOME}/wine"
+export ZSH_TMUX_CONFIG="${XDG_CONFIG_HOME}/tmux/tmux.conf"
+
+# FZF
+export FZF_DEFAULT_COMMAND='fd --hidden --exclude .git'
+export FZF_CTRL_T_COMMAND='fd --hidden --exclude .git'
+export FZF_ALT_C_COMMAND='fd --type d --hidden --exclude .git'
+export FZF_DEFAULT_OPTS='
+  --height=60%
+  --layout=reverse
+  --border=rounded
+  --prompt="  › "
+  --pointer="▶"
+  --marker="✓"
+  --color=bg:#0A0E14,bg+:#0D1117,fg:#E8F0FC,fg+:#E8F0FC
+  --color=hl:#2AC3FF,hl+:#56D4DD,info:#7890AA,border:#1E2D40
+  --color=prompt:#2AC3FF,pointer:#A77DFF,marker:#39FF14,spinner:#FFD000
+'
+
+# ── PATH (deduplicated) ────────────────────────────────────────────────────────
+typeset -U path PATH
+
+for _p in \
+  "${HOME}/.local/bin" \
+  "${HOME}/bin" \
+  "${CARGO_HOME}/bin" \
+  "${GOPATH}/bin" \
+  "${NPM_HOME}/bin" \
+  "${GEM_HOME}/bin" \
+  "${HOME}/.local/share/mise/shims"
+do
+  [[ -d "$_p" ]] && path=("$_p" $path)
+done
+unset _p
+
+typeset -U path PATH fpath
+
+# ── Ensure dirs exist ──────────────────────────────────────────────────────────
+mkdir -p \
+  "${XDG_CACHE_HOME}/zsh" \
+  "${XDG_STATE_HOME}/zsh"

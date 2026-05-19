@@ -1,0 +1,78 @@
+binds {
+    // Core shell/session.
+    Mod+Tab repeat=false { toggle-overview; }
+    Mod+O repeat=false { toggle-overview; }
+    Mod+Alt+Space repeat=false { toggle-overview; }
+    Mod+Ctrl+Space hotkey-overlay-title="Session Picker" { spawn "kora-session" "picker"; }
+    Mod+Shift+Space hotkey-overlay-title="Session Power" { spawn "kora-session" "power"; }
+    Mod+Shift+Slash { show-hotkey-overlay; }
+    Mod+Shift+E { quit; }
+    Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+    Mod+Shift+P { power-off-monitors; }
+
+    // Apps.
+    Mod+Return hotkey-overlay-title="Open a Terminal: kitty" { spawn "kitty"; }
+    Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
+    Mod+Space hotkey-overlay-title="Launcher" { spawn "bash" "-lc" "if command -v kora-launcher >/dev/null 2>&1; then exec kora-launcher; else exec fuzzel; fi"; }
+
+    // Window management.
+    Mod+Q repeat=false { close-window; }
+    Mod+H { focus-column-left; }
+    Mod+J { focus-window-down; }
+    Mod+K { focus-window-up; }
+    Mod+L { focus-column-right; }
+    Mod+Left { focus-column-left; }
+    Mod+Down { focus-window-down; }
+    Mod+Up { focus-window-up; }
+    Mod+Right { focus-column-right; }
+    Mod+Shift+Left { move-column-left; }
+    Mod+Shift+Down { move-window-down; }
+    Mod+Shift+Up { move-window-up; }
+    Mod+Shift+Right { move-column-right; }
+    Mod+F { fullscreen-window; }
+    Mod+Shift+F { toggle-window-floating; }
+    Mod+A { toggle-window-floating; }
+
+    // Screenshots and clipboard.
+    Print { spawn "bash" "-lc" "if command -v satty >/dev/null 2>&1; then grim -g \"$(slurp)\" - | satty --filename - >/dev/null; else grim -g \"$(slurp)\" - | wl-copy; fi"; }
+    Mod+S { screenshot; }
+    Mod+Shift+S { spawn "niri-screenshot-selection"; }
+    Mod+W { spawn "bash" "-lc" "if command -v qs >/dev/null 2>&1; then qs ipc call wallpaper toggle && exit 0; fi; if command -v wallpaper-control >/dev/null 2>&1; then exec wallpaper-control menu; else exec \"$HOME/dotfiles/bin/wallpaper/wallpaper-control\" menu; fi"; }
+    Ctrl+Print { screenshot-screen; }
+    Alt+Print { screenshot-window; }
+    Mod+Y { spawn "bash" "-lc" "selection=$(cliphist list | fuzzel --dmenu --prompt 'clip> ' || true); [ -n \"$selection\" ] && cliphist decode <<<\"$selection\" | wl-copy"; }
+    Mod+Alt+L allow-inhibiting=false { spawn "loginctl" "lock-session"; }
+
+    // Hardware controls through direct Wayland/Linux tools.
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "-l" "1.5" "@DEFAULT_AUDIO_SINK@" "5%+"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
+    XF86AudioMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86AudioMicMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "set" "5%+"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
+    XF86AudioPlay allow-when-locked=true { spawn "playerctl" "play-pause"; }
+    XF86AudioPause allow-when-locked=true { spawn "playerctl" "play-pause"; }
+    XF86AudioNext allow-when-locked=true { spawn "playerctl" "next"; }
+    XF86AudioPrev allow-when-locked=true { spawn "playerctl" "previous"; }
+
+    // Workspaces.
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+
+    Mod+Shift+1 { move-column-to-workspace 1; }
+    Mod+Shift+2 { move-column-to-workspace 2; }
+    Mod+Shift+3 { move-column-to-workspace 3; }
+    Mod+Shift+4 { move-column-to-workspace 4; }
+    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
+}

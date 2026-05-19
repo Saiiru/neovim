@@ -1,0 +1,105 @@
+# ~/.config/atuin/config.toml
+#
+# Atuin is the primary shell-history database.
+# Zsh still writes a local HISTFILE as a fallback, but search/sync/dedup live here.
+
+# ── Search ────────────────────────────────────────────────────────────────────
+search_mode = "fuzzy"
+filter_mode = "workspace"
+filter_mode_shell_up_key_binding = "directory"
+search_mode_shell_up_key_binding = "prefix"
+workspaces = true
+
+# ── Interface ─────────────────────────────────────────────────────────────────
+style = "compact"
+inline_height = 16
+inline_height_shell_up_key_binding = 10
+show_preview = true
+max_preview_height = 6
+exit_mode = "return-original"
+enter_accept = true
+keymap_mode = "auto"
+show_tabs = false
+show_help = true
+ctrl_n_shortcuts = true
+
+# ── Sync ──────────────────────────────────────────────────────────────────────
+auto_sync = true
+sync_address = "https://api.atuin.sh"
+sync_frequency = "5m"
+update_check = false
+
+# ── Recording / privacy ───────────────────────────────────────────────────────
+dialect = "us"
+timezone = "local"
+strip_trailing_whitespace = true
+secrets_filter = true
+
+# Keep noise and secrets out of the database. This is not deduplication; use
+# `atuin-dedup` for exact duplicate cleanup.
+history_filter = [
+  "^\\s+$",
+  "^clear$",
+  "^exit$",
+  "^history(\\s|$)",
+  "^atuin history",
+  "^atuin search",
+  "^atuin-dedup",
+  "^atuin-prune",
+  "^cd(\\s+)?$",
+  "^ls(\\s+)?$",
+  "^ll(\\s+)?$",
+  "^la(\\s+)?$",
+  "^pwd$",
+  "password",
+  "passwd",
+  "token=",
+  "api[_-]?key",
+  "SECRET",
+]
+
+cwd_filter = [
+  "/\\.ssh($|/)",
+  "/\\.gnupg($|/)",
+  "/password-store($|/)",
+]
+
+[sync]
+records = true
+
+[search]
+filters = [ "workspace", "directory", "session", "host", "global" ]
+
+[ui]
+columns = [
+  "exit",
+  "duration",
+  "time",
+  { type = "directory", width = 28 },
+  "command",
+]
+
+[stats]
+common_subcommands = [
+  "arduino-cli",
+  "cargo",
+  "docker",
+  "git",
+  "go",
+  "mise",
+  "niri",
+  "npm",
+  "pacman",
+  "pnpm",
+  "qs",
+  "systemctl",
+  "tmux",
+  "yay",
+]
+common_prefix = [ "sudo", "doas", "env" ]
+ignored_commands = [ "cd", "clear", "exit", "ls", "ll", "la", "pwd" ]
+
+[tmux]
+enabled = true
+width = "90%"
+height = "70%"

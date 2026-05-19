@@ -1,0 +1,17 @@
+# Workstation quality-of-life group for the Arcane Niri desktop.
+gum
+fastfetch
+dust
+# tldr                      # Conflicts with installed tealdeer; tealdeer covers this role.
+plocate
+ffmpegthumbnailer
+webp-pixbuf-loader
+gvfs-mtp
+gvfs-smb
+gvfs-nfs
+gnome-disk-utility
+libqalculate
+wiremix
+bluetui
+# localsend                 # Not in pacman here; use Flatpak/AUR if desired.
+sshfs

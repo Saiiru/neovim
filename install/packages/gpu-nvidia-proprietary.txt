@@ -1,0 +1,10 @@
+# NVIDIA proprietary stack.
+# Install only when hardware detection shows NVIDIA and you accept the driver policy.
+nvidia-open-dkms
+nvidia-utils
+nvidia-settings
+vulkan-tools
+
+# Optional legacy/proprietary branch and VA-API bridge, often repo/AUR-policy dependent:
+# nvidia-dkms
+# libva-nvidia-driver

@@ -1,0 +1,69 @@
+[mgr]
+ratio = [1, 4, 3]
+sort_by = "natural"
+sort_sensitive = false
+sort_reverse = false
+sort_dir_first = true
+linemode = "size"
+show_hidden = true
+show_symlink = true
+scrolloff = 8
+mouse_events = ["click", "scroll"]
+title_format = "{cwd}"
+syntect_theme = ""
+
+[preview]
+wrap = "yes"
+tab_size = 2
+max_width = 1400
+max_height = 1400
+image_delay = 0
+image_filter = "triangle"
+image_quality = 90
+ueberzug_scale = 1.0
+cache_dir = ""
+
+[opener]
+edit = [{ run = '${EDITOR:-nvim} "$@"', block = true, for = "unix" }]
+
+play = [{ run = 'mpv "$@"', orphan = true, for = "linux" }]
+
+pdf = [{ run = 'zathura "$@"', orphan = true, for = "linux" }]
+
+browser = [{ run = 'xdg-open "$1"', orphan = true, for = "linux" }]
+
+wallpaper-set = [
+  { run = '$HOME/.local/bin/wallpaper-control set "$1"', orphan = false, for = "linux" },
+]
+
+reveal = [
+  { run = 'xdg-open "$(dirname "$1")"', desc = "Reveal", orphan = true, for = "linux" },
+]
+
+extract = [
+  { run = 'ya pub extract --list "$@"', desc = "Extract here", for = "unix" },
+]
+
+[open]
+prepend_rules = [
+  { name = "*.md", use = "edit" },
+  { name = "*.txt", use = "edit" },
+  { name = "*.json", use = "edit" },
+  { name = "*.toml", use = "edit" },
+  { name = "*.yaml", use = "edit" },
+  { name = "*.yml", use = "edit" },
+  { name = "*.lua", use = "edit" },
+  { name = "*.sh", use = "edit" },
+  { mime = "text/*", use = "edit" },
+
+  { name = "*.pdf", use = "pdf" },
+  { mime = "image/*", use = "browser" },
+  { mime = "video/*", use = "play" },
+  { mime = "audio/*", use = "play" },
+
+  { name = "*.zip", use = "extract" },
+  { name = "*.tar", use = "extract" },
+  { name = "*.gz", use = "extract" },
+  { name = "*.xz", use = "extract" },
+  { name = "*.7z", use = "extract" },
+]

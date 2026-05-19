@@ -1,0 +1,14 @@
+# Rejected/default-off Dr460nized packages for this Niri setup.
+plasma-desktop              # Reject: not moving to KDE.
+kwin                        # Reject: Niri is compositor.
+kwin-effect-rounded-corners-git # Reject: KWin-only.
+kwin-effects-better-blur-dx # Reject: KWin-only.
+xdg-desktop-portal-kde      # Reject: KDE portal, conflicts with chosen portal policy.
+plasma-nm                   # Reject: Plasma widget.
+plasma-pa                   # Reject: Plasma audio widget.
+plasma-firewall             # Reject: Plasma frontend.
+powerdevil                  # Reject: KDE power daemon.
+discover                    # Reject: KDE software center.
+konsole                     # Reject: Kitty is primary.
+spectacle                   # Reject: use grim/slurp/satty/Niri screenshot flow.
+sddm-kcm                    # Reject: KDE control module.

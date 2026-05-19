@@ -1,0 +1,158 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+warning_disk="${ARCANE_DISK_WARNING:-80}"
+critical_disk="${ARCANE_DISK_CRITICAL:-90}"
+warning_temp="${ARCANE_TEMP_WARNING:-75}"
+critical_temp="${ARCANE_TEMP_CRITICAL:-85}"
+interval="${ARCANE_HEALTH_INTERVAL:-300}"
+
+notify() {
+  local urgency="$1"
+  local title="$2"
+  local body="$3"
+
+  printf '%s: %s\n%s\n' "$urgency" "$title" "$body"
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send -u "$urgency" "$title" "$body" >/dev/null 2>&1 || true
+  fi
+}
+
+disk_report() {
+  df -P -T | awk 'NR > 1 && $1 ~ "^/dev/" {print $1 "\t" $2 "\t" $6 "\t" $7}'
+}
+
+check_disk() {
+  local status=0
+
+  while IFS=$'\t' read -r device fstype usage mountpoint; do
+    local percent="${usage%%%}"
+    [[ "$percent" =~ ^[0-9]+$ ]] || continue
+
+    printf 'disk %-24s %4s %-8s %s\n' "$mountpoint" "$usage" "$fstype" "$device"
+
+    if (( percent >= critical_disk )); then
+      notify critical "Critical disk usage" "$mountpoint is ${usage} full on $device"
+      status=2
+    elif (( percent >= warning_disk )); then
+      notify normal "High disk usage" "$mountpoint is ${usage} full on $device"
+      [[ "$status" -lt 1 ]] && status=1
+    fi
+  done < <(disk_report)
+
+  return "$status"
+}
+
+sensor_values() {
+  if command -v sensors >/dev/null 2>&1; then
+    sensors 2>/dev/null \
+      | awk '
+          /Package id 0:|Tctl:|Tdie:|edge:|junction:|Composite:/ {
+            for (i = 1; i <= NF; i++) {
+              if ($i ~ /^\+[0-9]+(\.[0-9]+)?°C$/) {
+                label=$0
+                sub(/^[[:space:]]*/, "", label)
+                print label
+                break
+              }
+            }
+          }
+        '
+    return 0
+  fi
+
+  for zone in /sys/class/thermal/thermal_zone*/temp; do
+    [[ -r "$zone" ]] || continue
+    local raw label value
+    raw="$(<"$zone")"
+    [[ "$raw" =~ ^[0-9]+$ ]] || continue
+    value=$((raw / 1000))
+    label="$(basename "$(dirname "$zone")")"
+    printf '%s: +%s.0°C\n' "$label" "$value"
+  done
+}
+
+check_temp() {
+  local status=0
+  local saw=0
+
+  while IFS= read -r line; do
+    local temp
+    temp="$(printf '%s\n' "$line" | grep -Eo '\+[0-9]+(\.[0-9]+)?°C' | head -1 | tr -d '+°C' || true)"
+    [[ -n "$temp" ]] || continue
+    saw=1
+
+    local integer="${temp%.*}"
+    printf 'temp %s\n' "$line"
+
+    if (( integer >= critical_temp )); then
+      notify critical "Critical temperature" "$line"
+      status=2
+    elif (( integer >= warning_temp )); then
+      notify normal "High temperature" "$line"
+      [[ "$status" -lt 1 ]] && status=1
+    fi
+  done < <(sensor_values)
+
+  if [[ "$saw" == "0" ]]; then
+    printf 'temp no sensor values found. Install lm_sensors and run sensors manually.\n'
+  fi
+
+  return "$status"
+}
+
+run_once() {
+  local status=0
+
+  check_disk || status=$?
+  check_temp || {
+    local temp_status=$?
+    (( temp_status > status )) && status="$temp_status"
+  }
+
+  return "$status"
+}
+
+usage() {
+  cat <<'USAGE'
+arcane-health-monitor
+
+Usage:
+  arcane-health-monitor once
+  arcane-health-monitor disk
+  arcane-health-monitor temp
+  arcane-health-monitor daemon
+
+Environment:
+  ARCANE_DISK_WARNING=80
+  ARCANE_DISK_CRITICAL=90
+  ARCANE_TEMP_WARNING=75
+  ARCANE_TEMP_CRITICAL=85
+  ARCANE_HEALTH_INTERVAL=300
+USAGE
+}
+
+case "${1:-once}" in
+  once)
+    run_once
+    ;;
+  disk)
+    check_disk
+    ;;
+  temp)
+    check_temp
+    ;;
+  daemon)
+    while true; do
+      run_once || true
+      sleep "$interval"
+    done
+    ;;
+  -h|--help|help)
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac

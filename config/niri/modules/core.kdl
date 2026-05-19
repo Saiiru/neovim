@@ -1,0 +1,48 @@
+config-notification {
+    disable-failed
+}
+
+prefer-no-csd
+
+hotkey-overlay {
+    skip-at-startup
+}
+
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+gestures {
+    hot-corners {
+        off
+    }
+}
+
+clipboard {
+    disable-primary
+}
+
+overview {
+    zoom 0.75
+
+    workspace-shadow {
+        off
+    }
+}
+
+recent-windows {
+    highlight {
+        corner-radius 12
+        active-color "#4b00d4"
+        urgent-color "#ffb4ab"
+    }
+
+    binds {
+        Alt+Tab         { next-window     scope="output"; }
+        Alt+Shift+Tab   { previous-window scope="output"; }
+        Alt+grave       { next-window     filter="app-id"; }
+        Alt+Shift+grave { previous-window filter="app-id"; }
+    }
+}
+
+debug {
+    honor-xdg-activation-with-invalid-serial
+}

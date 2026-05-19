@@ -1,0 +1,8 @@
+# Hybrid GPU baseline.
+# The installer detects multiple GPU vendors but does not decide switching policy.
+# Install the vendor-specific groups deliberately after reading the hardware report.
+mesa
+vulkan-tools
+
+# Optional, AUR/policy-dependent:
+# envycontrol

@@ -1,0 +1,39 @@
+daemonize
+show-failed-attempts
+screenshot
+effect-blur=7x5
+effect-vignette=0.2:0.5
+color=0A0E1490
+font=Maple Mono NF
+indicator
+indicator-radius=200
+indicator-thickness=20
+line-color=111826
+ring-color=22304A
+inside-color=111826
+key-hl-color=7EE787
+separator-color=00000000
+text-color=D7E2F0
+text-caps-lock-color=
+line-ver-color=2AC3FF
+ring-ver-color=2AC3FF
+inside-ver-color=111826
+text-ver-color=F2F7FF
+ring-wrong-color=FF3B5C
+text-wrong-color=FF3B5C
+inside-wrong-color=111826
+inside-clear-color=111826
+text-clear-color=F2F7FF
+ring-clear-color=A77DFF
+line-clear-color=111826
+line-wrong-color=111826
+bs-hl-color=fab387
+grace=1
+grace-no-mouse
+grace-no-touch
+fade-in=0.2
+ignore-empty-password
+
+# 24h clock format
+timestr=%H:%M:%S
+datestr=%d %B, %a

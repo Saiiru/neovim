@@ -1,0 +1,5 @@
+alias gs='git status -sb'
+alias gd='git diff'
+alias gdc='git diff --cached'
+alias gl='git log --graph --decorate --oneline --abbrev-commit'
+alias groot='cd "$(git rev-parse --show-toplevel 2>/dev/null)"'
