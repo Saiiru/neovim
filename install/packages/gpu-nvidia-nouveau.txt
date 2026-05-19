@@ -1,8 +1,0 @@
-# NVIDIA open-source Nouveau stack.
-# Use only deliberately; performance/features differ from proprietary NVIDIA.
-mesa
-vulkan-tools
-
-# Review package availability before enabling:
-# xf86-video-nouveau
-# vulkan-nouveau

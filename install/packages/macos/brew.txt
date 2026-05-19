@@ -1,2 +1,0 @@
-# Placeholder for a future macOS profile.
-# Add one Homebrew package per line when the macOS tree exists.

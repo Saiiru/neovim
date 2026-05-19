@@ -1,8 +1,0 @@
-# AMD gaming layer. Requires deliberate multilib policy.
-steam
-gamemode
-lib32-gamemode
-mangohud
-gamescope
-lib32-mesa
-lib32-vulkan-radeon

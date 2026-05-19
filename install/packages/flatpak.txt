@@ -1,2 +1,0 @@
-# Optional Flatpak packages.
-# Add one package id per line if you use Flatpak.

@@ -1,7 +1,0 @@
-# Optional Dr460nized-inspired packages. These are not part of the canonical Niri stack.
-ark                         # Archive manager.
-kate                        # KDE editor; optional GUI fallback.
-okular                      # PDF viewer; optional if Zathura is insufficient.
-kdeconnect                  # Phone integration; pulls KDE stack pieces.
-partitionmanager            # Disk GUI; use carefully.
-bluedevil                   # KDE Bluetooth tooling; optional.

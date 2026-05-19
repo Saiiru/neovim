@@ -1,6 +1,0 @@
-# Intel Mesa GPU stack.
-mesa
-vulkan-intel
-intel-media-driver
-libva-intel-driver
-vulkan-tools
