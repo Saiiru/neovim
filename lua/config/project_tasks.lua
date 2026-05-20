@@ -413,16 +413,24 @@ resolvers.arduino = function(action)
     return nil
   end
 
+  local fqbn = vim.g.arduino_fqbn or "arduino:avr:uno"
+  local baud = tostring(vim.g.arduino_baud or "9600")
+  local port = vim.g.arduino_port or ""
+  local env = "ARDUINO_FQBN=" .. vim.fn.shellescape(fqbn) .. " ARDUINO_BAUD=" .. vim.fn.shellescape(baud)
+  if port ~= "" then
+    env = env .. " ARDUINO_PORT=" .. vim.fn.shellescape(port)
+  end
+
   local commands = {
-    build = "ArduinoCompile",
-    run = "ArduinoUploadSafe",
-    dev = "ArduinoMonitor",
-    clean = "ArduinoCleanBuild",
-    check = "ArduinoStatus",
+    build = env .. " mise run arduino-build",
+    run = env .. " mise run arduino-upload",
+    dev = env .. " mise run arduino-monitor",
+    clean = env .. " mise run arduino-clean",
+    check = env .. " mise run arduino-status",
   }
 
   if commands[action] then
-    return { command = commands[action], label = "arduino", kind = "nvim_command" }
+    return { command = commands[action], label = "arduino:mise", kind = action == "dev" and "server" or "job" }
   end
 end
 

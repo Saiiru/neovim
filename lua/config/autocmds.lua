@@ -84,14 +84,31 @@ vim.api.nvim_create_autocmd("ExitPre", {
 -- Options for markdown
 vim.api.nvim_create_autocmd("FileType", {
   group = augroup("markdown_options"),
-  pattern = "markdown",
+  pattern = { "markdown", "mdx", "quarto" },
   callback = function()
-    vim.opt_local.wrap = false
+    vim.opt_local.wrap = true
     vim.opt_local.linebreak = true
+    vim.opt_local.spell = true
+    vim.opt_local.conceallevel = 2
+    vim.opt_local.concealcursor = "nc"
     vim.opt_local.tabstop = 2
     vim.opt_local.shiftwidth = 2
     vim.opt_local.softtabstop = 2
     vim.opt_local.expandtab = true
+  end,
+})
+
+-- Options for CSS-like files
+vim.api.nvim_create_autocmd("FileType", {
+  group = augroup("css_options"),
+  pattern = { "css", "scss", "sass", "less" },
+  callback = function()
+    vim.opt_local.wrap = false
+    vim.opt_local.tabstop = 2
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.softtabstop = 2
+    vim.opt_local.expandtab = true
+    vim.opt_local.colorcolumn = "100"
   end,
 })
 
@@ -143,3 +160,4 @@ vim.api.nvim_create_autocmd({ "FocusLost", "BufLeave", "InsertLeave" }, {
     vim.cmd("silent! update")
   end,
 })
+pcall(require, "config.kora-workflow")
