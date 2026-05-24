@@ -38,7 +38,7 @@ local function is_java_21(candidate)
   return output:match('version%s+"21') ~= nil or output:match('openjdk version%s+"21') ~= nil
 end
 
-local function ensure_java_21()
+local function detect_java_21()
   local candidates = {
     vim.env.JDTLS_JAVA and vim.env.JDTLS_JAVA or nil,
     vim.env.JDTLS_JAVA_HOME and (vim.env.JDTLS_JAVA_HOME .. "/bin/java") or nil,
@@ -49,15 +49,24 @@ local function ensure_java_21()
 
   for _, candidate in ipairs(candidates) do
     if is_java_21(candidate) then
-      local java_home = candidate:gsub("/bin/java$", "")
-      vim.env.JAVA_HOME = java_home
-      vim.env.JDTLS_JAVA_HOME = java_home
-      vim.env.JDTLS_JAVA = candidate
       return candidate
     end
   end
 
   return nil
+end
+
+local function ensure_java_21()
+  local candidate = detect_java_21()
+  if not candidate then
+    return nil
+  end
+
+  local java_home = candidate:gsub("/bin/java$", "")
+  vim.env.JAVA_HOME = java_home
+  vim.env.JDTLS_JAVA_HOME = java_home
+  vim.env.JDTLS_JAVA = candidate
+  return candidate
 end
 
 local function java_executable()
@@ -312,6 +321,10 @@ function M.start()
       })
     end,
   }
+end
+
+function M.has_java_21()
+  return detect_java_21() ~= nil
 end
 
 return M
