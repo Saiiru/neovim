@@ -12,13 +12,14 @@ end
 -- Automatically create a file if it does not exist when opening it
 function OpenFile()
   local filepath = vim.fn.expand("<cfile>")
+  local escaped = vim.fn.fnameescape(filepath)
   if vim.fn.filereadable(filepath) == 0 then
     -- Create and open the file
-    vim.cmd("edit " .. filepath)
+    vim.cmd("edit " .. escaped)
     print("Created new file: " .. filepath)
   else
     -- Open the existing file
-    vim.cmd("edit " .. filepath)
+    vim.cmd("edit " .. escaped)
   end
 end
 

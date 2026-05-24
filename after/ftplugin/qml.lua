@@ -13,4 +13,4 @@ vim.diagnostic.config({
   signs = true,
   update_in_insert = false,
   severity_sort = true,
-}, vim.api.nvim_get_current_buf())
+})

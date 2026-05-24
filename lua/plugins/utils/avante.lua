@@ -1,4 +1,3 @@
-local avante_prompts = require("config.prompts").avante
 local utils = require "config.utils"
 
 local function ensure_avante_signs()
@@ -38,36 +37,11 @@ local function guard_avante_native()
   return false
 end
 
-local function create_avante_call(prompt, use_context)
-  if use_context then
-    return function()
-      ensure_avante_native_modules()
-      ensure_avante_signs()
-      if not guard_avante_native() then
-        return
-      end
-      local filetype = vim.bo.filetype ~= "" and vim.bo.filetype or "unknown"
-      local filename = vim.fn.expand "%:t"
-      filename = filename ~= "" and filename or "unnamed buffer"
-      local context = string.format("This is %s code from file '%s'. ", filetype, filename)
-      require("avante.api").ask { question = context .. prompt }
-    end
-  end
-
-  return function()
-    ensure_avante_native_modules()
-    ensure_avante_signs()
-    if not guard_avante_native() then
-      return
-    end
-    require("avante.api").ask { question = prompt }
-  end
-end
 
 return {
   "yetone/avante.nvim",
   version = false,
-  enabled = utils.is_online(),
+  enabled = false, -- Surface consolidada em sidekick.lua; manter desativado por enquanto.
   build = "make",
   init = function()
     ensure_avante_native_modules()
@@ -112,7 +86,7 @@ return {
       behaviour = {
         auto_suggestions = false,
         auto_set_highlight_group = true,
-        auto_set_keymaps = true,
+        auto_set_keymaps = false,
         auto_apply_diff_after_generation = false,
         support_paste_from_clipboard = false,
         minimize_diff = true,
@@ -173,58 +147,6 @@ return {
     "MunifTanjim/nui.nvim",
     "zbirenbaum/copilot.lua",
   },
-  keys = {
-    {
-      "<leader>aa",
-      function()
-        ensure_avante_native_modules()
-        ensure_avante_signs()
-        if not guard_avante_native() then
-          return
-        end
-        require("avante.api").ask()
-      end,
-      desc = "Ask",
-      mode = { "n", "v" },
-    },
-    {
-      "<leader>ae",
-      function()
-        ensure_avante_native_modules()
-        ensure_avante_signs()
-        if not guard_avante_native() then
-          return
-        end
-        require("avante.api").edit()
-      end,
-      desc = "Edit",
-      mode = { "n", "v" },
-    },
-    { "<leader>af", "<cmd>AvanteClear<cr>", desc = "Clear", mode = { "n", "v" } },
-    {
-      "<leader>a?",
-      function() require("avante.api").select_model() end,
-      desc = "Select model",
-    },
-    { "<leader>ar", create_avante_call(avante_prompts.refactor), desc = "Refactor Code", mode = { "n", "v" } },
-    { "<leader>av", create_avante_call(avante_prompts.code_review), desc = "Code Review", mode = { "n", "v" } },
-    {
-      "<leader>aA",
-      create_avante_call(avante_prompts.architecture_suggestion),
-      desc = "Architecture Suggestions",
-      mode = { "n", "v" },
-    },
-    {
-      "<leader>al",
-      create_avante_call(avante_prompts.readability_analysis),
-      desc = "Code Readability Analysis",
-      mode = { "n", "v" },
-    },
-    { "<leader>ao", create_avante_call(avante_prompts.optimize_code), desc = "Optimize Code", mode = { "n", "v" } },
-    { "<leader>ax", create_avante_call(avante_prompts.explain_code, true), desc = "Explain Code", mode = { "n", "v" } },
-    { "<leader>ab", create_avante_call(avante_prompts.fix_bugs, true), desc = "Fix Bugs", mode = { "n", "v" } },
-    { "<leader>au", create_avante_call(avante_prompts.add_tests), desc = "Add Tests", mode = { "n", "v" } },
-    { "<leader>az", create_avante_call(avante_prompts.security_review), desc = "Security Analysis", mode = { "n", "v" } },
-    { "<leader>am", create_avante_call(avante_prompts.summarize), desc = "Summarize text", mode = { "n", "v" } },
-  },
+  -- No direct keymaps here. Sidekick owns the AI surface keyspace.
+
 }

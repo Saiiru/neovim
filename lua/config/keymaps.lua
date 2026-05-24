@@ -86,7 +86,7 @@ map("n", "<leader>bn", ":enew<cr>", { desc = "New Empty Buffer", noremap = true,
 map("n", "<leader>bl", ":blast<cr>", { desc = "Last Buffer", noremap = true, silent = true })
 map("n", "<leader>ba", ":%bdelete!<cr>", { desc = "Delete All Buffers", noremap = true, silent = true })
 map("n", "<leader>bs", ":source %<cr>", { desc = "Source Buffer", noremap = true, silent = true })
-map("n", "<leader><leader>S", ":source %<cr>", { desc = "Source Buffer", noremap = true, silent = true })
+
 
 -- ── File Operations ──────────────────────────────────────────────────────────
 map("n", "<leader>q", ":q<cr>", { desc = "Quit File", noremap = true, silent = true })
@@ -102,9 +102,7 @@ map("n", "<leader>os", ":set spell!<cr>", { desc = "Toggle Spell Check", noremap
 map("n", "<leader>oS", function()
   SpellToggle("en_us,pt_br")
 end, { desc = "Toggle Spell EN/PT", noremap = true, silent = true })
-map("n", "<leader>5", function()
-  SpellToggle("en_us,pt_br")
-end, { desc = "Toggle Spell EN/PT", noremap = true, silent = true })
+
 map("n", "<leader>z", "[s1z=``", { desc = "Fix Previous Spelling", noremap = true, silent = true })
 map("n", "<leader>oe", "<cmd>LtexEnglish<cr>", { desc = "LTeX English", noremap = true, silent = true })
 map("n", "<leader>op", "<cmd>LtexPortuguese<cr>", { desc = "LTeX Portuguese", noremap = true, silent = true })

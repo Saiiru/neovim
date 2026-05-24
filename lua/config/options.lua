@@ -91,7 +91,7 @@ opt.path:append("**")
 opt.selection = "inclusive"
 opt.mouse = "a"
 opt.clipboard:append("unnamedplus")
-opt.modifiable = true
+-- `modifiable` já é true por padrão; manter a linha só aumentava ruído.
 opt.encoding = "UTF-8"
 opt.wildmenu = true
 opt.wildmode = "longest:full,full"

@@ -7,16 +7,8 @@ return {
   enabled = is_online(),
   opts = {
     panel = {
-      enabled = true,
+      enabled = false,
       auto_refresh = false,
-      keymap = {
-        jump_prev = "[[",
-        jump_next = "]]",
-        accept = "<CR>",
-        refresh = "gr",
-        open = "<leader>ck",
-      },
-      layout = { position = "bottom", ratio = 0.4 },
     },
     -- Mantido desligado por padrão porque o Copilot já entra no `blink.cmp`.
     -- Se ligar as duas fontes ao mesmo tempo, a experiência duplica sugestões.
@@ -53,20 +45,5 @@ return {
       typescriptreact = true,
     },
   },
-  keys = {
-    {
-      "<leader>ck",
-      function()
-        require("copilot.panel").open({})
-      end,
-      desc = "Copilot Panel",
-    },
-    {
-      "<leader>cK",
-      function()
-        require("copilot.suggestion").toggle_auto_trigger()
-      end,
-      desc = "Copilot Toggle Inline Suggestion",
-    },
-  },
+  -- No direct keymaps: this plugin now serves as backend/completion support only.
 }
