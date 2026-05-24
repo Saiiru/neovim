@@ -1,564 +1,127 @@
--- Project Tasks
---
--- Camada única para build/run/test/check/dev em projetos reais.
--- A ideia é agir como um workbench: detectar o projeto, escolher o comando
--- correto, mostrar resultado em quickfix e abrir servidores em janela do tmux.
-
 local M = {}
 
-local root_markers = {
-  ".git",
-  "package.json",
-  "pnpm-lock.yaml",
-  "yarn.lock",
-  "bun.lock",
-  "bun.lockb",
-  "pyproject.toml",
-  "requirements.txt",
-  "manage.py",
-  "go.mod",
-  "go.work",
-  "Cargo.toml",
-  "pom.xml",
-  "mvnw",
-  "build.gradle",
-  "build.gradle.kts",
-  "gradlew",
-  "Makefile",
-  "CMakeLists.txt",
-  "meson.build",
-  "platformio.ini",
-  "arduino-cli.yaml",
-  "sketch.yaml",
-  "composer.json",
-  "mix.exs",
-  "deno.json",
-  "deno.jsonc",
-  "gleam.toml",
-  "build.zig",
-  "docker-compose.yml",
-  "compose.yml",
+local runners = {
+  mise = "mise",
+  project_task = "project-task",
 }
 
-local shell = vim.o.shell ~= "" and vim.o.shell or "/bin/sh"
-
-local function root()
-  return vim.fs.root(0, root_markers) or vim.fn.getcwd()
-end
-
-local function current_file()
-  local name = vim.api.nvim_buf_get_name(0)
-  return name ~= "" and name or nil
-end
-
-local function exists(path)
-  return path and vim.uv.fs_stat(path) ~= nil
-end
-
-local function has(name)
-  return exists(root() .. "/" .. name)
-end
+local default_actions = {
+  "build",
+  "run",
+  "dev",
+  "test",
+  "check",
+  "lint",
+  "format",
+  "clean",
+  "setup",
+  "qa",
+  "typecheck",
+}
 
 local function executable(name)
   return vim.fn.executable(name) == 1
 end
 
-local function esc(path)
-  return vim.fn.shellescape(path)
+local function project_root()
+  local file = vim.api.nvim_buf_get_name(0)
+  local start = file ~= "" and file or vim.fn.getcwd()
+  return vim.fs.root(start, { ".git", "mise.toml", ".mise.toml" }) or vim.fn.getcwd()
 end
 
 local function project_name()
-  return vim.fn.fnamemodify(root(), ":t")
+  return vim.fs.basename(project_root())
 end
 
-local function read_json(path)
-  if not exists(path) then
-    return nil
+local function runner_name()
+  if executable(runners.mise) then
+    return runners.mise
   end
-
-  local ok, decoded = pcall(vim.json.decode, table.concat(vim.fn.readfile(path), "\n"))
-  return ok and decoded or nil
-end
-
-local function package_json()
-  return read_json(root() .. "/package.json")
-end
-
-local function package_manager()
-  if has "bun.lock" or has "bun.lockb" then
-    return "bun"
+  if executable(runners.project_task) then
+    return runners.project_task
   end
-  if has "pnpm-lock.yaml" then
-    return "pnpm"
-  end
-  if has "yarn.lock" then
-    return "yarn"
-  end
-  return "npm"
-end
-
-local function package_run(script)
-  local pm = package_manager()
-  if pm == "npm" then
-    return "npm run " .. script
-  end
-  if pm == "yarn" then
-    return "yarn " .. script
-  end
-  if pm == "pnpm" then
-    return "pnpm " .. script
-  end
-  if pm == "bun" then
-    return "bun run " .. script
-  end
-  return pm .. " run " .. script
-end
-
-local function script_command(names)
-  local pkg = package_json()
-  local scripts = pkg and pkg.scripts or {}
-  for _, name in ipairs(names) do
-    if scripts[name] then
-      return package_run(name), name
-    end
-  end
-  return nil, nil
-end
-
-local function python_bin()
-  local candidates = {
-    root() .. "/.venv/bin/python",
-    root() .. "/venv/bin/python",
-  }
-
-  for _, candidate in ipairs(candidates) do
-    if exists(candidate) then
-      return esc(candidate)
-    end
-  end
-
-  return executable "python3" and "python3" or "python"
-end
-
-local function node_single_file(action, file)
-  local ext = vim.fn.fnamemodify(file, ":e")
-  if action == "run" then
-    if ext == "ts" or ext == "tsx" then
-      if executable "tsx" then
-        return "tsx " .. esc(file)
-      end
-      return "npx tsx " .. esc(file)
-    end
-    if ext == "jsx" then
-      return "node " .. esc(file)
-    end
-    return "node " .. esc(file)
-  end
-
-  if action == "check" and (ext == "ts" or ext == "tsx") then
-    return "npx tsc --noEmit"
-  end
-
   return nil
 end
 
-local function c_output(file)
-  local stem = vim.fn.fnamemodify(file, ":t:r")
-  return "build/" .. stem
-end
-
-local resolvers = {}
-
-resolvers.node = function(action)
-  if not has "package.json" then
+local function runner_command(task_name)
+  local runner = runner_name()
+  if not runner then
     return nil
   end
 
-  local script_map = {
-    build = { "build", "compile" },
-    run = { "start", "preview" },
-    dev = { "dev", "serve", "start" },
-    test = { "test", "test:unit", "vitest" },
-    check = { "check", "typecheck", "lint", "test" },
-    lint = { "lint", "eslint" },
-    format = { "format", "fmt" },
-    clean = { "clean" },
-  }
-
-  local command, script = script_command(script_map[action] or {})
-  if command then
-    return {
-      command = command,
-      label = "node:" .. script,
-      kind = action == "dev" and "server" or "job",
-    }
+  if runner == runners.mise then
+    return { runner, "run", task_name }
   end
 
-  local file = current_file()
-  if file then
-    local single = node_single_file(action, file)
-    if single then
-      return { command = single, label = "node:file", kind = "job" }
+  return { runner, task_name }
+end
+
+local function capture_command(command, cwd)
+  local result = vim.system(command, {
+    cwd = cwd,
+    text = true,
+  }):wait()
+
+  return result.code or 1, result.stdout or "", result.stderr or ""
+end
+
+local function fetch_tasks()
+  local runner = runner_name()
+  if not runner then
+    return {}
+  end
+
+  local command
+  if runner == runners.mise then
+    command = { runner, "tasks", "ls", "--json" }
+  else
+    command = { runner, "list", "--json" }
+  end
+
+  local code, output = capture_command(command, project_root())
+  if code ~= 0 or output == "" then
+    return {}
+  end
+
+  local ok, decoded = pcall(vim.json.decode, output)
+  if not ok or type(decoded) ~= "table" then
+    return {}
+  end
+
+  local tasks = {}
+  for _, item in ipairs(decoded) do
+    if type(item) == "table" and item.name then
+      table.insert(tasks, {
+        name = item.name,
+        description = item.description or "",
+        interactive = item.interactive == true,
+        source = item.source or item.file or "",
+      })
     end
   end
 
-  return nil
+  table.sort(tasks, function(a, b)
+    return a.name < b.name
+  end)
+
+  return tasks
 end
 
-resolvers.deno = function(action)
-  if not (has "deno.json" or has "deno.jsonc") then
-    return nil
+local function describe_task(task)
+  if not task then
+    return "-"
   end
 
-  local commands = {
-    build = "deno task build",
-    run = "deno task start",
-    dev = "deno task dev",
-    test = "deno test",
-    check = "deno check .",
-    lint = "deno lint",
-    format = "deno fmt",
-  }
-
-  if commands[action] then
-    return { command = commands[action], label = "deno", kind = action == "dev" and "server" or "job" }
-  end
-end
-
-resolvers.python = function(action)
-  if not (has "pyproject.toml" or has "requirements.txt" or has "manage.py" or vim.bo.filetype == "python") then
-    return nil
+  local detail = task.description
+  if detail == "" then
+    detail = task.source
   end
 
-  local py = python_bin()
-  local file = current_file()
-
-  if action == "build" and has "pyproject.toml" then
-    return { command = py .. " -m build", label = "python:build", kind = "job" }
-  end
-  if action == "run" and file then
-    return { command = py .. " " .. esc(file), label = "python:file", kind = "job" }
-  end
-  if action == "dev" and has "manage.py" then
-    return { command = py .. " manage.py runserver", label = "django", kind = "server" }
-  end
-  if action == "dev" and has "main.py" then
-    return { command = "uvicorn main:app --reload", label = "uvicorn", kind = "server" }
-  end
-  if action == "dev" and has "app/main.py" then
-    return { command = "uvicorn app.main:app --reload", label = "uvicorn", kind = "server" }
-  end
-  if action == "test" then
-    return { command = "pytest -q", label = "pytest", kind = "job" }
-  end
-  if action == "check" or action == "lint" then
-    return { command = "ruff check .", label = "ruff", kind = "job" }
-  end
-  if action == "format" then
-    return { command = "ruff format . && ruff check --fix .", label = "ruff format", kind = "job" }
-  end
-end
-
-resolvers.rust = function(action)
-  if not has "Cargo.toml" then
-    return nil
+  if detail ~= "" then
+    return task.name .. " — " .. detail
   end
 
-  local commands = {
-    build = "cargo build",
-    run = "cargo run",
-    dev = "cargo run",
-    test = "cargo test",
-    check = "cargo clippy --all-targets --all-features -- -D warnings",
-    lint = "cargo clippy --all-targets --all-features",
-    format = "cargo fmt --all",
-    clean = "cargo clean",
-  }
-
-  if commands[action] then
-    return { command = commands[action], label = "cargo", kind = action == "dev" and "server" or "job" }
-  end
-end
-
-resolvers.go = function(action)
-  if not (has "go.mod" or has "go.work" or vim.bo.filetype == "go") then
-    return nil
-  end
-
-  local commands = {
-    build = "go build ./...",
-    run = "go run .",
-    dev = "go run .",
-    test = "go test ./...",
-    check = "go vet ./...",
-    lint = "golangci-lint run",
-    format = "gofmt -w . && goimports -w .",
-    clean = "go clean -cache -testcache",
-  }
-
-  if commands[action] then
-    return { command = commands[action], label = "go", kind = action == "dev" and "server" or "job" }
-  end
-end
-
-resolvers.java = function(action)
-  if has "gradlew" then
-    local commands = {
-      build = "./gradlew build",
-      run = "./gradlew run",
-      dev = "./gradlew bootRun",
-      test = "./gradlew test",
-      check = "./gradlew check",
-      clean = "./gradlew clean",
-    }
-    if commands[action] then
-      return { command = commands[action], label = "gradle", kind = action == "dev" and "server" or "job" }
-    end
-  end
-
-  if has "pom.xml" or has "mvnw" then
-    local mvn = has "mvnw" and "./mvnw" or "mvn"
-    local commands = {
-      build = mvn .. " compile",
-      run = mvn .. " exec:java",
-      dev = mvn .. " spring-boot:run",
-      test = mvn .. " test",
-      check = mvn .. " verify",
-      clean = mvn .. " clean",
-    }
-    if commands[action] then
-      return { command = commands[action], label = "maven", kind = action == "dev" and "server" or "job" }
-    end
-  end
-
-  local file = current_file()
-  if vim.bo.filetype == "java" and file then
-    local class = vim.fn.fnamemodify(file, ":t:r")
-    local dir = vim.fn.fnamemodify(file, ":h")
-    if action == "build" or action == "check" then
-      return { command = "javac " .. esc(file), label = "javac", kind = "job" }
-    end
-    if action == "run" then
-      return { command = "javac " .. esc(file) .. " && java -cp " .. esc(dir) .. " " .. class, label = "java:file", kind = "job" }
-    end
-  end
-end
-
-resolvers.cmake = function(action)
-  if not has "CMakeLists.txt" then
-    return nil
-  end
-
-  local commands = {
-    build = "cmake -S . -B build && cmake --build build",
-    test = "ctest --test-dir build --output-on-failure",
-    check = "cmake --build build",
-    clean = "cmake --build build --target clean",
-  }
-
-  if commands[action] then
-    return { command = commands[action], label = "cmake", kind = "job" }
-  end
-end
-
-resolvers.make = function(action)
-  if not has "Makefile" then
-    return nil
-  end
-
-  local commands = {
-    build = "make",
-    run = "make run",
-    dev = "make dev",
-    test = "make test",
-    check = "make check",
-    lint = "make lint",
-    format = "make format",
-    clean = "make clean",
-  }
-
-  if commands[action] then
-    return { command = commands[action], label = "make", kind = action == "dev" and "server" or "job" }
-  end
-end
-
-resolvers.c_cpp = function(action)
-  local ft = vim.bo.filetype
-  local file = current_file()
-  if not file or (ft ~= "c" and ft ~= "cpp" and ft ~= "objc" and ft ~= "objcpp") then
-    return nil
-  end
-
-  local compiler = (ft == "cpp" or ft == "objcpp") and "g++" or "gcc"
-  local std = (ft == "cpp" or ft == "objcpp") and "-std=c++20" or "-std=c17"
-  local output = c_output(file)
-  local compile = "mkdir -p build && " .. compiler .. " " .. std .. " -Wall -Wextra -Wpedantic -g " .. esc(file) .. " -o " .. esc(output)
-
-  if action == "build" or action == "check" then
-    return { command = compile, label = compiler, kind = "job" }
-  end
-  if action == "run" then
-    return { command = compile .. " && " .. esc(root() .. "/" .. output), label = compiler .. ":run", kind = "job" }
-  end
-  if action == "lint" then
-    return { command = "clang-tidy " .. esc(file), label = "clang-tidy", kind = "job" }
-  end
-  if action == "format" then
-    return { command = "clang-format -i " .. esc(file), label = "clang-format", kind = "job" }
-  end
-end
-
-resolvers.arduino = function(action)
-  if not (vim.bo.filetype == "arduino" or has "arduino-cli.yaml" or has "sketch.yaml") then
-    return nil
-  end
-
-  local fqbn = vim.g.arduino_fqbn or "arduino:avr:uno"
-  local baud = tostring(vim.g.arduino_baud or "9600")
-  local port = vim.g.arduino_port or ""
-  local env = "ARDUINO_FQBN=" .. vim.fn.shellescape(fqbn) .. " ARDUINO_BAUD=" .. vim.fn.shellescape(baud)
-  if port ~= "" then
-    env = env .. " ARDUINO_PORT=" .. vim.fn.shellescape(port)
-  end
-
-  local commands = {
-    build = env .. " mise run arduino-build",
-    run = env .. " mise run arduino-upload",
-    dev = env .. " mise run arduino-monitor",
-    clean = env .. " mise run arduino-clean",
-    check = env .. " mise run arduino-status",
-  }
-
-  if commands[action] then
-    return { command = commands[action], label = "arduino:mise", kind = action == "dev" and "server" or "job" }
-  end
-end
-
-resolvers.lua = function(action)
-  if vim.bo.filetype ~= "lua" and not has ".luarc.json" and not has "stylua.toml" then
-    return nil
-  end
-
-  local file = current_file()
-  local commands = {
-    run = file and ("lua " .. esc(file)) or nil,
-    test = "busted",
-    check = "luacheck .",
-    lint = "selene .",
-    format = "stylua .",
-  }
-
-  if commands[action] then
-    return { command = commands[action], label = "lua", kind = "job" }
-  end
-end
-
-resolvers.shell = function(action)
-  local ft = vim.bo.filetype
-  local file = current_file()
-  if not file or (ft ~= "sh" and ft ~= "bash" and ft ~= "zsh" and ft ~= "fish") then
-    return nil
-  end
-
-  if action == "run" then
-    local runner = ft == "zsh" and "zsh" or ft == "fish" and "fish" or "bash"
-    return { command = runner .. " " .. esc(file), label = "shell:file", kind = "job" }
-  end
-  if action == "check" or action == "lint" then
-    return { command = "shellcheck " .. esc(file), label = "shellcheck", kind = "job" }
-  end
-  if action == "format" and ft ~= "fish" then
-    return { command = "shfmt -w " .. esc(file), label = "shfmt", kind = "job" }
-  end
-end
-
-resolvers.docker = function(action)
-  if not (has "docker-compose.yml" or has "docker-compose.yaml" or has "compose.yml" or has "compose.yaml") then
-    return nil
-  end
-
-  local compose = "docker compose"
-  local commands = {
-    build = compose .. " build",
-    dev = compose .. " up",
-    run = compose .. " up",
-    check = compose .. " config",
-    clean = compose .. " down",
-  }
-
-  if commands[action] then
-    return { command = commands[action], label = "docker compose", kind = action == "dev" and "server" or "job" }
-  end
-end
-
-resolvers.php = function(action)
-  if not has "composer.json" then
-    return nil
-  end
-
-  local commands = {
-    build = "composer install",
-    run = "php -S localhost:8000 -t public",
-    dev = "php -S localhost:8000 -t public",
-    test = "composer test",
-    check = "composer validate",
-    lint = "composer lint",
-    format = "composer format",
-  }
-
-  if commands[action] then
-    return { command = commands[action], label = "composer", kind = action == "dev" and "server" or "job" }
-  end
-end
-
-resolvers.zig = function(action)
-  if not has "build.zig" then
-    return nil
-  end
-
-  local commands = {
-    build = "zig build",
-    run = "zig build run",
-    test = "zig build test",
-    check = "zig build",
-    format = "zig fmt .",
-  }
-
-  if commands[action] then
-    return { command = commands[action], label = "zig", kind = "job" }
-  end
-end
-
-local resolver_order = {
-  "arduino",
-  "node",
-  "deno",
-  "python",
-  "rust",
-  "go",
-  "java",
-  "cmake",
-  "make",
-  "c_cpp",
-  "lua",
-  "shell",
-  "docker",
-  "php",
-  "zig",
-}
-
-local function resolve(action)
-  for _, name in ipairs(resolver_order) do
-    local task = resolvers[name](action)
-    if task then
-      task.action = action
-      task.resolver = name
-      task.cwd = root()
-      task.title = ("%s:%s"):format(action, project_name())
-      return task
-    end
-  end
-  return nil
+  return task.name
 end
 
 local function clean_lines(output)
@@ -576,7 +139,7 @@ local function open_results(title, output, code)
   end
 
   vim.fn.setqflist({}, "r", {
-    title = title .. " [exit " .. code .. "]",
+    title = title .. " [exit " .. tostring(code) .. "]",
     lines = lines,
   })
 
@@ -587,103 +150,95 @@ local function open_results(title, output, code)
   end
 end
 
-local function run_job(task)
-  vim.notify("Project task: " .. task.command, vim.log.levels.INFO, { title = task.label })
+local function run_job(task_name, title)
+  local command = runner_command(task_name)
+  if not command then
+    vim.notify("No task runner available.", vim.log.levels.ERROR, { title = "Project Tasks" })
+    return
+  end
 
-  vim.system({ shell, "-lc", task.command }, {
-    cwd = task.cwd,
+  vim.notify("Project task: " .. table.concat(command, " "), vim.log.levels.INFO, { title = "Project Tasks" })
+
+  vim.system(command, {
+    cwd = project_root(),
     text = true,
   }, function(result)
     vim.schedule(function()
       local output = table.concat({
-        "$ " .. task.command,
+        "$ " .. table.concat(command, " "),
         "",
         result.stdout or "",
         result.stderr or "",
       }, "\n")
 
-      open_results(task.title, output, result.code or 0)
-      local level = result.code == 0 and vim.log.levels.INFO or vim.log.levels.ERROR
-      vim.notify(task.title .. " exited with " .. tostring(result.code), level, { title = "Project Tasks" })
+      open_results(title or task_name, output, result.code or 0)
+      local level = (result.code or 1) == 0 and vim.log.levels.INFO or vim.log.levels.ERROR
+      vim.notify((title or task_name) .. " exited with " .. tostring(result.code or 0), level, { title = "Project Tasks" })
     end)
   end)
 end
 
-local function run_server(task)
-  local tmux = require "config.tmux"
-  local banner = table.concat({
-    "printf '\\033[1;36m%s\\033[0m\\n' " .. esc("Project server: " .. task.label),
-    "printf '%s\\n\\n' " .. esc("$ " .. task.command),
-    task.command,
-    "code=$?",
-    "printf '\\n\\033[1;33m[server exited: %s]\\033[0m\\n' \"$code\"",
-    "exec " .. esc(shell),
-  }, "; ")
+local function run_terminal(task_name, title)
+  local command = runner_command(task_name)
+  if not command then
+    vim.notify("No task runner available.", vim.log.levels.ERROR, { title = "Project Tasks" })
+    return
+  end
 
-  tmux.window(banner, {
-    cwd = task.cwd,
-    title = "dev:" .. project_name(),
-  })
-end
-
-local function run_terminal(task)
-  require("config.tmux").split(task.command, {
-    cwd = task.cwd,
+  require("config.tmux").split(table.concat(command, " "), {
+    cwd = project_root(),
     size = 18,
+    title = title or task_name,
   })
 end
 
-local function run_task(action, mode)
-  local task = resolve(action)
-  if not task then
-    vim.notify("No project task found for: " .. action, vim.log.levels.WARN, { title = "Project Tasks" })
-    return
+local function menu_items()
+  local tasks = fetch_tasks()
+  if #tasks == 0 then
+    local fallback = {}
+    for _, name in ipairs(default_actions) do
+      table.insert(fallback, { label = name, action = name, empty = true })
+    end
+    return fallback
   end
 
-  if task.kind == "nvim_command" then
-    vim.cmd(task.command)
-    return
+  local items = {}
+  for _, task in ipairs(tasks) do
+    table.insert(items, {
+      label = describe_task(task),
+      action = task.name,
+      interactive = task.interactive,
+    })
   end
 
-  if mode == "terminal" then
-    run_terminal(task)
-  elseif mode == "server" or task.kind == "server" then
-    run_server(task)
-  else
-    run_job(task)
-  end
+  return items
 end
 
 function M.info()
+  local tasks = fetch_tasks()
   local lines = {
     "Project: " .. project_name(),
-    "Root: " .. root(),
-    "Filetype: " .. vim.bo.filetype,
+    "Root: " .. project_root(),
+    "Runner: " .. (runner_name() or "-"),
+    "Tasks: " .. tostring(#tasks),
     "",
   }
 
-  for _, action in ipairs({ "build", "run", "dev", "test", "check", "lint", "format", "clean" }) do
-    local task = resolve(action)
-    table.insert(lines, ("%8s  %s"):format(action, task and (task.label .. " -> " .. task.command) or "-"))
+  if #tasks == 0 then
+    table.insert(lines, "No mise/project-task tasks detected.")
+    table.insert(lines, "Create tasks in the project root, then reload.")
+  else
+    for _, task in ipairs(tasks) do
+      table.insert(lines, ("%-18s %s"):format(task.name, task.description ~= "" and task.description or task.source))
+    end
   end
 
   vim.notify(table.concat(lines, "\n"), vim.log.levels.INFO, { title = "Project Tasks" })
 end
 
 function M.menu()
-  local actions = {
-    { label = "Build", action = "build" },
-    { label = "Run", action = "run" },
-    { label = "Dev Server", action = "dev", mode = "server" },
-    { label = "Test", action = "test" },
-    { label = "Check", action = "check" },
-    { label = "Lint", action = "lint" },
-    { label = "Format", action = "format" },
-    { label = "Clean", action = "clean" },
-    { label = "Info", action = "info" },
-  }
-
-  vim.ui.select(actions, {
+  local items = menu_items()
+  vim.ui.select(items, {
     prompt = "Project task",
     format_item = function(item)
       return item.label
@@ -692,48 +247,62 @@ function M.menu()
     if not choice then
       return
     end
-    if choice.action == "info" then
-      M.info()
-    else
-      run_task(choice.action, choice.mode)
+
+    if choice.empty then
+      vim.notify("No mise tasks found for this project.", vim.log.levels.WARN, { title = "Project Tasks" })
+      return
     end
+
+    M.run(choice.action, { mode = choice.interactive and "terminal" or nil, title = choice.action })
   end)
+end
+
+function M.run(task_name, opts)
+  opts = opts or {}
+  if opts.mode == "terminal" then
+    run_terminal(task_name, opts.title or task_name)
+  else
+    run_job(task_name, opts.title or task_name)
+  end
 end
 
 function M.setup()
   local commands = {
-    ProjectBuild = { action = "build" },
-    ProjectRun = { action = "run" },
-    ProjectDev = { action = "dev", mode = "server" },
-    ProjectTest = { action = "test" },
-    ProjectCheck = { action = "check" },
-    ProjectLint = { action = "lint" },
-    ProjectFormat = { action = "format" },
-    ProjectClean = { action = "clean" },
-    ProjectTerminal = { action = "run", mode = "terminal" },
+    ProjectBuild = { task = "build" },
+    ProjectRun = { task = "run" },
+    ProjectDev = { task = "dev", mode = "terminal", title = "dev" },
+    ProjectTest = { task = "test" },
+    ProjectCheck = { task = "check" },
+    ProjectLint = { task = "lint" },
+    ProjectFormat = { task = "format" },
+    ProjectClean = { task = "clean" },
+    ProjectSetup = { task = "setup" },
+    ProjectQA = { task = "qa" },
+    ProjectTypecheck = { task = "typecheck" },
+    ProjectTerminal = { task = "run", mode = "terminal", title = "terminal" },
   }
 
   for name, spec in pairs(commands) do
     vim.api.nvim_create_user_command(name, function()
-      run_task(spec.action, spec.mode)
+      M.run(spec.task, spec)
     end, {})
   end
 
   vim.api.nvim_create_user_command("ProjectMenu", M.menu, {})
   vim.api.nvim_create_user_command("ProjectInfo", M.info, {})
+  vim.api.nvim_create_user_command("ProjectTasks", M.info, {})
 
-  -- Aliases curtos para fluxo rápido no command-line.
   vim.api.nvim_create_user_command("Build", function()
-    run_task "build"
+    M.run("build")
   end, {})
   vim.api.nvim_create_user_command("Run", function()
-    run_task "run"
+    M.run("run")
   end, {})
   vim.api.nvim_create_user_command("Test", function()
-    run_task "test"
+    M.run("test")
   end, {})
   vim.api.nvim_create_user_command("Check", function()
-    run_task "check"
+    M.run("check")
   end, {})
 
   local map = vim.keymap.set
@@ -747,6 +316,8 @@ function M.setup()
   map("n", "<leader>ml", "<cmd>ProjectLint<cr>", { desc = "Project Lint" })
   map("n", "<leader>mf", "<cmd>ProjectFormat<cr>", { desc = "Project Format" })
   map("n", "<leader>mx", "<cmd>ProjectClean<cr>", { desc = "Project Clean" })
+  map("n", "<leader>mS", "<cmd>ProjectSetup<cr>", { desc = "Project Setup" })
+  map("n", "<leader>mQ", "<cmd>ProjectQA<cr>", { desc = "Project QA" })
   map("n", "<leader>mT", "<cmd>ProjectTerminal<cr>", { desc = "Project Run Terminal" })
 end
 

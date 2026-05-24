@@ -83,8 +83,8 @@ return {
         theme = theme,
         globalstatus = true,
         always_divide_middle = false,
-        component_separators = { left = "│", right = "│" },
-        section_separators = { left = "", right = "" },
+        component_separators = { left = "", right = "" },
+        section_separators = { left = "", right = "" },
         disabled_filetypes = {
           statusline = { "dashboard", "alpha", "starter", "lazy", "mason" },
           winbar = {},

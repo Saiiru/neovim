@@ -9,29 +9,59 @@ local root_markers = {
   "build.gradle.kts",
 }
 
+local preferred_java_home = "/usr/lib/jvm/java-21-openjdk"
+
 local function mason_root()
   return vim.env.MASON or (vim.fn.stdpath "data" .. "/mason")
 end
 
-local function java_executable()
+local function java_version(candidate)
+  if not candidate or not vim.uv.fs_stat(candidate) then
+    return nil
+  end
+
+  local result = vim.system({ candidate, "-version" }, { text = true }):wait(2000)
+  local output = table.concat({ result.stdout or "", result.stderr or "" }, "\n")
+  if output == "" then
+    return nil
+  end
+
+  return output
+end
+
+local function is_java_21(candidate)
+  local output = java_version(candidate)
+  if not output then
+    return false
+  end
+
+  return output:match('version%s+"21') ~= nil or output:match('openjdk version%s+"21') ~= nil
+end
+
+local function ensure_java_21()
   local candidates = {
-    vim.env.JDTLS_JAVA,
+    vim.env.JDTLS_JAVA and vim.env.JDTLS_JAVA or nil,
     vim.env.JDTLS_JAVA_HOME and (vim.env.JDTLS_JAVA_HOME .. "/bin/java") or nil,
+    vim.env.JAVA_HOME and (vim.env.JAVA_HOME .. "/bin/java") or nil,
+    preferred_java_home .. "/bin/java",
     "/usr/lib/jvm/java-21-openjdk/bin/java",
-    "/usr/lib/jvm/java-22-openjdk/bin/java",
-    "/usr/lib/jvm/java-23-openjdk/bin/java",
-    "/usr/lib/jvm/java-24-openjdk/bin/java",
-    "/usr/lib/jvm/java-25-openjdk/bin/java",
-    "/usr/lib/jvm/java-26-openjdk/bin/java",
   }
 
   for _, candidate in ipairs(candidates) do
-    if candidate and vim.uv.fs_stat(candidate) then
+    if is_java_21(candidate) then
+      local java_home = candidate:gsub("/bin/java$", "")
+      vim.env.JAVA_HOME = java_home
+      vim.env.JDTLS_JAVA_HOME = java_home
+      vim.env.JDTLS_JAVA = candidate
       return candidate
     end
   end
 
-  return "java"
+  return nil
+end
+
+local function java_executable()
+  return ensure_java_21()
 end
 
 local function java_runtimes()
@@ -156,6 +186,12 @@ function M.start()
     return
   end
 
+  local java_home_bin = ensure_java_21()
+  if not java_home_bin then
+    vim.notify("JDTLS requires Java 21. Set JAVA_HOME or JDTLS_JAVA_HOME to a Java 21 install.", vim.log.levels.ERROR)
+    return
+  end
+
   local paths = jdtls_paths()
   if not paths or paths.launcher == "" or vim.fn.executable(paths.bin) ~= 1 then
     vim.notify("jdtls is not installed in Mason", vim.log.levels.WARN)
@@ -179,7 +215,7 @@ function M.start()
   local cmd = {
     paths.bin,
     "--java-executable",
-    java_executable(),
+    java_home_bin or java_executable(),
     "--jvm-arg=-Dlog.protocol=true",
     "--jvm-arg=-Dlog.level=ALL",
     "--jvm-arg=-Xmx1g",
@@ -218,9 +254,8 @@ function M.start()
         "jdk.*",
         "sun.*",
       },
-      importOrder = { "java", "jakarta", "javax", "com", "org" },
     },
-    sources = {
+    source = {
       organizeImports = {
         starThreshold = 9999,
         staticThreshold = 9999,
