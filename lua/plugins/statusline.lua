@@ -6,48 +6,75 @@ return {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
     opts = function(_, opts)
+      local formatting = require("config.formatting")
       local c = {
-        bg = "#0d0f18",
-        fg = "#c8d3f5",
-        muted = "#828bb8",
-        red = "#ff757f",
-        green = "#c3e88d",
-        yellow = "#ffc777",
+        bg = "#0a0e14",
+        panel = "#131a24",
+        surface = "#1b2433",
+        edge = "#2d3f76",
+        fg = "#d7e2f0",
+        muted = "#7f8cab",
+        red = "#ff5d73",
+        green = "#7ee787",
+        yellow = "#ffd76e",
         blue = "#82aaff",
-        magenta = "#c099ff",
+        magenta = "#c792ea",
         cyan = "#86e1fc",
       }
 
+      local function autoformat_color()
+        return formatting.enabled() and { fg = c.green, bg = c.surface, gui = "bold" }
+          or { fg = c.red, bg = c.surface, gui = "bold" }
+      end
+
       local theme = {
         normal = {
-          a = { fg = c.blue, bg = c.bg, gui = "bold" },
-          b = { fg = c.fg, bg = c.bg },
-          c = { fg = c.fg, bg = c.bg },
+          a = { fg = c.bg, bg = c.blue, gui = "bold" },
+          b = { fg = c.fg, bg = c.panel },
+          c = { fg = c.fg, bg = c.surface },
+          x = { fg = c.fg, bg = c.panel },
+          y = { fg = c.fg, bg = c.surface },
+          z = { fg = c.bg, bg = c.cyan, gui = "bold" },
         },
         insert = {
-          a = { fg = c.green, bg = c.bg, gui = "bold" },
-          b = { fg = c.fg, bg = c.bg },
-          c = { fg = c.fg, bg = c.bg },
+          a = { fg = c.bg, bg = c.green, gui = "bold" },
+          b = { fg = c.fg, bg = c.panel },
+          c = { fg = c.fg, bg = c.surface },
+          x = { fg = c.fg, bg = c.panel },
+          y = { fg = c.fg, bg = c.surface },
+          z = { fg = c.bg, bg = c.cyan, gui = "bold" },
         },
         visual = {
-          a = { fg = c.magenta, bg = c.bg, gui = "bold" },
-          b = { fg = c.fg, bg = c.bg },
-          c = { fg = c.fg, bg = c.bg },
+          a = { fg = c.bg, bg = c.magenta, gui = "bold" },
+          b = { fg = c.fg, bg = c.panel },
+          c = { fg = c.fg, bg = c.surface },
+          x = { fg = c.fg, bg = c.panel },
+          y = { fg = c.fg, bg = c.surface },
+          z = { fg = c.bg, bg = c.cyan, gui = "bold" },
         },
         replace = {
-          a = { fg = c.red, bg = c.bg, gui = "bold" },
-          b = { fg = c.fg, bg = c.bg },
-          c = { fg = c.fg, bg = c.bg },
+          a = { fg = c.bg, bg = c.red, gui = "bold" },
+          b = { fg = c.fg, bg = c.panel },
+          c = { fg = c.fg, bg = c.surface },
+          x = { fg = c.fg, bg = c.panel },
+          y = { fg = c.fg, bg = c.surface },
+          z = { fg = c.bg, bg = c.cyan, gui = "bold" },
         },
         command = {
-          a = { fg = c.yellow, bg = c.bg, gui = "bold" },
-          b = { fg = c.fg, bg = c.bg },
-          c = { fg = c.fg, bg = c.bg },
+          a = { fg = c.bg, bg = c.yellow, gui = "bold" },
+          b = { fg = c.fg, bg = c.panel },
+          c = { fg = c.fg, bg = c.surface },
+          x = { fg = c.fg, bg = c.panel },
+          y = { fg = c.fg, bg = c.surface },
+          z = { fg = c.bg, bg = c.cyan, gui = "bold" },
         },
         inactive = {
           a = { fg = c.muted, bg = c.bg },
           b = { fg = c.muted, bg = c.bg },
           c = { fg = c.muted, bg = c.bg },
+          x = { fg = c.muted, bg = c.bg },
+          y = { fg = c.muted, bg = c.bg },
+          z = { fg = c.muted, bg = c.bg },
         },
       }
 
@@ -56,8 +83,8 @@ return {
         theme = theme,
         globalstatus = true,
         always_divide_middle = false,
-        component_separators = "",
-        section_separators = "",
+        component_separators = { left = "│", right = "│" },
+        section_separators = { left = "", right = "" },
         disabled_filetypes = {
           statusline = { "dashboard", "alpha", "starter", "lazy", "mason" },
           winbar = {},
@@ -76,10 +103,16 @@ return {
             fmt = function(mode)
               return mode:sub(1, 1)
             end,
-            color = { fg = c.yellow, bg = c.bg, gui = "bold" },
+            color = { fg = c.bg, bg = c.blue, gui = "bold" },
           },
         },
-        lualine_b = {},
+        lualine_b = {
+          {
+            "branch",
+            icon = nil,
+            color = { fg = c.fg, bg = c.panel, gui = "bold" },
+          },
+        },
         lualine_c = {
           {
             "filename",
@@ -98,14 +131,19 @@ return {
             sources = { "nvim_diagnostic" },
             symbols = { error = "E:", warn = "W:", info = "I:", hint = "H:" },
           },
+          {
+            function()
+              return formatting.status()
+            end,
+            color = autoformat_color,
+          },
         },
         lualine_y = {
-          { "branch", color = { fg = c.magenta, bg = c.bg, gui = "bold" } },
           { "diff", symbols = { added = "+", modified = "~", removed = "-" } },
         },
         lualine_z = {
           { "progress" },
-          { "location", color = { fg = c.blue, bg = c.bg, gui = "bold" } },
+          { "location", color = { fg = c.bg, bg = c.cyan, gui = "bold" } },
         },
       }
 

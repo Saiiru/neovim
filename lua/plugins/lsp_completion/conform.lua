@@ -2,6 +2,8 @@ return {
   "stevearc/conform.nvim",
   event = { "BufReadPre", "BufNewFile" },
   opts = function()
+    local formatting = require("config.formatting")
+
     local function buf_dir(bufnr)
       local name = vim.api.nvim_buf_get_name(bufnr)
       if name == "" then
@@ -150,6 +152,9 @@ return {
         if ft == "gitcommit" then
           return nil
         end
+        if not formatting.enabled() then
+          return nil
+        end
         return {
           timeout_ms = 1500,
           lsp_format = "fallback",
@@ -183,6 +188,13 @@ return {
       end,
       mode = { "n", "v" },
       desc = "Format Buffer/Selection",
+    },
+    {
+      "<leader>cT",
+      function()
+        require("config.formatting").toggle()
+      end,
+      desc = "Toggle Autoformat",
     },
     {
       "<leader>cW",

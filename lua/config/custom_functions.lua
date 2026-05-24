@@ -1,5 +1,7 @@
 -- lua/config/custom_functions.lua
 
+local formatting = require("config.formatting")
+
 -- Toggle conceallevel between 0 and 2
 function ToggleConcealLevel()
   if vim.wo.conceallevel == 0 then
@@ -27,6 +29,14 @@ end
 -- Uso manual:
 --   :FixWhitespace
 vim.api.nvim_create_user_command("FixWhitespace", [[%s/\s\+$//e]], {})
+
+vim.api.nvim_create_user_command("AutoFormatToggle", function()
+  formatting.toggle()
+end, { desc = "Toggle persistent autoformat" })
+
+vim.api.nvim_create_user_command("AutoFormatStatus", function()
+  vim.notify(formatting.status(), vim.log.levels.INFO, { title = "Conform" })
+end, { desc = "Show persistent autoformat status" })
 
 -- Formatação nativa: tenta Conform primeiro e cai para LSP se necessário.
 -- Substitui o antigo `call CocAction('format')`.

@@ -29,7 +29,7 @@ return {
         { "<leader>cg", desc = "Generate Documentation" },
         { "<leader>T", group = "ToggleTerm" },
         { "<leader>A", group = "Arduino" },
-        { "<leader>a", group = "Avante" },
+        { "<leader>a", group = "AI" },
         { "<leader>gh", group = "Git Hunks" },
         { "<leader>h", group = "Harpoon" },
         { "<leader>?", group = "Cheatsheets" },
