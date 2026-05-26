@@ -8,7 +8,7 @@ local M = {}
 -- ── Ícones genéricos do sistema (expanded com nerd fonts) ─────────────────────
 M.misc = {
   bat       = "󰭟",
-  branch    = "",
+  branch    = "",
   lsp       = "󰄲",
   position  = "󰇚",
   encoding  = "󰈙",
@@ -18,6 +18,8 @@ M.misc = {
   separator = "│",
   zoom      = "󰁌",
   session   = "󰓪",
+  time      = "",
+  cwd       = "",
 
   -- UI & Viewport (refined nerd fonts)
   pin       = "󰐃",
@@ -37,8 +39,8 @@ M.misc = {
   regex     = "󰞙",
 
   -- Diagnostics
-  error     = "",
-  warning   = "",
+  error     = "",
+  warning   = "",
   info      = "󰋼",
   hint      = "󰌶",
 
@@ -66,7 +68,7 @@ M.misc = {
   undo      = "󰕌",
   redo      = "󰕍",
   copy      = "󰆐",
-  paste     = "",
+  paste     = "󰅖",
   delete    = "󰆴",
 
   -- Testing
