@@ -58,7 +58,7 @@ return {
       noctis_palette = {
         bg = p.bg_dark,
         fg = p.fg,
-        label = p.blue,
+        label = p.cyan,
         desc = p.fg_dark,
         border = p.border,
       },

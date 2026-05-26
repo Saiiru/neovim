@@ -19,7 +19,7 @@ return {
   opts = {
     legacy_commands = false,
     workspaces = {
-      { name = "Leveling", path = "~/Documents/leveling" },
+      { name = "Obsidian", path = "/home/sairu/Documents/Obsidian" },
     },
     picker = {
       name = "fzf-lua",

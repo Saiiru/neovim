@@ -5,23 +5,23 @@ return {
     priority = 1000,
     config = function()
       local p = {
-        bg = "#0A0E14",
-        bg_dark = "#111826",
+        bg = "#0a0e14",
+        bg_dark = "#101722",
         bg_float = "#182132",
         border = "#22304A",
 
-        fg = "#F2F7FF",
-        fg_dark = "#98A9C2",
+        fg = "#d7e2f0",
+        fg_dark = "#6f7d99",
 
-        red = "#FF3B5C",
-        orange = "#FF8F40",
-        yellow = "#FFD000",
-        green = "#39FF14",
-        blue = "#2AC3FF",
-        cyan = "#56D4DD",
-        magenta = "#A77DFF",
+        red = "#ff5d73",
+        orange = "#ff9e64",
+        yellow = "#ffd76e",
+        green = "#7ee787",
+        blue = "#82aaff",
+        cyan = "#86e1fc",
+        magenta = "#c792ea",
 
-        github = "#C9D1D9",
+        github = "#d7e2f0",
       }
 
       vim.g.noctis_palette = p
@@ -34,11 +34,11 @@ return {
           module_default = true,
           styles = {
             -- Comentários com mais contraste visual para leitura rápida
-            comments = "italic,bold",
-            keywords = "NONE",
+            comments = "italic",
+            keywords = "bold",
             -- Funções em negrito para achar fluxo de execução mais rápido
             functions = "bold",
-            types = "NONE",
+            types = "italic",
           },
         },
         palettes = {
@@ -64,11 +64,11 @@ return {
         },
         groups = {
           carbonfox = {
-            NormalFloat = { bg = "NONE" },
-            FloatBorder = { fg = p.border, bg = "NONE" },
+            NormalFloat = { bg = p.bg_dark },
+            FloatBorder = { fg = p.border, bg = p.bg_dark },
             Pmenu = { bg = p.bg_dark },
-            PmenuSel = { bg = p.border, fg = p.blue, style = "bold" },
-            CursorLineNr = { fg = p.yellow, style = "bold" },
+            PmenuSel = { bg = p.cyan, fg = p.bg, style = "bold" },
+            CursorLineNr = { fg = p.cyan, style = "bold" },
             Visual = { bg = p.bg_float },
             WinSeparator = { fg = p.border },
             StatusLine = { bg = p.bg, fg = p.fg },
@@ -102,10 +102,10 @@ return {
             NotifyDEBUGBorder = { fg = p.fg_dark, bg = p.bg },
             NotifyTRACEBorder = { fg = p.magenta, bg = p.bg },
 
-            DiagnosticError = { fg = p.red },
-            DiagnosticWarn = { fg = p.yellow },
-            DiagnosticInfo = { fg = p.cyan },
-            DiagnosticHint = { fg = p.magenta },
+            DiagnosticError = { fg = p.red, style = "bold" },
+            DiagnosticWarn = { fg = p.yellow, style = "bold" },
+            DiagnosticInfo = { fg = p.cyan, style = "bold" },
+            DiagnosticHint = { fg = p.magenta, style = "bold" },
 
             RainbowDelimiter1 = { fg = p.red },
             RainbowDelimiter2 = { fg = p.yellow },
@@ -146,7 +146,7 @@ return {
             OilPermissionExecute = { fg = p.green },
 
             -- Destaques extras de código para uma leitura mais “viva”
-            Comment = { fg = p.fg_dark, style = "italic,bold" },
+            Comment = { fg = p.fg_dark, style = "italic" },
             Function = { fg = p.blue, style = "bold" },
             ["@function"] = { fg = p.blue, style = "bold" },
             ["@function.call"] = { fg = p.cyan, style = "bold" },

@@ -135,67 +135,10 @@ map("n", "<leader>?t", function()
 end, { desc = "Help: Project Tasks", noremap = true, silent = true })
 
 -- ── Quickfix ─────────────────────────────────────────────────────────────────
-map("n", "<C-n>", ":cnext<cr>", { desc = "Quickfix Next", noremap = true, silent = true })
-map("n", "<C-p>", ":cprev<cr>", { desc = "Quickfix Prev", noremap = true, silent = true })
-map("n", "<C-q>", ":cclose<cr>", { desc = "Quickfix Close", noremap = true, silent = false })
-map(
-  "n",
-  "<leader>cq",
-  "<cmd>DiagnosticsQuickfix<cr>",
-  { desc = "Diagnostics To Quickfix", noremap = true, silent = true }
-)
-map(
-  "n",
-  "<leader>cQ",
-  "<cmd>DiagnosticsQuickfix!<cr>",
-  { desc = "Buffer Diagnostics To Quickfix", noremap = true, silent = true }
-)
-map("n", "<leader>cn", ":cnext<cr>", { desc = "Quickfix Next", noremap = true, silent = true })
-map("n", "<leader>cp", ":cprevious<cr>", { desc = "Quickfix Previous", noremap = true, silent = true })
-map("n", "<leader>cO", ":copen<cr>", { desc = "Quickfix Open", noremap = true, silent = true })
+map("n", "[q", ":cprev<cr>", { desc = "Quickfix Previous", noremap = true, silent = true })
+map("n", "]q", ":cnext<cr>", { desc = "Quickfix Next", noremap = true, silent = true })
+map("n", "<leader>cq", ":copen<cr>", { desc = "Quickfix Open", noremap = true, silent = true })
 map("n", "<leader>cc", ":cclose<cr>", { desc = "Quickfix Close", noremap = true, silent = true })
 
 -- ── Terminal ─────────────────────────────────────────────────────────────────
 map("n", "<leader>t", ":sp<bar>term<cr>:resize 10<cr>", { desc = "Split Terminal", noremap = true, silent = true })
-
--- ── LSP (Legacy/Fallback) ────────────────────────────────────────────────────
-map("n", "<leader>lk", ":lua vim.lsp.buf.hover()<cr>", { desc = "LSP Hover", noremap = true, silent = true })
-map("n", "<leader>ld", ":lua vim.lsp.buf.definition()<cr>", { desc = "LSP Definition", noremap = true, silent = true })
-map(
-  "n",
-  "<leader>lt",
-  ":lua vim.lsp.buf.type_definition()<cr>",
-  { desc = "Type Definition", noremap = true, silent = true }
-)
-map(
-  "n",
-  "<leader>ln",
-  ":lua vim.diagnostic.goto_next()<cr>",
-  { desc = "Diagnostic Next", noremap = true, silent = true }
-)
-map(
-  "n",
-  "<leader>lN",
-  ":lua vim.diagnostic.goto_prev()<cr>",
-  { desc = "Diagnostic Previous", noremap = true, silent = true }
-)
-map("n", "<leader>lo", function()
-  vim.diagnostic.open_float(nil, { border = "single", scope = "line" })
-end, { desc = "Diagnostic Float", noremap = true, silent = true })
-map("n", "<leader>lr", ":lua vim.lsp.buf.references()<cr>", { desc = "LSP References", noremap = true, silent = true })
-map("n", "<leader>lR", ":lua vim.lsp.buf.rename()<cr>", { desc = "LSP Rename", noremap = true, silent = true })
-map("n", "<leader>lx", function()
-  require("trouble").toggle({ mode = "diagnostics", filter = { buf = 0 }, focus = false })
-end, { desc = "Trouble Buffer Diagnostics", noremap = true, silent = true })
-map("n", "<leader>lX", function()
-  require("trouble").toggle({ mode = "diagnostics", focus = false })
-end, { desc = "Trouble Workspace Diagnostics", noremap = true, silent = true })
-map("n", "<leader>ls", function()
-  require("trouble").toggle({ mode = "symbols", focus = false })
-end, { desc = "Trouble Symbols", noremap = true, silent = true })
-map("n", "<leader>lq", function()
-  require("trouble").toggle({ mode = "quickfix", focus = false })
-end, { desc = "Trouble Quickfix", noremap = true, silent = true })
-map("n", "<leader>ll", function()
-  require("trouble").toggle({ mode = "loclist", focus = false })
-end, { desc = "Trouble Loclist", noremap = true, silent = true })

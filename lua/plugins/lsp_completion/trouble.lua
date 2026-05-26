@@ -22,6 +22,9 @@ return {
           size = 0.32,
         },
       },
+      lsp = {
+        focus = false,
+      },
       symbols = {
         focus = false,
         win = {
@@ -35,25 +38,22 @@ return {
       loclist = {
         focus = false,
       },
-      lsp_references = {
-        focus = false,
-      },
     },
   },
   keys = {
     {
       "<leader>xx",
       function()
-        require("trouble").toggle({ mode = "diagnostics", filter = { buf = 0 }, focus = false })
+        require("trouble").toggle({ mode = "diagnostics", focus = false })
       end,
-      desc = "Trouble buffer diagnostics",
+      desc = "Trouble diagnostics",
     },
     {
       "<leader>xX",
       function()
-        require("trouble").toggle({ mode = "diagnostics", focus = false })
+        require("trouble").toggle({ mode = "diagnostics", filter = { buf = 0 }, focus = false })
       end,
-      desc = "Trouble workspace diagnostics",
+      desc = "Trouble buffer diagnostics",
     },
     {
       "<leader>xs",
@@ -70,18 +70,18 @@ return {
       desc = "Trouble quickfix",
     },
     {
-      "<leader>xl",
+      "<leader>xL",
       function()
         require("trouble").toggle({ mode = "loclist", focus = false })
       end,
       desc = "Trouble loclist",
     },
     {
-      "<leader>xr",
+      "<leader>xl",
       function()
-        require("trouble").toggle({ mode = "lsp_references", focus = false })
+        require("trouble").toggle({ mode = "lsp", focus = false })
       end,
-      desc = "Trouble references",
+      desc = "Trouble LSP locations",
     },
   },
 }

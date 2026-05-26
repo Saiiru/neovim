@@ -162,7 +162,7 @@ return {
     {
       "<leader>Fp",
       function()
-        require("fzf-lua").files({ cwd = "~/Documents/leveling" })
+        require("fzf-lua").files({ cwd = "/home/sairu/Documents/Obsidian" })
       end,
       desc = "FzfLua Obsidian Files",
     },

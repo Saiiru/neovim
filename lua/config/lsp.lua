@@ -19,29 +19,24 @@ local function supports_inlay_hints(bufnr)
 end
 
 M.on_attach = function(client, bufnr)
-  -- Keymaps locais do LSP: carregam apenas quando um servidor conecta no buffer.
+  -- Keymaps locais do LSP: entram apenas quando um servidor conecta no buffer.
   local map = function(mode, lhs, rhs, desc)
     vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
   end
 
-  local has_saga = pcall(require, "lspsaga")
   local has_fzf = pcall(require, "fzf-lua")
 
-  map("n", "K", has_saga and "<cmd>Lspsaga hover_doc<cr>" or vim.lsp.buf.hover, "LSP Hover")
-  map("n", "gd", has_saga and "<cmd>Lspsaga peek_definition<cr>" or vim.lsp.buf.definition, "LSP Definition (Peek)")
-  map("n", "gD", has_saga and "<cmd>Lspsaga goto_definition<cr>" or vim.lsp.buf.definition, "LSP Definition (Goto)")
-  map("n", "gr", has_fzf and "<cmd>FzfLua lsp_references<cr>" or vim.lsp.buf.references, "LSP References")
-  map("n", "gT", vim.lsp.buf.declaration, "LSP Declaration")
-  map("n", "gi", vim.lsp.buf.implementation, "Implementation")
-  map("n", "gt", has_fzf and "<cmd>FzfLua lsp_typedefs<cr>" or vim.lsp.buf.type_definition, "LSP Type Definition")
-  map("n", "<leader>rn", vim.lsp.buf.rename, "Rename")
-  map("n", "<leader>ca", has_saga and "<cmd>Lspsaga code_action<cr>" or vim.lsp.buf.code_action, "Code Action")
-  map("n", "<leader>cl", "<cmd>LspInfo<cr>", "LSP Info")
-  map("n", "<leader>cR", "<cmd>LspRestart<cr>", "LSP Restart")
-  map("n", "<leader>cf", function()
-    vim.lsp.buf.format({ async = true, bufnr = bufnr })
-  end, "LSP Format")
-  map("n", "<leader>lf", function()
+  local function diagnostic_float()
+    vim.diagnostic.open_float(nil, {
+      border = "rounded",
+      source = "if_many",
+      focusable = true,
+      header = "",
+      prefix = "",
+    })
+  end
+
+  local function format_buffer()
     local ok_conform, conform = pcall(require, "conform")
     if ok_conform then
       conform.format({
@@ -52,12 +47,25 @@ M.on_attach = function(client, bufnr)
     else
       vim.lsp.buf.format({ async = true, bufnr = bufnr })
     end
-  end, "Format buffer")
-  map("n", "[d", vim.diagnostic.goto_prev, "Previous diagnostic")
-  map("n", "]d", vim.diagnostic.goto_next, "Next diagnostic")
-  map("n", "<leader>ld", vim.diagnostic.open_float, "Line diagnostics")
-  map("n", "<leader>lq", "<cmd>DiagnosticsQuickfix<cr>", "Diagnostics Quickfix")
-  map("n", "<leader>lQ", "<cmd>DiagnosticsQuickfix!<cr>", "Buffer Diagnostics Quickfix")
+  end
+
+  map("n", "K", vim.lsp.buf.hover, "Hover")
+  map("n", "gd", vim.lsp.buf.definition, "Definition")
+  map("n", "gD", vim.lsp.buf.declaration, "Declaration")
+  map("n", "gr", function()
+    if has_fzf then
+      vim.cmd("FzfLua lsp_references")
+    else
+      vim.lsp.buf.references()
+    end
+  end, "References")
+  map("n", "gt", vim.lsp.buf.type_definition, "Type Definition")
+  map("n", "<leader>la", vim.lsp.buf.code_action, "Code Action")
+  map("n", "<leader>lr", vim.lsp.buf.rename, "Rename")
+  map("n", "<leader>lf", format_buffer, "Format")
+  map("n", "<leader>ld", diagnostic_float, "Diagnostic Float")
+  map("n", "<leader>ln", vim.diagnostic.goto_next, "Next diagnostic")
+  map("n", "<leader>lp", vim.diagnostic.goto_prev, "Previous diagnostic")
   map("n", "<leader>li", function()
     if vim.lsp.inlay_hint and vim.lsp.inlay_hint.is_enabled then
       vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }), { bufnr = bufnr })
