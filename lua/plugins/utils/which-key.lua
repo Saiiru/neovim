@@ -28,7 +28,7 @@ return {
         { "<leader>cQ", desc = "Buffer Diagnostics To Quickfix" },
         { "<leader>cg", desc = "Generate Documentation" },
         { "<leader>T", group = "ToggleTerm" },
-        { "<leader>A", group = "Arduino" },
+        { "<leader>A", group = "Embedded / Arduino" },
         { "<leader>a", group = "AI" },
         { "<leader>gh", group = "Git Hunks" },
         { "<leader>h", group = "Harpoon" },

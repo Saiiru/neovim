@@ -226,6 +226,24 @@ local function filetype_component()
   }
 end
 
+local function embedded_context_component()
+  return {
+    function()
+      local ok, arduino = pcall(require, "config.arduino")
+      if not ok or type(arduino.context_label) ~= "function" then
+        return ""
+      end
+
+      return arduino.context_label(0)
+    end,
+    cond = function()
+      local ok, arduino = pcall(require, "config.arduino")
+      return ok and type(arduino.is_context_buffer) == "function" and arduino.is_context_buffer(0)
+    end,
+    color = { fg = c.cyan, bg = c.panel, gui = "bold" },
+  }
+end
+
 local function lsp_component()
   return {
     current_lsp,
@@ -298,8 +316,10 @@ return {
           { formatter_status, color = { fg = c.green, bg = c.panel, gui = "bold" } },
           lsp_component(),
           filetype_component(),
+          embedded_context_component(),
           encoding_component(),
         },
+
         lualine_y = {
           { "diff", symbols = { added = "+", modified = "~", removed = "-" } },
         },

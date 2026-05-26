@@ -6,6 +6,6 @@ require("config.autocmds")
 require("config.keymaps")
 require("config.lsp_diagnostic")
 require("config.tmux") -- Batman integration
-require("config.arduino")
+require("config.arduino").setup()
 require("config.project_tasks")
 require("config.cheatsheets").setup()
