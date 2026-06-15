@@ -1,144 +1,298 @@
--- lua/config/keymaps.lua
-
-vim.g.mapleader = " "
-vim.g.maplocalleader = " "
 local map = vim.keymap.set
-local utils = require("config.utils")
 
--- ── Custom Functions ─────────────────────────────────────────────────────────
-map("n", "gf", function()
-  OpenFile()
-end, { desc = "Open or create file under cursor", noremap = true, silent = true })
+local function in_git_repo()
+  return vim.fn.isdirectory ".git" == 1
+end
 
--- ── Navigation ───────────────────────────────────────────────────────────────
+local function close_buffer()
+  local ok, bufremove = pcall(require, "mini.bufremove")
+  if ok then
+    bufremove.delete(0, false)
+    return
+  end
 
--- Disable double click mouse
-vim.api.nvim_set_keymap("n", "<2-LeftMouse>", "", { noremap = true, silent = true })
+  vim.cmd "bdelete"
+end
 
--- j/k respeitam linhas quebradas visualmente, mas preservam contagens como `10j`.
-map("n", "j", function()
-  return vim.v.count == 0 and "gj" or "j"
-end, { desc = "Down (wrap-aware)", expr = true, noremap = true, silent = true })
-map("n", "k", function()
-  return vim.v.count == 0 and "gk" or "k"
-end, { desc = "Up (wrap-aware)", expr = true, noremap = true, silent = true })
+_G.mini_git_cli = function(command, fallback)
+  if not in_git_repo() then
+    vim.notify(fallback or "Not a git repository", vim.log.levels.WARN)
+    return
+  end
 
--- Mantém H/M/L, J e K nativos para aprender Vim de verdade.
--- Movimento acelerado fica em Alt+h/j/k/l.
-map({ "n", "v" }, "<A-h>", "5h", { desc = "Move Left x5", noremap = true, silent = false })
-map({ "n", "v" }, "<A-j>", "5j", { desc = "Move Down x5", noremap = true, silent = false })
-map({ "n", "v" }, "<A-k>", "5k", { desc = "Move Up x5", noremap = true, silent = false })
-map({ "n", "v" }, "<A-l>", "5l", { desc = "Move Right x5", noremap = true, silent = false })
-map("n", "J", "mzJ`z", { desc = "Join Lines Keep Cursor", noremap = true, silent = true })
+  require("mini.pick").builtin.cli { command = command }
+end
 
--- Busca e scroll centralizados deixam navegação longa menos cansativa.
-map("n", "n", "nzzzv", { desc = "Next Search Result Centered", noremap = true, silent = true })
-map("n", "N", "Nzzzv", { desc = "Previous Search Result Centered", noremap = true, silent = true })
-map("n", "<C-d>", "<C-d>zz", { desc = "Half Page Down Centered", noremap = true, silent = true })
-map("n", "<C-u>", "<C-u>zz", { desc = "Half Page Up Centered", noremap = true, silent = true })
+-- Better up/down
+map({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
+map({ "n", "x" }, "<Down>", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
+map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
+map({ "n", "x" }, "<Up>", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
 
--- Remapping escape key
-map({ "i", "v" }, "kj", "<Esc>", { desc = "Escape", noremap = true, silent = true })
-map("t", "<Esc><Esc>", "<C-\\><C-N>", { desc = "Escape Term Mode", noremap = true, silent = true })
+-- Go to different windows
+map("n", "<C-h>", "<C-w>h", { desc = "Go to Left Window", remap = true })
+map("n", "<C-j>", "<C-w>j", { desc = "Go to Lower Window", remap = true })
+map("n", "<C-k>", "<C-w>k", { desc = "Go to Upper Window", remap = true })
+map("n", "<C-l>", "<C-w>l", { desc = "Go to Right Window", remap = true })
 
--- ── Editing ──────────────────────────────────────────────────────────────────
+-- Resize window using <ctrl> arrow keys
+map("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Increase Window Height" })
+map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease Window Height" })
+map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease Window Width" })
+map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase Window Width" })
 
--- Indenting
-map("v", "<", "<gv", { desc = "Indent Left", noremap = true, silent = false })
-map("v", ">", ">gv", { desc = "Indent Right", noremap = true, silent = false })
+-- Move Lines
+map("n", "<A-j>", "<cmd>execute 'move .+' . v:count1<cr>==", { desc = "Move Down" })
+map("n", "<A-k>", "<cmd>execute 'move .-' . (v:count1 + 1)<cr>==", { desc = "Move Up" })
+map("i", "<A-j>", "<esc><cmd>m .+1<cr>==gi", { desc = "Move Down" })
+map("i", "<A-k>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move Up" })
+map("v", "<A-j>", ":<C-u>execute \"'<,'>move '>+\" . v:count1<cr>gv=gv", { desc = "Move Down" })
+map("v", "<A-k>", ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv", { desc = "Move Up" })
 
--- Copy-Pasting
-map("v", "<C-c>", "\"+y", { desc = "Copy To Clipboard", noremap = true, silent = false })
-map("n", "<C-s>", "\"+P", { desc = "Paste From Clipboard", noremap = true, silent = false })
+-- Goto
+map("n", "gl", "$", { desc = "Go to end of line" })
+map("n", "gh", "^", { desc = "Go to start of line" })
 
--- Add semicolon at the end of the line
-map("i", "<C-;>", "<esc>A;<esc>i", { desc = "Semicolon at end", noremap = true, silent = true })
-map("n", "<leader>3", function()
-  vim.cmd("retab")
-  vim.cmd("FixWhitespace")
-end, { desc = "Retab + Fix Whitespace", noremap = true, silent = true })
+-- buffers
+map("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
+map("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer" })
+map("n", "[b", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
+map("n", "]b", "<cmd>bnext<cr>", { desc = "Next Buffer" })
+map("n", "<S-q>", close_buffer, { desc = "Delete Buffer" })
+map("n", "<leader>bd", close_buffer, { desc = "Delete Buffer" })
+map("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
+map("n", "<leader>`", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
 
--- ── Window Management ────────────────────────────────────────────────────────
+-- Clear search with <esc>
+map({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Escape and Clear hlsearch" })
 
--- Focus between windows
-map("n", "<C-h>", "<C-w>h", { desc = "Focus Left", noremap = true, silent = false })
-map("n", "<C-j>", "<C-w>j", { desc = "Focus Down", noremap = true, silent = false })
-map("n", "<C-k>", "<C-w>k", { desc = "Focus Up", noremap = true, silent = false })
-map("n", "<C-l>", "<C-w>l", { desc = "Focus Right", noremap = true, silent = false })
-
--- Resize windows
-map("n", "<C-S-H>", "3<C-w>>", { desc = "Resize Width +", noremap = true, silent = false })
-map("n", "<C-S-J>", "3<C-w>-", { desc = "Resize Height -", noremap = true, silent = false })
-map("n", "<C-S-K>", "3<C-w>+", { desc = "Resize Height +", noremap = true, silent = false })
-map("n", "<C-S-L>", "3<C-w><", { desc = "Resize Width -", noremap = true, silent = false })
-
--- Splits
-map("n", "<leader>pv", "<C-w>v", { desc = "Split Vertically", noremap = true, silent = false })
-map("n", "<leader>ph", "<C-w>s", { desc = "Split Horizontally", noremap = true, silent = false })
-map("n", "<leader>pe", "<C-w>=", { desc = "Equal Split", noremap = true, silent = false })
-map("n", "<leader>px", ":close<CR>", { desc = "Close Split", noremap = true, silent = false })
-map("n", "<leader>po", ":only<CR>", { desc = "Single Pane", noremap = true, silent = false })
-
--- ── Buffers ──────────────────────────────────────────────────────────────────
-map("n", "<Tab>", ":bnext<cr>", { desc = "Next Buffer", noremap = true, silent = true })
-map("n", "<S-Tab>", ":bprevious<cr>", { desc = "Previous Buffer", noremap = true, silent = true })
-map("n", "<leader>bn", ":enew<cr>", { desc = "New Empty Buffer", noremap = true, silent = true })
-map("n", "<leader>bl", ":blast<cr>", { desc = "Last Buffer", noremap = true, silent = true })
-map("n", "<leader>ba", ":%bdelete!<cr>", { desc = "Delete All Buffers", noremap = true, silent = true })
-map("n", "<leader>bs", ":source %<cr>", { desc = "Source Buffer", noremap = true, silent = true })
-
-
--- ── File Operations ──────────────────────────────────────────────────────────
-map("n", "<leader>q", ":q<cr>", { desc = "Quit File", noremap = true, silent = true })
-map("n", "<leader>Q", ":qa<cr>", { desc = "Quit All", noremap = true, silent = true })
-map("n", "<leader>w", ":w<cr>", { desc = "Write File", noremap = true, silent = true })
-map("n", "<leader>W", ":wa<cr>", { desc = "Write All", noremap = true, silent = true })
-map("n", "<leader>M", ":messages<cr>", { desc = "Show Messages", noremap = true, silent = true })
-
--- ── Options & UI ─────────────────────────────────────────────────────────────
-map("n", "<leader>ow", ":set wrap!<cr>", { desc = "Toggle Wrap", noremap = true, silent = true })
-map("n", "<leader>ol", ":set linebreak!<cr>", { desc = "Toggle Linebreak", noremap = true, silent = true })
-map("n", "<leader>os", ":set spell!<cr>", { desc = "Toggle Spell Check", noremap = true, silent = true })
-map("n", "<leader>oS", function()
-  SpellToggle("en_us,pt_br")
-end, { desc = "Toggle Spell EN/PT", noremap = true, silent = true })
-
-map("n", "<leader>z", "[s1z=``", { desc = "Fix Previous Spelling", noremap = true, silent = true })
-map("n", "<leader>oe", "<cmd>LtexEnglish<cr>", { desc = "LTeX English", noremap = true, silent = true })
-map("n", "<leader>op", "<cmd>LtexPortuguese<cr>", { desc = "LTeX Portuguese", noremap = true, silent = true })
-map("n", "<leader>oa", "<cmd>LtexAuto<cr>", { desc = "LTeX Auto Language", noremap = true, silent = true })
-map("n", "<leader>oh", ":set hlsearch!<cr>", { desc = "Toggle Search Highlight", noremap = true, silent = false })
-map("n", "<leader>od", ":pwd<cr>", { desc = "Show CWD", noremap = true, silent = false })
+-- Clear search, diff update and redraw
+-- taken from runtime/lua/_editor.lua
 map(
   "n",
-  "<leader>oc",
-  ":lua ToggleConcealLevel()<cr>",
-  { desc = "Toggle Conceallevel", noremap = true, silent = false }
+  "<leader>ur",
+  "<Cmd>nohlsearch<Bar>diffupdate<Bar>normal! <C-L><CR>",
+  { desc = "Redraw / Clear hlsearch / Diff Update" }
 )
-map("n", "<leader>on", function()
-  utils.launch_notepad()
-end, { desc = "Toggle Notepad", noremap = true, silent = true })
-map("n", "<leader>oN", function()
-  utils.save_notepad()
-end, { desc = "Save Notepad", noremap = true, silent = true })
-map("n", "<leader>?m", function()
-  require("config.cheatsheets").open("motions")
-end, { desc = "Help: Vim Motions", noremap = true, silent = true })
-map("n", "<leader>?s", function()
-  require("config.cheatsheets").open("surround")
-end, { desc = "Help: Surround", noremap = true, silent = true })
-map("n", "<leader>?v", function()
-  require("config.cheatsheets").open("multicursor")
-end, { desc = "Help: Visual Multi", noremap = true, silent = true })
-map("n", "<leader>?t", function()
-  require("config.cheatsheets").open("tasks")
-end, { desc = "Help: Project Tasks", noremap = true, silent = true })
 
--- ── Quickfix ─────────────────────────────────────────────────────────────────
-map("n", "[q", ":cprev<cr>", { desc = "Quickfix Previous", noremap = true, silent = true })
-map("n", "]q", ":cnext<cr>", { desc = "Quickfix Next", noremap = true, silent = true })
-map("n", "<leader>cq", ":copen<cr>", { desc = "Quickfix Open", noremap = true, silent = true })
-map("n", "<leader>cc", ":cclose<cr>", { desc = "Quickfix Close", noremap = true, silent = true })
+-- https://github.com/mhinz/vim-galore#saner-behavior-of-n-and-n
+map("n", "n", "'Nn'[v:searchforward].'zv'", { expr = true, desc = "Next Search Result" })
+map("x", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next Search Result" })
+map("o", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next Search Result" })
+map("n", "N", "'nN'[v:searchforward].'zv'", { expr = true, desc = "Prev Search Result" })
+map("x", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev Search Result" })
+map("o", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev Search Result" })
 
--- ── Terminal ─────────────────────────────────────────────────────────────────
-map("n", "<leader>t", ":sp<bar>term<cr>:resize 10<cr>", { desc = "Split Terminal", noremap = true, silent = true })
+-- Add undo break-points
+map("i", ",", ",<c-g>u")
+map("i", ".", ".<c-g>u")
+map("i", ";", ";<c-g>u")
+
+-- save file
+map({ "i", "x", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save File" })
+
+-- save file using leader
+map("n", "<leader>fs", "<cmd>w<cr>", { desc = "Save File" })
+
+--keywordprg
+map("n", "<leader>K", "<cmd>norm! K<cr>", { desc = "Keywordprg" })
+
+-- better indenting
+map("v", "<", "<gv")
+map("v", ">", ">gv")
+
+-- commenting
+map("n", "gco", "o<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>", { desc = "Add Comment Below" })
+map("n", "gcO", "O<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>", { desc = "Add Comment Above" })
+
+-- lazy
+map("n", "<leader>zz", "<cmd>Lazy<cr>", { desc = "Lazy" })
+
+-- new file
+map("n", "<leader>fn", "<cmd>enew<cr>", { desc = "New File" })
+
+-- location list
+map("n", "<leader>xl", function()
+  local success, err = pcall(vim.fn.getloclist(0, { winid = 0 }).winid ~= 0 and vim.cmd.lclose or vim.cmd.lopen)
+  if not success and err then
+    vim.notify(err, vim.log.levels.ERROR)
+  end
+end, { desc = "Location List" })
+-- quickfix list
+map("n", "<leader>xq", function()
+  local success, err = pcall(vim.fn.getqflist({ winid = 0 }).winid ~= 0 and vim.cmd.cclose or vim.cmd.copen)
+  if not success and err then
+    vim.notify(err, vim.log.levels.ERROR)
+  end
+end, { desc = "Quickfix List" })
+
+map("n", "[q", vim.cmd.cprev, { desc = "Previous Quickfix" })
+map("n", "]q", vim.cmd.cnext, { desc = "Next Quickfix" })
+
+-- diagnostic
+local diagnostic_goto = function(next, severity)
+  severity = severity and vim.diagnostic.severity[severity] or nil
+  return function()
+    vim.diagnostic.jump { count = next and 1 or -1, float = true, severity = severity }
+  end
+end
+map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
+map("n", "]d", diagnostic_goto(true), { desc = "Next Diagnostic" })
+map("n", "[d", diagnostic_goto(false), { desc = "Prev Diagnostic" })
+map("n", "]e", diagnostic_goto(true, "ERROR"), { desc = "Next Error" })
+map("n", "[e", diagnostic_goto(false, "ERROR"), { desc = "Prev Error" })
+map("n", "]w", diagnostic_goto(true, "WARN"), { desc = "Next Warning" })
+map("n", "[w", diagnostic_goto(false, "WARN"), { desc = "Prev Warning" })
+
+-- quit
+map("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit All" })
+
+-- highlights under cursor
+map("n", "<leader>ui", vim.show_pos, { desc = "Inspect Pos" })
+map("n", "<leader>uI", "<cmd>InspectTree<cr>", { desc = "Inspect Tree" })
+
+-- Terminal Mappings
+map("t", "<esc><esc>", "<c-\\><c-n>", { desc = "Enter Normal Mode" })
+map("t", "<C-h>", "<cmd>wincmd h<cr>", { desc = "Go to Left Window" })
+map("t", "<C-j>", "<cmd>wincmd j<cr>", { desc = "Go to Lower Window" })
+map("t", "<C-k>", "<cmd>wincmd k<cr>", { desc = "Go to Upper Window" })
+map("t", "<C-l>", "<cmd>wincmd l<cr>", { desc = "Go to Right Window" })
+map("t", "<C-/>", "<cmd>close<cr>", { desc = "Hide Terminal" })
+map("t", "<c-_>", "<cmd>close<cr>", { desc = "which_key_ignore" })
+
+-- windows
+map("n", "<leader>ww", "<C-W>p", { desc = "Other Window", remap = true })
+map("n", "<leader>wd", "<C-W>c", { desc = "Delete Window", remap = true })
+map("n", "<leader>w-", "<C-W>s", { desc = "Split Window Below", remap = true })
+map("n", "<leader>w|", "<C-W>v", { desc = "Split Window Right", remap = true })
+map("n", "<leader>-", "<C-W>s", { desc = "Split Window Below", remap = true })
+map("n", "<leader>|", "<C-W>v", { desc = "Split Window Right", remap = true })
+
+-- tabs
+map("n", "<leader><tab>l", "<cmd>tablast<cr>", { desc = "Last Tab" })
+map("n", "<leader><tab>o", "<cmd>tabonly<cr>", { desc = "Close Other Tabs" })
+map("n", "<leader><tab>f", "<cmd>tabfirst<cr>", { desc = "First Tab" })
+map("n", "<leader><tab><tab>", "<cmd>tabnew<cr>", { desc = "New Tab" })
+map("n", "<leader><tab>]", "<cmd>tabnext<cr>", { desc = "Next Tab" })
+map("n", "<leader><tab>d", "<cmd>tabclose<cr>", { desc = "Close Tab" })
+map("n", "<leader><tab>[", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
+
+vim.api.nvim_create_user_command("FormatDisable", function(args)
+  if args.bang then
+    -- FormatDisable! will disable formatting just for this buffer
+    vim.b.disable_autoformat = true
+  else
+    vim.g.disable_autoformat = true
+  end
+end, {
+  desc = "Disable autoformat-on-save",
+  bang = true,
+})
+vim.api.nvim_create_user_command("FormatEnable", function()
+  vim.b.disable_autoformat = false
+  vim.g.disable_autoformat = false
+end, {
+  desc = "Re-enable autoformat-on-save",
+})
+
+-- Define a global variable to enable/disable autoformat
+local auto_format = true
+map("n", "<leader>uf", function()
+  auto_format = not auto_format
+  if auto_format then
+    vim.cmd "FormatEnable"
+  else
+    vim.cmd "FormatDisable"
+  end
+end, { desc = "Toggle Autoformat" })
+
+-- ------------------------------------------------------------------------- }}}
+-- {{{ Folding commands.
+
+-- Author: Karl Yngve Lervåg
+--    See: https://github.com/lervag/dotnvim
+
+-- Close all fold except the current one.
+map("n", "zv", "zMzvzz", {
+  desc = "Close all folds except the current one",
+})
+
+-- Close current fold when open. Always open next fold.
+map("n", "zj", "zcjzOzz", {
+  desc = "Close current fold when open. Always open next fold.",
+})
+
+-- Close current fold when open. Always open previous fold.
+map("n", "zk", "zckzOzz", {
+  desc = "Close current fold when open. Always open previous fold.",
+})
+
+-- Refer [FAQ - Neovide](https://neovide.dev/faq.html#how-can-i-use-cmd-ccmd-v-to-copy-and-paste)
+if vim.g.neovide then
+  vim.keymap.set("n", "<D-s>", ":w<CR>") -- Save
+  vim.keymap.set("v", "<D-c>", '"+y') -- Copy
+  vim.keymap.set({ "n", "v" }, "<D-v>", '"+P') -- Paste normal and visual mode
+  vim.keymap.set({ "i", "c" }, "<D-v>", "<C-R>+") -- Paste insert and command mode
+  vim.keymap.set("t", "<D-v>", [[<C-\><C-N>"+P]]) -- Paste terminal mode  vim.keymap.set("n", "<D-s>", ":w<CR>") -- Save
+end
+
+-- Silent keymap option
+local opts = { silent = true }
+
+-- Better paste
+-- remap "p" in visual mode to delete the highlighted text without overwriting your yanked/copied text, and then paste the content from the unnamed register.
+map("v", "p", '"_dP', opts)
+
+-- Copy whole file content to clipboard with C-c
+map("n", "<C-c>", ":%y+<CR>", opts)
+
+-- Select all text in buffer with Alt-a
+map("n", "<A-a>", "ggVG", { noremap = true, silent = true, desc = "Select all" })
+
+-- Visual --
+-- Stay in indent mode
+map("v", "<", "<gv", opts)
+map("v", ">", ">gv", opts)
+
+-- Easier access to beginning and end of lines
+map("n", "<A-h>", "^", {
+  desc = "Go to start of line",
+  silent = true,
+})
+map("n", "<A-l>", "$", {
+  desc = "Go to end of line",
+  silent = true,
+})
+
+-- Move live up or down
+-- moving
+map("n", "<A-Down>", ":m .+1<CR>", opts)
+map("n", "<A-Up>", ":m .-2<CR>", opts)
+map("i", "<A-Down>", "<Esc>:m .+1<CR>==gi", opts)
+map("i", "<A-Up>", "<Esc>:m .-2<CR>==gi", opts)
+map("v", "<A-Down>", ":m '>+1<CR>gv=gv", opts)
+map("v", "<A-Up>", ":m '<-2<CR>gv=gv", opts)
+
+-- Fix Spell checking
+map("n", "z0", "1z=", {
+  desc = "Fix world under cursor",
+})
+
+-- Toggle wrap
+map("n", "<leader>tw", "<cmd>set wrap!<CR>", {
+  desc = "Toggle Wrap",
+  silent = true,
+})
+
+-- Toggle spell
+map("n", "<leader>ts", "<cmd>set spell!<CR>", {
+  desc = "Toggle Spell",
+  silent = true,
+})
+
+map(
+  "n",
+  "<leader>us",
+  "<cmd>lua require('utils.cspell').add_word_to_c_spell_dictionary()<CR>",
+  { noremap = true, silent = true, desc = "Add unknown to cspell dictionary" }
+)

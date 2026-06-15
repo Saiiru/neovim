@@ -1,45 +1,46 @@
--- lua/config/autocmds.lua
-
 local function augroup(name)
-  return vim.api.nvim_create_augroup("sairu_" .. name, { clear = true })
+  return vim.api.nvim_create_augroup("my_nvim_" .. name, { clear = true })
 end
-
--- ── General Behavior ─────────────────────────────────────────────────────────
 
 -- Check if we need to reload the file when it changed
 vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
-  group = augroup("checktime"),
-  command = "checktime",
+  group = augroup "checktime",
+  callback = function()
+    if vim.o.buftype ~= "nofile" then
+      vim.cmd "checktime"
+    end
+  end,
 })
 
 -- Highlight on yank
 vim.api.nvim_create_autocmd("TextYankPost", {
-  group = augroup("highlight_yank"),
+  group = augroup "highlight_yank",
   callback = function()
-    vim.highlight.on_yank()
+    (vim.hl or vim.highlight).on_yank()
   end,
 })
 
--- Resize splits if window got resized
+-- resize splits if window got resized
 vim.api.nvim_create_autocmd({ "VimResized" }, {
-  group = augroup("resize_splits"),
+  group = augroup "resize_splits",
   callback = function()
-    local current_tab = vim.api.nvim_get_current_tabpage()
-    vim.cmd("tabdo wincmd =")
-    vim.api.nvim_set_current_tabpage(current_tab)
+    local current_tab = vim.fn.tabpagenr()
+    vim.cmd "tabdo wincmd ="
+    vim.cmd("tabnext " .. current_tab)
   end,
 })
 
--- Go to last loc when opening a buffer
+-- go to last loc when opening a buffer
 vim.api.nvim_create_autocmd("BufReadPost", {
-  group = augroup("last_loc"),
-  callback = function()
+  group = augroup "last_loc",
+  callback = function(event)
     local exclude = { "gitcommit" }
-    local buf = vim.api.nvim_get_current_buf()
-    if vim.tbl_contains(exclude, vim.bo[buf].filetype) then
+    local buf = event.buf
+    if vim.tbl_contains(exclude, vim.bo[buf].filetype) or vim.b[buf].lazyvim_last_loc then
       return
     end
-    local mark = vim.api.nvim_buf_get_mark(buf, "\"")
+    vim.b[buf].lazyvim_last_loc = true
+    local mark = vim.api.nvim_buf_get_mark(buf, '"')
     local lcount = vim.api.nvim_buf_line_count(buf)
     if mark[1] > 0 and mark[1] <= lcount then
       pcall(vim.api.nvim_win_set_cursor, 0, mark)
@@ -47,117 +48,168 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   end,
 })
 
--- Close some filetypes with <q>
+-- close some filetypes with <q>
 vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("close_with_q"),
+  group = augroup "close_with_q",
   pattern = {
     "PlenaryTestPopup",
+    "checkhealth",
+    "dbout",
+    "grug-far",
     "help",
     "lspinfo",
-    "man",
+    "neotest-output",
+    "neotest-output-panel",
+    "neotest-summary",
     "notify",
     "qf",
-    "query",
     "spectre_panel",
     "startuptime",
     "tsplayground",
-    "neotest-output",
-    "checkhealth",
-    "neotest-summary",
-    "neotest-output-panel",
   },
   callback = function(event)
     vim.bo[event.buf].buflisted = false
-    vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = event.buf, silent = true })
+    vim.schedule(function()
+      vim.keymap.set("n", "q", function()
+        vim.cmd "close"
+        pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
+      end, {
+        buffer = event.buf,
+        silent = true,
+        desc = "Quit buffer",
+      })
+    end)
   end,
 })
 
--- ── User Requested Autocmds ──────────────────────────────────────────────────
-
--- Keep cursor unchanged after quitting (Set back to beam)
-vim.api.nvim_create_autocmd("ExitPre", {
-  group = augroup("Exit"),
-  command = "set guicursor=a:ver90",
-  desc = "Set cursor back to beam when leaving Neovim.",
+-- make it easier to close man-files when opened inline
+vim.api.nvim_create_autocmd("FileType", {
+  group = augroup "man_unlisted",
+  pattern = { "man" },
+  callback = function(event)
+    vim.bo[event.buf].buflisted = false
+  end,
 })
 
--- Options for markdown
+-- wrap and check for spell in text filetypes
 vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("markdown_options"),
-  pattern = { "markdown", "mdx", "quarto" },
+  group = augroup "wrap_spell",
+  pattern = { "*.txt", "*.tex", "*.typ", "gitcommit", "markdown" },
   callback = function()
     vim.opt_local.wrap = true
-    vim.opt_local.linebreak = true
     vim.opt_local.spell = true
-    vim.opt_local.conceallevel = 2
-    vim.opt_local.concealcursor = "nc"
-    vim.opt_local.tabstop = 2
-    vim.opt_local.shiftwidth = 2
-    vim.opt_local.softtabstop = 2
-    vim.opt_local.expandtab = true
   end,
 })
 
--- Options for CSS-like files
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("css_options"),
-  pattern = { "css", "scss", "sass", "less" },
+-- Fix conceallevel for json files
+vim.api.nvim_create_autocmd({ "FileType" }, {
+  group = augroup "json_conceal",
+  pattern = { "json", "jsonc", "json5" },
   callback = function()
-    vim.opt_local.wrap = false
-    vim.opt_local.tabstop = 2
-    vim.opt_local.shiftwidth = 2
-    vim.opt_local.softtabstop = 2
-    vim.opt_local.expandtab = true
-    vim.opt_local.colorcolumn = "100"
+    vim.opt_local.conceallevel = 0
   end,
 })
 
--- Disable commenting next line
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("no_comment_newline"),
-  pattern = "*",
+-- Auto create dir when saving a file, in case some intermediate directory does not exist
+vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+  group = augroup "auto_create_dir",
+  callback = function(event)
+    if event.match:match "^%w%w+:[\\/][\\/]" then
+      return
+    end
+    -- support both new and old versions of neovim
+    local uv = vim.uv or vim.loop
+    local file = uv.fs_realpath and uv.fs_realpath(event.match) or event.match
+    vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
+  end,
+})
+
+-- Set filetype for .env and .env.* files
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  group = augroup "env_filetype",
+  pattern = { "*.env", ".env.*" },
   callback = function()
-    vim.opt_local.formatoptions:remove({ "r", "o" })
+    vim.opt_local.filetype = "sh"
   end,
 })
 
--- Hide cursor in SnacksDashboardOpened
-vim.api.nvim_create_autocmd("User", {
-  group = augroup("snacks_dashboard_hide_cursor"),
-  pattern = "SnacksDashboardOpened",
+-- Set filetype for .hurl files
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  group = augroup "hurl_filetype",
+  pattern = { "*.hurl" },
   callback = function()
-    vim.cmd([[hi Cursor blend=100]])
-    vim.cmd("set guicursor+=a:Cursor/lCursor")
+    vim.opt_local.filetype = "hurl"
   end,
 })
 
--- Unhide cursor in SnacksDashboardClosed
-vim.api.nvim_create_autocmd("User", {
-  group = augroup("snacks_dashboard_show_cursor"),
-  pattern = "SnacksDashboardClosed",
+-- Set filetype for .toml files
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  group = augroup "toml_filetype",
+  pattern = { "*.tomg-config*" },
   callback = function()
-    vim.cmd([[hi Cursor blend=0]])
-    vim.cmd("set guicursor+=a:Cursor/lCursor")
+    vim.opt_local.filetype = "toml"
   end,
 })
 
--- Autosave leve:
--- - usa `:update`, então só escreve se o buffer realmente mudou.
--- - ignora terminais, quickfix, prompts, buffers temporários e arquivos sem nome.
--- - evita escrever a cada tecla, que pesa em projetos grandes e ferramentas LSP.
-vim.api.nvim_create_autocmd({ "FocusLost", "BufLeave", "InsertLeave" }, {
-  group = augroup("auto_save"),
+-- Set filetype for .code-snippets files
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  group = augroup "code_snippets_filetype",
+  pattern = { "*.code-snippets" },
+  callback = function()
+    vim.opt_local.filetype = "json"
+  end,
+})
+
+vim.filetype.add {
+  extension = {
+    cshtml = "aspnetcorerazor",
+    edge = "edge",
+    eex = "eelixir",
+    ejs = "ejs",
+    gohtml = "gohtml",
+    gohtmltmpl = "gohtmltmpl",
+    gowork = "gowork",
+    gotmpl = "gotmpl",
+    handlebars = "handlebars",
+    hbs = "hbs",
+    jade = "jade",
+    leaf = "leaf",
+    mdx = "mdx",
+    mustache = "mustache",
+    njk = "njk",
+    nunjucks = "nunjucks",
+    pcss = "postcss",
+    razor = "razor",
+    re = "reason",
+    sss = "sugarss",
+    templ = "templ",
+  },
+  filename = {
+    ["go.work"] = "gowork",
+  },
+  pattern = {
+    [".*%.blade%.php"] = "blade",
+    [".*%.django%.html"] = "django-html",
+    [".*%.djhtml"] = "django-html",
+    [".*%.html%.eex"] = "html-eex",
+  },
+}
+
+-- LSP
+local completion = vim.g.completion_mode or "blink" -- or 'native'
+vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)
-    if vim.bo[args.buf].buftype ~= "" then
-      return
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client then
+      -- Built-in completion
+      if completion == "native" and client:supports_method "textDocument/completion" then
+        vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
+      end
+
+      -- Inlay hints
+      if client:supports_method "textDocument/inlayHints" then
+        vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
+      end
     end
-    if not vim.bo[args.buf].modifiable or vim.bo[args.buf].readonly then
-      return
-    end
-    if vim.api.nvim_buf_get_name(args.buf) == "" then
-      return
-    end
-    vim.cmd("silent! update")
   end,
 })
-pcall(require, "config.kora-workflow")
