@@ -17,7 +17,7 @@ local function term_nav(dir)
     end)
   end
 end
-local hostname = io.popen("hostname"):read("*a"):gsub("%s+", "")
+local hostname = (vim.uv or vim.loop).os_gethostname() or "node"
 
 return {
   {
@@ -49,7 +49,7 @@ return {
       {
         "<leader>sT",
         function()
-          Snacks.picker.todo_comments { keywords = { "TODO", "FIX", "FIXME" } }
+          Snacks.picker.todo_comments({ keywords = { "TODO", "FIX", "FIXME" } })
         end,
         desc = "Todo/Fix/Fixme",
       },
@@ -115,7 +115,7 @@ return {
         enabled = true,
         actions = {
           flash = function(picker)
-            require("flash").jump {
+            require("flash").jump({
               pattern = "^",
               label = { after = { 0, 0 } },
               search = {
@@ -130,7 +130,7 @@ return {
                 local idx = picker.list:row2idx(match.pos[1])
                 picker.list:_move(idx, true, true)
               end,
-            }
+            })
           end,
         },
         ---@class snacks.picker.sources.Config
@@ -186,9 +186,9 @@ return {
         preset = {
           header = logo,
           keys = {
-            { icon = " ", key = "f", desc = "Find File", action = ":lua require('fff').find_files()" },
-            { icon = " ", key = "g", desc = "Find Text", action = ":lua require('fff').live_grep()" },
-            { icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
+            { icon = " ", key = "f", desc = "Find File", action = ":lua require('fff').find_files()}" },
+            { icon = " ", key = "g", desc = "Find Text", action = ":lua require('fff').live_grep()}" },
+            { icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')}" },
             {
               icon = " ",
               key = "c",
@@ -208,8 +208,6 @@ return {
             section = "terminal",
             title = "Productsway.com",
             icon = "©",
-            --  local user = hostname or vim.env.USER or "User"
-            --  local user = vim.fn.expand("$USER")
             cmd = "echo Welcome back, " .. hostname .. "! | bunx cowsay --think",
           },
           { section = "startup" },
@@ -278,10 +276,10 @@ return {
       terminal = {
         win = {
           keys = {
-            nav_h = { "<C-h>", term_nav "h", desc = "Go to Left Window", expr = true, mode = "t" },
-            nav_j = { "<C-j>", term_nav "j", desc = "Go to Lower Window", expr = true, mode = "t" },
-            nav_k = { "<C-k>", term_nav "k", desc = "Go to Upper Window", expr = true, mode = "t" },
-            nav_l = { "<C-l>", term_nav "l", desc = "Go to Right Window", expr = true, mode = "t" },
+            nav_h = { "<C-h>", term_nav("h"), desc = "Go to Left Window", expr = true, mode = "t" },
+            nav_j = { "<C-j>", term_nav("j"), desc = "Go to Lower Window", expr = true, mode = "t" },
+            nav_k = { "<C-k>", term_nav("k"), desc = "Go to Upper Window", expr = true, mode = "t" },
+            nav_l = { "<C-l>", term_nav("l"), desc = "Go to Right Window", expr = true, mode = "t" },
           },
         },
       },
@@ -320,19 +318,19 @@ return {
       {
         "<leader>e",
         function()
-          Snacks.explorer {
+          Snacks.explorer({
             auto_close = true,
-          }
+          })
         end,
         desc = "File Explorer",
       },
       {
         "<leader>E",
         function()
-          Snacks.explorer {
-            cwd = vim.fn.expand "%:p:h",
+          Snacks.explorer({
+            cwd = vim.fn.expand("%:p:h"),
             auto_close = true,
-          }
+          })
         end,
         desc = "File Explorer (cwd)",
       },
@@ -347,14 +345,14 @@ return {
       {
         "<leader>fB",
         function()
-          Snacks.picker.buffers { hidden = true, nofile = true }
+          Snacks.picker.buffers({ hidden = true, nofile = true })
         end,
         desc = "Buffers (all)",
       },
       {
         "<leader>fc",
         function()
-          Snacks.picker.files { cwd = vim.fn.stdpath "config" }
+          Snacks.picker.files({ cwd = vim.fn.stdpath("config") })
         end,
         desc = "Find Config File",
       },
@@ -779,19 +777,19 @@ return {
           vim.opt.statuscolumn = [[%!v:lua.require'snacks.statuscolumn'.get()]]
 
           -- Create some toggle mappings
-          Snacks.toggle.option("spell", { name = "Spelling" }):map "<leader>us"
-          Snacks.toggle.option("wrap", { name = "Wrap" }):map "<leader>uw"
-          Snacks.toggle.option("relativenumber", { name = "Relative Number" }):map "<leader>uL"
-          Snacks.toggle.diagnostics():map "<leader>ud"
-          Snacks.toggle.line_number():map "<leader>ul"
+          Snacks.toggle.option("spell", { name = "Spelling" }):map("<leader>us")
+          Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
+          Snacks.toggle.option("relativenumber", { name = "Relative Number" }):map("<leader>uL")
+          Snacks.toggle.diagnostics():map("<leader>ud")
+          Snacks.toggle.line_number():map("<leader>ul")
           Snacks.toggle
             .option("conceallevel", { off = 0, on = vim.o.conceallevel > 0 and vim.o.conceallevel or 2 })
-            :map "<leader>uc"
-          Snacks.toggle.treesitter():map "<leader>uT"
-          Snacks.toggle.option("background", { off = "light", on = "dark", name = "Dark Background" }):map "<leader>ub"
-          Snacks.toggle.inlay_hints():map "<leader>uh"
-          Snacks.toggle.indent():map "<leader>ug"
-          Snacks.toggle.dim():map "<leader>uD"
+            :map("<leader>uc")
+          Snacks.toggle.treesitter():map("<leader>uT")
+          Snacks.toggle.option("background", { off = "light", on = "dark", name = "Dark Background" }):map("<leader>ub")
+          Snacks.toggle.inlay_hints():map("<leader>uh")
+          Snacks.toggle.indent():map("<leader>ug")
+          Snacks.toggle.dim():map("<leader>uD")
         end,
       })
     end,

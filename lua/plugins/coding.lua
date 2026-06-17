@@ -352,4 +352,17 @@ return {
       { "<leader>ci", "<cmd>Neogen<cr>", desc = "Neogen: Annotation generator" },
     },
   },
+  -- Workspace Diagnostics (from nvpunk)
+  {
+    "artemave/workspace-diagnostics.nvim",
+    event = "LspAttach",
+    config = function()
+      require("workspace-diagnostics").setup {
+        -- Disable workspace files filtering for now
+        -- workspace_files = function(bufnr)
+        --   return vim.fn.globpath(vim.fn.expand("%:p:h"), "*.{lua,py,js,ts,go,rs,java,cpp,c}*", false, true)
+        -- end,
+      }
+    end,
+  },
 }

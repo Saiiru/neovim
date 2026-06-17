@@ -1,91 +1,63 @@
+-- Theme Configuration
+-- Wraps theme_manager for backward compatibility
+
 local M = {}
 
-local theme_names = { "kanagawa" }
+-- Available themes
+M.available_themes = { "noir" }
+M.current_theme = "noir"
 
-M.themes = {
-  kanagawa = function()
-    vim.o.background = "dark"
-    require("kanagawa").load "wave"
-  end,
-}
-
-local function list_themes()
-  return table.concat(theme_names, ", ")
+function M.get_current()
+  return M.current_theme
 end
 
-local function apply_overrides()
-  local function link(group, target)
-    vim.api.nvim_set_hl(0, group, { link = target })
-  end
-
-  -- LazyGit floating windows (Snacks / lazygit float)
-  link("LazyGitFloat", "NormalFloat")
-  link("LazyGitBorder", "FloatBorder")
-  link("LazyGitTitle", "FloatTitle")
-  link("SnacksLazygit", "NormalFloat")
-  link("SnacksLazygitBorder", "FloatBorder")
-  link("SnacksLazygitTitle", "FloatTitle")
-
-  -- Snacks picker highlights
-  link("SnacksPickerInputBorder", "FloatBorder")
-  link("SnacksPickerInputTitle", "FloatTitle")
-  link("SnacksPickerBoxTitle", "FloatTitle")
-  link("SnacksPickerSelected", "Visual")
-  link("SnacksPickerToggle", "IncSearch")
-  link("SnacksPickerPickWinCurrent", "Search")
-  link("SnacksPickerPickWin", "Search")
-
-  -- mini.pick fallback highlights
-  link("MiniPickNormal", "NormalFloat")
-  link("MiniPickBorder", "FloatBorder")
-  link("MiniPickBorderBusy", "FloatBorder")
-  link("MiniPickBorderText", "FloatTitle")
-  link("MiniPickHeader", "Title")
-  link("MiniPickMatchCurrent", "Visual")
-  link("MiniPickMatchMarked", "IncSearch")
-  link("MiniPickMatchRanges", "Search")
-  link("MiniPickPrompt", "Title")
-  link("MiniPickPromptCaret", "Cursor")
-  link("MiniPickPromptPrefix", "Title")
-  link("MiniPickPromptSymbol", "Type")
-  link("MiniPickIconDirectory", "Directory")
-  link("MiniPickIconFile", "NormalFloat")
-  link("MiniPickPreviewLine", "CursorLine")
-  link("MiniPickPreviewRegion", "Visual")
+function M.get_available()
+  return M.available_themes
 end
 
 function M.apply(name)
-  local theme = name or vim.g.theme or "kanagawa"
-  local apply = M.themes[theme]
-  if not apply then
-    vim.notify(("Unknown theme '%s'. Available: %s"):format(theme, list_themes()), vim.log.levels.WARN)
-    return
+  -- Read current transparency preference
+  local prefs = require("config.preferences")
+  local transparency = prefs.get("transparency")
+  vim.g.transparency = transparency
+  
+  if name and name ~= M.current_theme then
+    local theme_manager = require("config.theme_manager")
+    if theme_manager.themes[name] then
+      theme_manager.themes[name].apply()
+      M.current_theme = name
+      vim.g.theme = name
+      vim.notify("Theme applied: " .. name, vim.log.levels.INFO)
+      return true
+    end
+    vim.notify("Theme not found: " .. name, vim.log.levels.ERROR)
+    return false
   end
-
-  vim.g.theme = theme
-  apply()
-  apply_overrides()
+  
+  -- Apply current theme
+  local theme_manager = require("config.theme_manager")
+  if theme_manager.themes[M.current_theme] then
+    theme_manager.themes[M.current_theme].apply()
+  end
 end
 
 function M.setup()
-  vim.api.nvim_create_autocmd("ColorScheme", {
-    callback = apply_overrides,
-  })
-
-  vim.api.nvim_create_user_command("Theme", function(opts)
-    if opts.args == "" then
-      local current = vim.g.theme or "kanagawa"
-      vim.notify(("Current theme: %s. Available: %s"):format(current, list_themes()))
-      return
-    end
-
-    M.apply(opts.args)
-  end, {
-    nargs = "?",
-    complete = function()
-      return theme_names
-    end,
-  })
+  local theme_manager = require("config.theme_manager")
+  theme_manager.setup()
+  
+  -- Apply saved preference
+  local prefs = require("config.preferences")
+  local saved_theme = prefs.get("theme")
+  local transparency = prefs.get("transparency")
+  
+  -- Set global transparency for theme manager
+  vim.g.transparency = transparency
+  
+  if saved_theme and theme_manager.themes[saved_theme] then
+    M.apply(saved_theme)
+  else
+    M.apply("noir")
+  end
 end
 
 return M

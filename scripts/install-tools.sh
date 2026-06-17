@@ -1,116 +1,86 @@
 #!/bin/bash
+# nvim-specific tool installations
+# Everything else is managed by mise (see ~/.config/mise/config.toml)
+# Run after: mise install
 
-# Check if mise is installed, if not install it
-if ! command -v mise &> /dev/null; then
-    echo "Installing mise..."
-    curl https://mise.run | sh
-    # Add mise to shell
-    echo '' >> ~/.bashrc
-    echo 'eval "$(mise activate)"' >> ~/.bashrc
-    echo '' >> ~/.zshrc  
-    echo 'eval "$(mise activate)"' >> ~/.zshrc
-    mkdir -p ~/.config/fish
-    echo '' >> ~/.config/fish/config.fish
-    echo 'eval "mise activate fish | source"' >> ~/.config/fish/config.fish
-    # Activate mise for current session
-    eval "$(mise activate)"
+set -euo pipefail
+
+echo "🔧 Installing nvim-specific tools..."
+
+# ─────────────────────────────────────────────────────────────
+# Tree-sitter CLI (required for nvim-treesitter on Neovim 0.11+)
+# ══════════════════════════════════════════════════════════════
+# Tenta via cargo (mise gerencia cargo:tree-sitter-cli), fallback npm
+if command -v cargo &> /dev/null; then
+    echo "📦 Installing tree-sitter-cli via cargo..."
+    cargo install tree-sitter-cli --locked 2>/dev/null || true
+elif command -v npm &> /dev/null; then
+    echo "📦 Installing tree-sitter-cli via npm..."
+    npm install -g tree-sitter-cli 2>/dev/null || true
+else
+    echo "⚠️  Neither cargo nor npm found. Install tree-sitter-cli manually."
 fi
 
-# Install tools with mise first (per package installation)
-echo "Installing tools with mise..."
-mise use -g bat@latest
-mise use -g biome@latest
-mise use -g black@latest
-mise use -g bun@latest
-mise use -g delta@latest
-mise use -g difftastic@latest
-mise use -g deno@latest
-mise use -g dprint@latest
-mise use -g fzf@latest
-mise use -g fd@latest
-mise use -g go@latest
-mise use -g hurl@latest
-mise use -g lazygit@latest
-mise use -g lua-language-server@latest
-mise use -g neovim@nightly
-mise use -g node@lts
-mise use -g rg@latest
-mise use -g ruff@latest
-mise use -g rye@latest
-mise use -g stylua@latest
-mise use -g usage@latest
-mise use -g uv@latest
-mise use -g zoxide@latest
-mise use -g yarn@1.22.22
-
-# Note: Most tools are now handled by mise, removing manual Go tool installations
-
-# Install system dependencies (Ubuntu/Debian)
-if command -v apt &> /dev/null; then
-    echo "Installing system dependencies..."
-    sudo apt update
-    sudo apt install -y \
-        trash-cli \
-        imagemagick \
-        ghostscript \
-        tree-sitter-cli
-fi
-
-# Install tree-sitter CLI (required for nvim-treesitter on Neovim 0.11+)
-echo "Installing tree-sitter CLI..."
-if ! command -v tree-sitter &> /dev/null; then
-  if command -v cargo &> /dev/null; then
-    cargo install tree-sitter-cli
-  elif command -v npm &> /dev/null; then
-    npm install -g tree-sitter-cli
-  else
-    echo "Warning: Neither cargo nor npm found. Please install tree-sitter-cli manually."
-  fi
-fi
-
-# Install gopls (Go language server) via Go
-echo "Installing gopls..."
+# ─────────────────────────────────────────────────────────────
+# Go Language Server (gopls) — official channel
+# ══════════════════════════════════════════════════════════════
 if command -v go &> /dev/null; then
-  go install golang.org/x/tools/gopls@latest
+    echo "📦 Installing gopls..."
+    go install golang.org/x/tools/gopls@latest
 else
-  echo "Warning: Go not found, skipping gopls installation"
+    echo "⚠️  Go not found (mise should provide it). Skipping gopls."
 fi
 
-# Install rust-analyzer (Rust language server)
-echo "Installing rust-analyzer..."
+# ─────────────────────────────────────────────────────────────
+# Rust Analyzer — official channel
+# ══════════════════════════════════════════════════════════════
 if command -v rustup &> /dev/null; then
-  rustup component add rust-analyzer
+    echo "📦 Installing rust-analyzer via rustup..."
+    rustup component add rust-analyzer
 elif command -v cargo &> /dev/null; then
-  cargo install rust-analyzer
-elif command -v brew &> /dev/null; then
-  brew install rust-analyzer
+    echo "📦 Installing rust-analyzer via cargo..."
+    cargo install rust-analyzer --locked 2>/dev/null || true
 else
-  echo "Warning: rustup/cargo/brew not found. Install rust-analyzer manually via: rustup component add rust-analyzer"
+    echo "⚠️  rustup/cargo not found. Install rust-analyzer manually."
 fi
 
-# Install npm packages
-echo "Installing npm packages..."
-npm install -g --force \
-  @antfu/ni \
-  basedpyright \
-  @fsouza/prettierd \
-  @mermaid-js/mermaid-cli \
-  @tailwindcss/language-server \
-  @vtsls/language-server \
-  cspell \
-  npm-check-updates \
-  oxlint \
-  pnpm \
-  prettier \
-  rustywind \
-  typescript \
-  typescript-language-server \
-  vscode-langservers-extracted
+# ─────────────────────────────────────────────────────────────
+# NPM packages for LSPs (not in mise config — version pinned here)
+# ══════════════════════════════════════════════════════════════
+if command -v npm &> /dev/null; then
+    echo "📦 Installing npm LSP packages..."
+    # PUPPETEER_SKIP_DOWNLOAD evita download do chromium no mermaid-cli
+    PUPPETEER_SKIP_DOWNLOAD=1 npm install -g --force \
+        @antfu/ni \
+        @fsouza/prettierd \
+        @mermaid-js/mermaid-cli \
+        @tailwindcss/language-server \
+        @vtsls/language-server \
+        cspell \
+        npm-check-updates \
+        oxlint \
+        pnpm \
+        prettier \
+        rustywind \
+        typescript \
+        typescript-language-server \
+        vscode-langservers-extracted \
+        basedpyright
+else
+    echo "⚠️  npm not found. Skipping npm LSP packages."
+fi
 
-# Install Python tools with uv (note: pyright is already handled by npm)
-echo "Installing tools with uv..."
-uv tool install codespell
-uv tool install isort
-uv tool install ruff
+# ─────────────────────────────────────────────────────────────
+# Python tools via uv (project-specific, not global mise)
+# ══════════════════════════════════════════════════════════════
+if command -v uv &> /dev/null; then
+    echo "📦 Installing Python tools via uv..."
+    uv tool install codespell
+    uv tool install isort
+    # ruff, mypy, pytest, jupyterlab, ipython, yt-dlp → já em mise/uv tools globais
+else
+    echo "⚠️  uv not found. Skipping uv tools."
+fi
 
-echo "All tools have been installed successfully!"
+echo "✅ nvim-specific tools installation complete!"
+echo "   Run ':Lazy sync' and ':TSInstallSync lua vim vimdoc json markdown python typescript go rust' in Neovim."

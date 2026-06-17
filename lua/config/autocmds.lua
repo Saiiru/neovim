@@ -183,6 +183,8 @@ vim.filetype.add {
     re = "reason",
     sss = "sugarss",
     templ = "templ",
+    cs = "csharp",
+    ino = "arduino",
   },
   filename = {
     ["go.work"] = "gowork",
@@ -192,6 +194,7 @@ vim.filetype.add {
     [".*%.django%.html"] = "django-html",
     [".*%.djhtml"] = "django-html",
     [".*%.html%.eex"] = "html-eex",
+    [".*%.ino$"] = "arduino",
   },
 }
 

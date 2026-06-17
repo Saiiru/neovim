@@ -296,3 +296,9 @@ map(
   "<cmd>lua require('utils.cspell').add_word_to_c_spell_dictionary()<CR>",
   { noremap = true, silent = true, desc = "Add unknown to cspell dictionary" }
 )
+
+-- Theme keymaps
+map("n", "<leader>ut", "<cmd>Theme<cr>", { desc = "Select Theme" })
+map("n", "<leader>uT", "<cmd>ThemeCycle<cr>", { desc = "Cycle Theme" })
+map("n", "<leader>uk", "<cmd>ThemeKitty<cr>", { desc = "Generate Kitty Config" })
+map("n", "<leader>um", "<cmd>ThemeTmux<cr>", { desc = "Generate Tmux Config" })

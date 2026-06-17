@@ -11,7 +11,7 @@ local function deduplicate(list)
 end
 
 local function get_listed_buffers()
-  local buffers = vim.fn.getbufinfo { buflisted = 1 }
+  local buffers = vim.fn.getbufinfo({ buflisted = 1 })
   table.sort(buffers, function(a, b)
     return a.bufnr < b.bufnr
   end)
@@ -52,18 +52,18 @@ local function mini_diff_goto(direction)
 end
 
 local function mini_diff_apply_current()
-  vim.cmd "normal ghgh"
+  vim.cmd("normal ghgh")
 end
 
 local function mini_diff_reset_current()
-  vim.cmd "normal gHgh"
+  vim.cmd("normal gHgh")
 end
 
 local function git_blame_line()
   local buf = vim.api.nvim_get_current_buf()
   local path = vim.api.nvim_buf_get_name(buf)
-  local lnum = vim.fn.line "."
-  if not vim.fn.isdirectory ".git" then
+  local lnum = vim.fn.line(".")
+  if not vim.fn.isdirectory(".git") then
     vim.notify("Not a git repository", vim.log.levels.WARN)
     return
   end
@@ -74,11 +74,11 @@ local function git_blame_line()
     end
     local info = {}
     for line in vim.gsplit(obj.stdout, "\n", { plain = true, trimempty = true }) do
-      local key, val = line:match "^(%S+) (.+)$"
+      local key, val = line:match("^(%S+) (.+)$")
       if key == "author" then
         info.author = val
       elseif key == "author-mail" then
-        info.mail = val:match "<(.+)>" or val
+        info.mail = val:match("<(.+)>") or val
       elseif key == "author-time" then
         info.time = os.date("%Y-%m-%d %H:%M", tonumber(val))
       elseif key == "summary" then
@@ -87,13 +87,19 @@ local function git_blame_line()
         info.filename = val
       end
     end
-    local commit = obj.stdout:match "^(%x+)"
+    local commit = obj.stdout:match("^(%x+)")
     if not commit or commit == "0000000000000000" then
       vim.notify("Not committed yet", vim.log.levels.INFO)
       return
     end
     vim.notify(
-      string.format(" %s   %s   %s   %s", commit:sub(1, 8), info.author or "?", info.time or "?", info.summary or "?"),
+      string.format(
+        " %s   %s   %s   %s",
+        commit:sub(1, 8),
+        info.author or "?",
+        info.time or "?",
+        info.summary or "?"
+      ),
       vim.log.levels.INFO
     )
   end)
@@ -129,7 +135,7 @@ return {
       },
     },
     config = function(_, options)
-      local icons = require "mini.icons"
+      local icons = require("mini.icons")
       icons.setup(options)
       -- Mocking methods of 'nvim-tree/nvim-web-devicons' for better integrations with plugins outside 'mini.nvim'
       icons.mock_nvim_web_devicons()
@@ -137,16 +143,17 @@ return {
   },
   {
     "echasnovski/mini.statusline",
+    enabled = false,
     opts = {
       set_vim_settings = false,
       content = {
         active = function()
-          local MiniStatusline = require "mini.statusline"
-          local mode, mode_hl = MiniStatusline.section_mode { trunc_width = 120 }
-          local git = MiniStatusline.section_git { trunc_width = 40 }
-          local filename = MiniStatusline.section_filename { trunc_width = 140 }
-          local diagnostics = MiniStatusline.section_diagnostics { trunc_width = 75 }
-          return MiniStatusline.combine_groups {
+          local MiniStatusline = require("mini.statusline")
+          local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
+          local git = MiniStatusline.section_git({ trunc_width = 40 })
+          local filename = MiniStatusline.section_filename({ trunc_width = 140 })
+          local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
+          return MiniStatusline.combine_groups({
             { hl = mode_hl, strings = { mode:upper() } },
             { hl = "MiniStatuslineDevinfo", strings = { git, diagnostics } },
             "%<", -- Mark general truncate point
@@ -160,7 +167,7 @@ return {
               },
             },
             { hl = mode_hl, strings = { "%l:%v" } },
-          }
+          })
         end,
       },
     },
@@ -216,7 +223,7 @@ return {
       local function toggle_dotfiles()
         show_dotfiles = not show_dotfiles
         local new_filter = show_dotfiles and filter_show or filter_hide
-        require("mini.files").refresh { content = { filter = new_filter } }
+        require("mini.files").refresh({ content = { filter = new_filter } })
       end
 
       local function copy_path()
@@ -335,14 +342,14 @@ return {
       {
         "<leader>ul",
         function()
-          require("noice").cmd "last"
+          require("noice").cmd("last")
         end,
         desc = "Noice Last Message",
       },
       {
         "<leader>uh",
         function()
-          require("noice").cmd "history"
+          require("noice").cmd("history")
         end,
         desc = "Noice History",
       },
@@ -455,13 +462,13 @@ return {
       {
         "<leader>?",
         function()
-          require("which-key").show { global = false }
+          require("which-key").show({ global = false })
         end,
         desc = "Buffer Keymaps (which-key)",
       },
     },
     config = function(_, opts)
-      local wk = require "which-key"
+      local wk = require("which-key")
       wk.setup(opts)
       if not vim.tbl_isempty(opts.defaults) then
         wk.register(opts.defaults)
@@ -475,28 +482,28 @@ return {
       {
         "]h",
         function()
-          mini_diff_goto "next"
+          mini_diff_goto("next")
         end,
         desc = "Next Hunk",
       },
       {
         "[h",
         function()
-          mini_diff_goto "prev"
+          mini_diff_goto("prev")
         end,
         desc = "Prev Hunk",
       },
       {
         "]H",
         function()
-          mini_diff_goto "last"
+          mini_diff_goto("last")
         end,
         desc = "Last Hunk",
       },
       {
         "[H",
         function()
-          mini_diff_goto "first"
+          mini_diff_goto("first")
         end,
         desc = "First Hunk",
       },
@@ -527,14 +534,14 @@ return {
       {
         "<leader>sr",
         function()
-          local grug = require "grug-far"
-          local ext = vim.bo.buftype == "" and vim.fn.expand "%:e"
-          grug.open {
+          local grug = require("grug-far")
+          local ext = vim.bo.buftype == "" and vim.fn.expand("%:e")
+          grug.open({
             transient = true,
             prefills = {
               filesFilter = ext and ext ~= "" and "*." .. ext or nil,
             },
-          }
+          })
         end,
         mode = { "n", "v" },
         desc = "Search and Replace",
@@ -542,13 +549,13 @@ return {
       {
         "<leader>sR",
         function()
-          local grug = require "grug-far"
-          grug.open {
+          local grug = require("grug-far")
+          grug.open({
             transient = true,
             prefills = {
-              paths = vim.fn.expand "%",
+              paths = vim.fn.expand("%"),
             },
-          }
+          })
         end,
         mode = { "n", "v" },
         desc = "Search and Replace (Buffer)",

@@ -8,7 +8,7 @@ local logo = [[
 ]]
 
 logo = string.rep("\n", 4) .. logo .. "\n"
-local hostname = io.popen("hostname"):read("*a"):gsub("%s+", "")
+local hostname = (vim.uv or vim.loop).os_gethostname() or "node"
 
 local function action_find_files()
   require("fff").find_files()
@@ -23,7 +23,7 @@ local function action_recent_files()
 end
 
 local function action_config_files()
-  require("fff").find_files_in_dir(vim.fn.stdpath "config")
+  require("fff").find_files_in_dir(vim.fn.stdpath("config"))
 end
 
 local function starter_footer()
@@ -65,7 +65,7 @@ return {
   {
     "echasnovski/mini.starter",
     opts = function()
-      local starter = require "mini.starter"
+      local starter = require("mini.starter")
       return {
         header = logo,
         footer = starter_footer,
@@ -99,14 +99,14 @@ return {
           {
             name = "󰒲 [L]azy",
             action = function()
-              lazy_cmd "Lazy"
+              lazy_cmd("Lazy")
             end,
             section = "Tools",
           },
           {
             name = "󰊳 [U]pdate",
             action = function()
-              lazy_cmd "Lazy update"
+              lazy_cmd("Lazy update")
             end,
             section = "Tools",
           },
@@ -124,7 +124,9 @@ return {
       }
     end,
     config = function(_, opts)
-      local starter = require "mini.starter"
+      local starter = require("mini.starter")
+      -- Disable auto-open on VimEnter - use snacks.dashboard instead
+      opts.autoopen = false
       starter.setup(opts)
 
       vim.api.nvim_create_autocmd("User", {
@@ -136,28 +138,8 @@ return {
         end,
       })
 
-      vim.api.nvim_create_autocmd("User", {
-        pattern = "MiniStarterOpened",
-        callback = function(args)
-          local buf = args.buf or vim.api.nvim_get_current_buf()
-          local map = function(lhs, rhs)
-            vim.keymap.set("n", lhs, rhs, { buffer = buf, silent = true, nowait = true })
-          end
-
-          map("f", action_find_files)
-          map("g", action_find_text)
-          map("r", action_recent_files)
-          map("c", action_config_files)
-          map("s", restore_session)
-          map("q", "<cmd>qa<cr>")
-          map("l", function()
-            lazy_cmd "Lazy"
-          end)
-          map("u", function()
-            lazy_cmd "Lazy update"
-          end)
-        end,
-      })
+      -- Disable auto-open on VimEnter - use snacks.dashboard instead
+      -- MiniStarter will be available on demand via :MiniStarter
     end,
   },
   {
