@@ -61,7 +61,7 @@ local quickfix_tasks = {
   test = true,
   lint = true,
   typecheck = true,
-  ["arduino:compile"] = true,
+  ["arduino-compile"] = true,
 }
 
 function M.setup()
@@ -84,6 +84,16 @@ function M.setup()
     if vim.uv.fs_stat(path) then vim.cmd.edit(path) else vim.notify("project does not define pde.toml", vim.log.levels.WARN) end
   end, { desc = "Open project pde.toml" })
   vim.api.nvim_create_user_command("PDEQuickfix", "copen", { desc = "Open quickfix" })
+  vim.api.nvim_create_user_command("PDESnippets", function()
+    require("pde.snippets").list()
+  end, { desc = "List snippets for current filetype" })
+  vim.api.nvim_create_user_command("PDESnippet", function(args)
+    if args.args == "" then
+      require("pde.snippets").pick()
+    else
+      require("pde.snippets").insert(args.args)
+    end
+  end, { nargs = "?", desc = "Insert snippet by name" })
   vim.api.nvim_create_user_command("PDEArduinoProfile", function()
     echo(require("pde.arduino").status_lines(0))
   end, { desc = "Show Arduino PDE profile" })

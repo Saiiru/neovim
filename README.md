@@ -121,6 +121,135 @@ mise run arduino:compile -> compiler output to quickfix
 mise run arduino:upload/flash/monitor -> explicit only
 ```
 
+## Keymaps
+
+Core:
+
+```txt
+<C-s>           save
+<leader>w       save
+<leader>q       quit window
+<leader>Q       quit all
+<esc>           clear search highlight
+<S-h>/<S-l>     previous/next buffer
+<leader>bd      delete buffer
+<leader><tab>   alternate buffer
+<leader>sv/sh   vertical/horizontal split
+```
+
+Finder:
+
+```txt
+<leader>ff      find files
+<leader>fg      live grep
+<leader>fb      buffers
+<leader>fh      help
+<leader>fr      resume picker
+```
+
+Code/LSP:
+
+```txt
+gd              go to definition
+gD              go to declaration
+gi              go to implementation
+gr              references
+K               hover
+[d / ]d         previous/next diagnostic
+<leader>cd      line diagnostic
+<leader>cl      diagnostics to loclist
+<leader>ca      code action
+<leader>cr      rename
+<leader>cf      format buffer
+```
+
+Quickfix:
+
+```txt
+[q / ]q         previous/next quickfix
+<leader>qo      open quickfix
+<leader>qc      close quickfix
+[l / ]l         previous/next loclist
+```
+
+PDE:
+
+```txt
+<leader>ps      PDE status
+<leader>pd      PDE doctor
+<leader>pv      PDE version
+<leader>pb      PDE build -> quickfix
+<leader>pt      PDE test -> quickfix
+<leader>pl      PDE lint -> quickfix
+<leader>pf      PDE format
+<leader>pm      open .mise.toml
+<leader>pc      open pde.toml
+```
+
+Arduino:
+
+```txt
+<leader>ab      boards
+<leader>ap      profile
+<leader>ac      compile -> quickfix
+<leader>aC      compile database
+<leader>au      upload
+<leader>af      flash
+<leader>am      monitor
+```
+
+## Snippets
+
+This config uses Neovim 0.12 native snippets, not LuaSnip. No snippet engine is installed by Neovim.
+
+Commands:
+
+```vim
+:PDESnippets          list snippets for current filetype
+:PDESnippet           pick snippet via vim.ui.select
+:PDESnippet main      insert snippet named main
+```
+
+Keymaps:
+
+```txt
+<leader>si      pick snippet
+<leader>sl      list snippets
+<leader>sm      insert main snippet
+<C-j>           jump forward through snippet placeholders
+<C-k>           jump backward through snippet placeholders
+```
+
+Completion:
+
+```txt
+<Tab>/<S-Tab>   handled by blink.cmp for completion menu and snippet movement
+<C-space>       open completion
+<CR>            accept completion
+```
+
+Available built-in snippets:
+
+```txt
+c:          main, fori, printf, guard
+cpp:        main, cout, class
+lua:        req, fn, mod
+python:     main, fn, cls
+javascript: fn, afn, log
+typescript: fn, afn, type
+go:         main, fn, err
+rust:       main, fn, test
+arduino:    sketch
+```
+
+Example:
+
+```vim
+:PDESnippet main
+```
+
+When called from normal mode, the snippet opens a new line below the cursor before expanding. Then use `<C-j>` / `<C-k>` to move through placeholders.
+
 ## Validation
 
 ```bash
