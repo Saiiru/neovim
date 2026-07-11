@@ -1,7 +1,3 @@
 return {
-{ -- Golang debugging
-    'leoluz/nvim-dap-go',
-    lazy = true,
-    ft = "go",
-  },
+  { "leoluz/nvim-dap-go", enabled = false },
 }

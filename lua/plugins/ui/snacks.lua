@@ -26,6 +26,7 @@ return {
       },
       picker = {
         enabled = true,
+        ui_select = true,
         sources = {
           explorer = {
           }
@@ -35,6 +36,7 @@ return {
         enabled = true
       },
       dashboard = {
+        enabled = false,
         sections = {
           { section = "header" },
           { section = "keys", gap = 1, padding = 1 },
@@ -180,6 +182,15 @@ return {
         end,
       }
     },
+    config = function(_, opts)
+      require("snacks").setup(opts)
+      if Snacks and Snacks.input and Snacks.input.input then
+        vim.ui.input = Snacks.input.input
+      end
+      if Snacks and Snacks.picker and Snacks.picker.select then
+        vim.ui.select = Snacks.picker.select
+      end
+    end,
     init = function()
       vim.api.nvim_create_autocmd("User", {
         pattern = "VeryLazy",

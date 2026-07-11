@@ -40,6 +40,10 @@ require("lazy").setup({
       missing = true,
       colorscheme = "tokyonight-night",
     },
+    rocks = {
+      enabled = false,
+      hererocks = false,
+    },
     performance = {
       rtp = {
         disabled_plugins = {
