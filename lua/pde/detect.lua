@@ -19,19 +19,50 @@ local markers = {
   { file = "manage.py", type = "backend", framework = "django" },
   { file = "pyproject.toml", type = "backend", framework = "python" },
   { file = "package.json", type = "node", framework = "node" },
+  { file = ".git", type = "git", framework = "generic" },
 }
 
 local function exists(root, name)
   return vim.uv.fs_stat(root .. "/" .. name) ~= nil
 end
 
-function M.root()
-  return vim.fs.root(0, { "pde.toml", ".mise.toml", "sketch.yaml", "platformio.ini", "package.json", "go.mod", "Cargo.toml", "pyproject.toml", ".git" }) or vim.uv.cwd()
+local function buffer_dir(bufnr)
+  bufnr = bufnr or 0
+  local name = vim.api.nvim_buf_get_name(bufnr)
+  if name == "" then
+    return vim.uv.cwd()
+  end
+  return vim.fs.dirname(name) or vim.uv.cwd()
 end
 
-function M.detect()
-  local root = M.root()
-  local info = { root = root, type = "unknown", framework = "unknown", has_mise = exists(root, ".mise.toml"), has_pde = exists(root, "pde.toml") }
+function M.root(bufnr)
+  bufnr = bufnr or 0
+  local start = buffer_dir(bufnr)
+  local root = vim.fs.root(start, {
+    "pde.toml",
+    ".mise.toml",
+    "sketch.yaml",
+    "platformio.ini",
+    "package.json",
+    "go.mod",
+    "Cargo.toml",
+    "pyproject.toml",
+    "compile_commands.json",
+    ".git",
+  })
+  return root or start
+end
+
+function M.detect(bufnr)
+  local root = M.root(bufnr)
+  local info = {
+    root = root,
+    type = "unknown",
+    framework = "unknown",
+    has_mise = exists(root, ".mise.toml"),
+    has_pde = exists(root, "pde.toml"),
+    has_compile_db = exists(root, "compile_commands.json"),
+  }
   for _, marker in ipairs(markers) do
     if exists(root, marker.file) then
       info.type = marker.type

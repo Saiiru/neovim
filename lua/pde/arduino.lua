@@ -1,7 +1,7 @@
 local M = {}
 
-local function root()
-  return require("pde.detect").root()
+local function root(bufnr)
+  return require("pde.detect").root(bufnr or 0)
 end
 
 local function read(path)
@@ -12,22 +12,22 @@ local function read(path)
   return text
 end
 
-function M.profile()
+function M.profile(bufnr)
   local env = vim.env.ARDUINO_PROFILE
   if env and env ~= "" then return env end
-  local text = read(root() .. "/pde.toml") or ""
+  local text = read(root(bufnr) .. "/pde.toml") or ""
   local pde_profile = text:match("active_profile%s*=%s*\"([^\"]+)\"") or text:match("profile%s*=%s*\"([^\"]+)\"")
   if pde_profile then return pde_profile end
-  local sketch = read(root() .. "/sketch.yaml") or ""
+  local sketch = read(root(bufnr) .. "/sketch.yaml") or ""
   return sketch:match("default_profile:%s*([%w%._%-]+)")
 end
 
-function M.fqbn()
-  local text = read(root() .. "/pde.toml") or ""
+function M.fqbn(bufnr)
+  local text = read(root(bufnr) .. "/pde.toml") or ""
   local pde_fqbn = text:match("fqbn%s*=%s*\"([^\"]+)\"")
   if pde_fqbn then return pde_fqbn end
-  local sketch = read(root() .. "/sketch.yaml") or ""
-  local profile = M.profile()
+  local sketch = read(root(bufnr) .. "/sketch.yaml") or ""
+  local profile = M.profile(bufnr)
   if not profile then
     return sketch:match("fqbn:%s*([^%s]+)")
   end
@@ -35,12 +35,12 @@ function M.fqbn()
   return block:match("fqbn:%s*([^%s]+)")
 end
 
-function M.status_lines()
-  local r = root()
+function M.status_lines(bufnr)
+  local r = root(bufnr)
   return {
-    "root: " .. r,
-    "profile: " .. tostring(M.profile()),
-    "fqbn: " .. tostring(M.fqbn()),
+    "arduino root: " .. r,
+    "profile: " .. tostring(M.profile(bufnr)),
+    "fqbn: " .. tostring(M.fqbn(bufnr)),
     "sketch.yaml: " .. tostring(vim.uv.fs_stat(r .. "/sketch.yaml") ~= nil),
     "compile_commands.json: " .. tostring(vim.uv.fs_stat(r .. "/compile_commands.json") ~= nil),
   }

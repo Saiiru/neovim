@@ -1,4 +1,5 @@
 require("core.options")
+require("core.theme").setup()
 require("core.diagnostics")
 require("core.autocmds")
 require("core.lazy")

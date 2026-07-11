@@ -53,30 +53,32 @@ lua/pde/
 ## PDE Commands
 
 ```txt
-:PDEStatus
-:PDEFramework
-:PDEToolchain
-:PDEOpenMise
-:PDEOpenProjectConfig
-:PDEDoctor
-:PDEVersion
-:PDEDev
-:PDEBuild
-:PDETest
-:PDELint
-:PDEFormat
-:PDETypecheck
-:PDERun
-:PDEQuickfix
-:PDEBoards
-:PDEArduinoProfile
-:PDEArduinoCompileDB
-:PDEArduinoCompile
-:PDEArduinoUpload
-:PDEArduinoFlash
-:PDEArduinoMonitor
-:PDEArduinoRestartLSP
+:PDEStatus                 read project/root/framework/LSP/tasks
+:PDEFramework              show detected project type/framework
+:PDEToolchain              show mise active tools
+:PDEOpenMise               open project .mise.toml
+:PDEOpenProjectConfig      open project pde.toml
+:PDEDoctor                 mise run pde-doctor
+:PDEVersion                mise run pde-version
+:PDEDev                    mise run dev
+:PDEBuild                  mise run build -> quickfix
+:PDETest                   mise run test -> quickfix
+:PDELint                   mise run lint -> quickfix
+:PDEFormat                 mise run format
+:PDETypecheck              mise run typecheck -> quickfix
+:PDERun                    mise run run
+:PDEQuickfix               open quickfix
+:PDEBoards                 mise run arduino-boards
+:PDEArduinoProfile         show sketch/pde Arduino profile
+:PDEArduinoCompileDB       mise run arduino-compile-db
+:PDEArduinoCompile         mise run arduino-compile -> quickfix
+:PDEArduinoUpload          mise run arduino-upload
+:PDEArduinoFlash           mise run arduino-flash
+:PDEArduinoMonitor         mise run arduino-monitor
+:PDEArduinoRestartLSP      restart Arduino language server
 ```
+
+Task names use hyphenated form by default because unquoted TOML keys do not accept `:`. Quoted task names with `:` are still resolved as fallback when present.
 
 ## Project detection
 
