@@ -1,8 +1,14 @@
 local M = {}
 
+local uv = vim.uv or vim.loop
+
 local markers = {
+  { file = "pde.toml", type = "pde", framework = "explicit" },
+  { file = ".mise.toml", type = "toolchain", framework = "mise" },
+  { file = "mise.toml", type = "toolchain", framework = "mise" },
   { file = "sketch.yaml", type = "embedded", framework = "arduino-cli" },
   { file = "platformio.ini", type = "embedded", framework = "platformio" },
+  { file = "compile_commands.json", type = "native", framework = "compile-db" },
   { file = "vite.config.ts", type = "frontend", framework = "vite" },
   { file = "vite.config.js", type = "frontend", framework = "vite" },
   { file = "next.config.js", type = "frontend", framework = "next" },
@@ -14,6 +20,7 @@ local markers = {
   { file = "nest-cli.json", type = "backend", framework = "nestjs" },
   { file = "pom.xml", type = "backend", framework = "maven/java" },
   { file = "build.gradle", type = "backend", framework = "gradle/java" },
+  { file = "settings.gradle", type = "backend", framework = "gradle/java" },
   { file = "go.mod", type = "backend", framework = "go" },
   { file = "Cargo.toml", type = "backend", framework = "rust" },
   { file = "manage.py", type = "backend", framework = "django" },
@@ -22,18 +29,35 @@ local markers = {
   { file = ".git", type = "git", framework = "generic" },
 }
 
-local function exists(root, name)
-  return root and vim.uv.fs_stat(root .. "/" .. name) ~= nil
+local root_markers = {}
+for _, marker in ipairs(markers) do
+  table.insert(root_markers, marker.file)
+end
+
+table.insert(root_markers, "mise/tasks")
+
+local function exists(path)
+  return path and uv.fs_stat(path) ~= nil
+end
+
+function M.exists(root, name)
+  return exists(root and (root .. "/" .. name))
+end
+
+local function buffer_start(bufnr)
+  bufnr = bufnr or 0
+  local name = vim.api.nvim_buf_get_name(bufnr)
+  if name ~= "" then
+    local stat = uv.fs_stat(name)
+    if stat and stat.type == "directory" then return name end
+    return vim.fs.dirname(name)
+  end
+  return uv.cwd()
 end
 
 function M.root(bufnr)
-  bufnr = bufnr or 0
-  local name = vim.api.nvim_buf_get_name(bufnr)
-  local start = name ~= "" and vim.fs.dirname(name) or vim.uv.cwd()
-  return vim.fs.root(start, {
-    "pde.toml", ".mise.toml", "sketch.yaml", "platformio.ini", "package.json",
-    "go.mod", "Cargo.toml", "pyproject.toml", "compile_commands.json", ".git",
-  }) or start or vim.uv.cwd()
+  local start = buffer_start(bufnr)
+  return vim.fs.root(start, root_markers) or start or uv.cwd()
 end
 
 function M.detect(bufnr)
@@ -42,18 +66,34 @@ function M.detect(bufnr)
     root = root,
     type = "unknown",
     framework = "unknown",
-    has_mise = exists(root, ".mise.toml"),
-    has_pde = exists(root, "pde.toml"),
-    has_compile_db = exists(root, "compile_commands.json"),
+    marker = nil,
+    has_mise = M.exists(root, ".mise.toml") or M.exists(root, "mise.toml") or M.exists(root, "mise/tasks"),
+    has_pde = M.exists(root, "pde.toml"),
+    has_compile_db = M.exists(root, "compile_commands.json"),
+    has_local_tasks = M.exists(root, ".mise.toml") or M.exists(root, "mise.toml") or M.exists(root, "mise/tasks"),
   }
+
   for _, marker in ipairs(markers) do
-    if exists(root, marker.file) then
+    if M.exists(root, marker.file) then
       info.type = marker.type
       info.framework = marker.framework
       info.marker = marker.file
-      return info
+      break
     end
   end
+
+  if info.framework == "mise" then
+    if M.exists(root, "sketch.yaml") then
+      info.type = "embedded"
+      info.framework = "arduino-cli"
+      info.marker = "sketch.yaml"
+    elseif M.exists(root, "platformio.ini") then
+      info.type = "embedded"
+      info.framework = "platformio"
+      info.marker = "platformio.ini"
+    end
+  end
+
   return info
 end
 

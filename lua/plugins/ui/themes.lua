@@ -22,6 +22,17 @@ return {
       sidebars = { "qf", "help", "terminal", "lazy", "mason" },
       dim_inactive = false,
       lualine_bold = false,
+      on_highlights = function(hl, c)
+        -- VEGA neon-noir accents over TokyoNight night: dark shell, cyan/violet/yellow signal.
+        hl.FloatBorder = { fg = c.cyan, bg = c.bg_dark }
+        hl.NormalFloat = { bg = c.bg_dark }
+        hl.WinSeparator = { fg = c.bg_highlight }
+        hl.CursorLineNr = { fg = c.yellow, bold = true }
+        hl.DiagnosticVirtualTextError = { fg = c.error, bg = c.bg_dark }
+        hl.DiagnosticVirtualTextWarn = { fg = c.warning, bg = c.bg_dark }
+        hl.DiagnosticVirtualTextInfo = { fg = c.info, bg = c.bg_dark }
+        hl.DiagnosticVirtualTextHint = { fg = c.hint, bg = c.bg_dark }
+      end,
     },
   },
 

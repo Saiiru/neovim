@@ -1,6 +1,7 @@
 local M = {}
 
 local function root(bufnr) return require("pde.detect").root(bufnr or 0) end
+
 local function read(path)
   local f = io.open(path, "r")
   if not f then return nil end
@@ -9,17 +10,48 @@ local function read(path)
   return text
 end
 
+local function trim(s)
+  return s and s:gsub("^%s+", ""):gsub("%s+$", "") or nil
+end
+
+local function unquote(s)
+  s = trim(s)
+  if not s then return nil end
+  return s:gsub('^"', ''):gsub('"$', ''):gsub("^'", ""):gsub("'$", "")
+end
+
+local function yaml_scalar(text, key)
+  return unquote((text or ""):match("\n?%s*" .. key .. ":%s*([^\n#]+)"))
+end
+
+local function profile_block(text, profile)
+  if not text or not profile then return nil end
+  local escaped = vim.pesc(profile)
+  local padded = "\n" .. text .. "\n__END__:\n"
+  return padded:match("\n%s*" .. escaped .. ":%s*\n(.-)\n%s*[%w%._%-]+:%s*\n")
+end
+
 function M.profile(bufnr)
-  local text = read(root(bufnr) .. "/pde.toml") or ""
-  return vim.env.ARDUINO_PROFILE or text:match("active_profile%s*=%s*\"([^\"]+)\"") or text:match("profile%s*=%s*\"([^\"]+)\"") or (read(root(bufnr) .. "/sketch.yaml") or ""):match("default_profile:%s*([%w%._%-]+)")
+  local r = root(bufnr)
+  local pde = read(r .. "/pde.toml") or ""
+  local sketch = read(r .. "/sketch.yaml") or ""
+  return vim.env.ARDUINO_PROFILE
+    or unquote(pde:match("active_profile%s*=%s*([^\n#]+)"))
+    or unquote(pde:match("profile%s*=%s*([^\n#]+)"))
+    or yaml_scalar(sketch, "default_profile")
+    or yaml_scalar(sketch, "profile")
 end
 
 function M.fqbn(bufnr)
-  local text = read(root(bufnr) .. "/pde.toml") or ""
-  local pde_fqbn = text:match("fqbn%s*=%s*\"([^\"]+)\"")
+  local r = root(bufnr)
+  local pde = read(r .. "/pde.toml") or ""
+  local pde_fqbn = unquote(pde:match("fqbn%s*=%s*([^\n#]+)"))
   if pde_fqbn then return pde_fqbn end
-  local sketch = read(root(bufnr) .. "/sketch.yaml") or ""
-  return sketch:match("fqbn:%s*([^%s]+)")
+
+  local sketch = read(r .. "/sketch.yaml") or ""
+  local profile = M.profile(bufnr)
+  local block = profile_block(sketch, profile)
+  return yaml_scalar(block or "", "fqbn") or yaml_scalar(sketch, "fqbn")
 end
 
 function M.status_lines(bufnr)

@@ -33,31 +33,51 @@ local command_to_task = {
 
 local qf_tasks = { build = true, test = true, lint = true, typecheck = true, ["arduino-compile"] = true }
 
+local function task_complete(_, line)
+  local tasks = require("pde.tasks").list(require("pde.detect").root(0))
+  local prefix = line:match("%S+$") or ""
+  local out = {}
+  for _, task in ipairs(tasks) do
+    if task:find(prefix, 1, true) == 1 then table.insert(out, task) end
+  end
+  return out
+end
+
 function M.setup()
   vim.api.nvim_create_user_command("PDEStatus", function()
     local info = require("pde.detect").detect(0)
-    local tasks = require("pde.tasks").list(info.root)
+    local entries = require("pde.tasks").entries(info.root)
+    local task_names = {}
+    for _, task in ipairs(entries) do table.insert(task_names, task.name .. "[" .. task.source .. "]") end
     local lines = {
       "PDE Status",
       "root: " .. info.root,
       "type: " .. info.type,
       "framework: " .. info.framework,
       "marker: " .. tostring(info.marker),
-      "has .mise.toml: " .. tostring(info.has_mise),
+      "has local mise tasks: " .. tostring(info.has_local_tasks),
+      "has .mise/mise.toml: " .. tostring(info.has_mise),
       "has pde.toml: " .. tostring(info.has_pde),
       "compile_commands.json: " .. tostring(info.has_compile_db),
       "lsp: " .. (lsp_names(0) ~= "" and lsp_names(0) or "none"),
-      "mise tasks: " .. (#tasks > 0 and table.concat(tasks, ", ") or "none"),
+      "mise tasks: " .. (#task_names > 0 and table.concat(task_names, ", ") or "none"),
     }
     if info.type == "embedded" then vim.list_extend(lines, require("pde.arduino").status_lines(0)) end
     echo(lines)
   end, { desc = "Show PDE project status" })
 
   vim.api.nvim_create_user_command("PDEQuickfix", "copen", { desc = "Open quickfix" })
+  vim.api.nvim_create_user_command("PDETask", function(opts)
+    require("pde.tasks").run(opts.args, { quickfix = qf_tasks[opts.args] })
+  end, { nargs = 1, complete = task_complete, desc = "Run a project-local mise task" })
   vim.api.nvim_create_user_command("PDEOpenMise", function()
-    local path = require("pde.detect").root(0) .. "/.mise.toml"
-    if vim.uv.fs_stat(path) then vim.cmd.edit(path) else vim.notify("project does not define .mise.toml", vim.log.levels.WARN) end
-  end, { desc = "Open .mise.toml" })
+    local root = require("pde.detect").root(0)
+    for _, name in ipairs({ ".mise.toml", "mise.toml" }) do
+      local path = root .. "/" .. name
+      if vim.uv.fs_stat(path) then vim.cmd.edit(path); return end
+    end
+    vim.notify("project does not define .mise.toml or mise.toml", vim.log.levels.WARN)
+  end, { desc = "Open project mise file" })
   vim.api.nvim_create_user_command("PDEOpenProjectConfig", function()
     local path = require("pde.detect").root(0) .. "/pde.toml"
     if vim.uv.fs_stat(path) then vim.cmd.edit(path) else vim.notify("project does not define pde.toml", vim.log.levels.WARN) end
@@ -69,7 +89,7 @@ function M.setup()
   for command, task in pairs(command_to_task) do
     vim.api.nvim_create_user_command(command, function()
       require("pde.tasks").run(task, { quickfix = qf_tasks[task] })
-    end, { desc = "Run mise task " .. task })
+    end, { desc = "Run project-local mise task " .. task })
   end
 end
 
