@@ -2,13 +2,8 @@ return {
   {
     "folke/snacks.nvim",
     dependencies = {
-      {
-        "rubiin/fortune.nvim",
-        enabled = true,
-        opts = {
-          display_format = "mixed",
-        }
-      }
+      -- Dashboard tips are disabled in the calm visual baseline.
+      { "rubiin/fortune.nvim", enabled = false },
     },
     priority = 1000,
     lazy = false,
@@ -35,39 +30,10 @@ return {
       layout = {
         enabled = true
       },
-      dashboard = {
+      dashboard = { enabled = false },
+      image = {
         enabled = false,
-        sections = {
-          { section = "header" },
-          { section = "keys", gap = 1, padding = 1 },
-          { section = "startup" },
-          { pane = 2, icon = "", title = "Tips", section = "terminal", cmd = 'echo -e "\\033[1;92m$(csfortune)\\033[1;97m"', ttl = 5, height = 2, indent = 3, padding = 1 },
-          { pane = 2, icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = 1 },
-          { pane = 2, icon = " ", title = "Projects", section = "projects", indent = 2, padding = 1 },
-          function()
-            local cmds = {
-              {
-                icon = " ",
-                title = "Git Status",
-                cmd = "hub --no-pager diff --stat -B -M -C",
-                height = 5,
-              }
-            }
-            return vim.tbl_map(function(cmd)
-              return vim.tbl_extend("force", {
-                pane = 2,
-                section = "terminal",
-                enabled = function()
-                  return Snacks.git.get_root() ~= nil
-                end,
-                padding = 1,
-                ttl = 5 * 60,
-                indent = 3,
-              }, cmd)
-            end, cmds)
-          end,
-
-        },
+        doc = { enabled = false },
       },
       notifier = {
         enabled = true,
