@@ -56,6 +56,14 @@ local function resolve(ft)
   return cfg
 end
 
+local function has_file(root, rel)
+  return root and vim.uv.fs_stat(root .. "/" .. rel) ~= nil
+end
+
+local function project_declares_typescript(root)
+  return has_file(root, "node_modules/typescript/lib/typescript.js")
+end
+
 function M.start(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   local ft = vim.bo[bufnr].filetype
@@ -78,10 +86,15 @@ function M.start(bufnr)
     return
   end
 
+  local root = root_for(bufnr, cfg.root_markers)
+  if cfg.name == "ts_ls" and not project_declares_typescript(root) then
+    return
+  end
+
   vim.lsp.start({
     name = cfg.name,
     cmd = cfg.cmd,
-    root_dir = root_for(bufnr, cfg.root_markers),
+    root_dir = root,
     settings = cfg.settings,
   }, { bufnr = bufnr })
 end

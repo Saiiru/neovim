@@ -231,15 +231,16 @@ Completion:
 Available built-in snippets:
 
 ```txt
-c:          main, fori, printf, guard
-cpp:        main, cout, class
-lua:        req, fn, mod
-python:     main, fn, cls
-javascript: fn, afn, log
-typescript: fn, afn, type
-go:         main, fn, err
-rust:       main, fn, test
-arduino:    sketch
+c:          checknull, fprintf, fori, guard, inc, incl, main, printf
+cpp:        cerr, class, cout, inc, incl, main, try
+lua:        autocmd, fn, mod, pcall, req, usercmd
+python:     cls, dataclass, fastapi, fn, from, imp, main, pytest, try, trylog, withopen
+javascript: afn, async, awaittry, error, fn, imp, imn, log, try, warn
+typescript: afn, awaittry, fn, iface, imp, imn, react, try, type, typeimp
+go:         deferclose, err, errnil, errwrap, fn, http, httperr, im, ims, main, tabletest, test
+rust:       derive, fn, iflet, main, matcherr, resultfn, test, use
+java:       class, imp, main, method, pkg, serr, sout, try, tryres
+arduino:    debounce, digital, pinin, pinout, serial, sketch
 ```
 
 Example:
