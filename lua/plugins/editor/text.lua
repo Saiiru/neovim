@@ -46,7 +46,8 @@ return {
           'typescript',
           'yaml'
         },
-        auto_install = true,
+        -- Parser installs are explicit operator actions. No network/install during startup.
+        auto_install = false,
         sync_install = false,
         highlight = {
           enable = true,
