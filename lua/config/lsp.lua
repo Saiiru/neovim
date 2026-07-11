@@ -410,7 +410,7 @@ M.servers = {
     },
   },
 
-  -- Arduino (uses clangd with Arduino-specific config)
+  -- Arduino / ESP32 (uses clangd with compile_commands.json)
   clangd = {
     cmd = {
       "clangd",
@@ -428,10 +428,10 @@ M.servers = {
     capabilities = capabilities,
     settings = {
       clangd = {
-        fallbackFlags = { "-std=c++17", "-DARDUINO=10819", "-DARDUINO_AVR_UNO", "-DARDUINO_ARCH_AVR" },
+        fallbackFlags = { "-std=c++17", "-DARDUINO=10819" },
         init_options = {
-          fallbackFlags = { "-std=c++17", "-DARDUINO=10819", "-DARDUINO_AVR_UNO", "-DARDUINO_ARCH_AVR" },
-          compilationDatabasePath = "./build",
+          fallbackFlags = { "-std=c++17", "-DARDUINO=10819" },
+          compilationDatabasePath = "",
         },
       },
     },

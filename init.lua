@@ -21,11 +21,34 @@ require("config.preferences")
 require("config.vim_conf")
 require("config.theme")
 require("config.lang")
-require("config.obsidian")
+require("config.obsidian").setup()
 require("config.dedsec_ui")
 require("config.dedsec_ui")
 require("config.workflows")
 require("config.whichkey")
+
+-- tpipeline after theme so it captures the correct colorscheme
+local ok_tpipeline, _ = pcall(require, "config.plugins.tpipeline")
+if ok_tpipeline then
+  vim.notify("vim-tpipeline loaded")
+end
+
+-- Load user_functions scripts (e.g., tasks.lua for Taskwarrior integration)
+local user_functions_dir = vim.fn.stdpath("config") .. "/lua/user_functions"
+if vim.uv or vim.loop then
+  local stat = vim.uv.fs_stat(user_functions_dir) or vim.loop.fs_stat(user_functions_dir)
+  if stat and stat.type == "directory" then
+    for _, file in ipairs(vim.fn.readdir(user_functions_dir)) do
+      if file:match("%.lua$") then
+        local name = "user_functions." .. file:gsub("%.lua$", "")
+        local ok, err = pcall(require, name)
+        if not ok then
+          vim.notify("Failed to load " .. name .. ": " .. tostring(err), vim.log.levels.WARN)
+        end
+      end
+    end
+  end
+end
 
 -- Setup LSP configs (registers all vim.lsp.config)
 require("config.lsp").setup()

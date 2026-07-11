@@ -302,3 +302,24 @@ map("n", "<leader>ut", "<cmd>Theme<cr>", { desc = "Select Theme" })
 map("n", "<leader>uT", "<cmd>ThemeCycle<cr>", { desc = "Cycle Theme" })
 map("n", "<leader>uk", "<cmd>ThemeKitty<cr>", { desc = "Generate Kitty Config" })
 map("n", "<leader>um", "<cmd>ThemeTmux<cr>", { desc = "Generate Tmux Config" })
+
+-- ── Kora / VEGA hardware ─────────────────────────────────────────────
+-- Usa `require("config.tasks").run_mise_task(...)` para abrir terminal
+-- com o comando `mise run <task>` no cwd do projeto.
+local Tasks = require("config.tasks")
+
+map("n", "<leader>pb", function() Tasks.run_mise_task("build") end,  { desc = "mise run build" })
+map("n", "<leader>pf", function() Tasks.run_mise_task("flash") end,  { desc = "mise run flash" })
+map("n", "<leader>pm", function() Tasks.run_mise_task("monitor") end,{ desc = "mise run monitor" })
+map("n", "<leader>ps", function() Tasks.run_mise_task("sync") end,   { desc = "mise run sync" })
+map("n", "<leader>pp", function() Tasks.run_mise_task("ports") end,  { desc = "mise run ports" })
+
+-- Taskwarrior quick-access
+map("n", "<leader>ta", "<cmd>split | terminal task kora-report<cr>", { desc = "Open Kora report" })
+map("n", "<leader>tn", function()
+  vim.ui.input({ prompt = "Task description: " }, function(input)
+    if input and #input > 0 then
+      vim.cmd("split | terminal task add " .. vim.fn.shellescape(input))
+    end
+  end)
+end, { desc = "Add Taskwarrior task" })
