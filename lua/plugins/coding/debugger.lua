@@ -6,5 +6,4 @@ return {
   { "theHamsta/nvim-dap-virtual-text", enabled = false },
   { "jay-babu/mason-nvim-dap.nvim", enabled = false },
   { "LiadOz/nvim-dap-repl-highlights", enabled = false },
-  { "nvim-neotest/nvim-nio", enabled = false },
 }

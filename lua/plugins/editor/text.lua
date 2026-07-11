@@ -1,125 +1,54 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    lazy = true,
-    event = "VeryLazy",
+    lazy = false,
+    priority = 900,
     dependencies = {
       "nvim-treesitter/nvim-treesitter-context",
       "nvim-treesitter/nvim-treesitter-textobjects",
     },
     config = function()
-      local parser_configs =
-          require("nvim-treesitter.parsers").get_parser_configs()
-      parser_configs.markdown.filetype_to_parsername = "octo"
+      local ok_ts, ts = pcall(require, "nvim-treesitter")
+      if ok_ts and ts.setup then
+        ts.setup({ install_dir = vim.fn.stdpath("data") .. "/site" })
+      end
 
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = {
-          'bash',
-          'c',
-          'css',
-          'devicetree',
-          'dockerfile',
-          'gitcommit',
-          'gitattributes',
-          'gitignore',
-          'fennel',
-          'helm',
-          'html',
-          'http',
-          'hcl',
-          'java',
-          'javascript',
-          'json',
-          'jq',
-          'lua',
-          'markdown',
-          'make',
-          'nginx',
-          'pem',
-          'python',
-          'ruby',
-          'rust',
-          'rst',
-          'ssh_config',
-          'terraform',
-          'toml',
-          'typescript',
-          'yaml'
-        },
-        -- Parser installs are explicit operator actions. No network/install during startup.
-        auto_install = false,
-        sync_install = false,
-        highlight = {
-          enable = true,
-          additional_vim_regex_highlighting = false,
-        },
-        ident = {
-          enable = true,
-        },
-        incremental_selection = {
-          enable = true,
-          keymaps = {
-            init_selection = "gnn",
-            node_incremental = "grn",
-            scope_incremental = "grc",
-            node_decremental = "grm",
-          },
-        },
-        textobjects = {
-          swap = {
-            enable = true,
-            swap_next = {
-              ["<leader>as"] = "@parameter.inner",
-            },
-            swap_previous = {
-              ["<leader>aS"] = "@parameter.inner",
-            },
-          },
-          move = {
-            enable = true,
-            set_jumps = true, -- whether to set jumps in the jumplist
-            goto_next_start = {
-              ["]m"] = "@function.outer",
-              ["]n"] = "@class.outer",
-            },
-            goto_next_end = {
-              ["]M"] = "@function.outer",
-              ["]N"] = "@class.outer",
-            },
-            goto_previous_start = {
-              ["[m"] = "@function.outer",
-              ["[n"] = "@class.outer",
-            },
-            goto_previous_end = {
-              ["[M"] = "@function.outer",
-              ["[n"] = "@class.outer",
-            },
-          },
-          lsp_interop = {
-            enable = true,
-            border = "single",
-            peek_definition_code = {
-              ["<leader><leader>m"] = "@function.outer",
-              ["<leader><leader>n"] = "@class.outer",
-            },
-          },
-          select = {
-            enable = true,
-            -- Automatically jump forward to textobj, similar to targets.vim
-            lookahead = true,
-            keymaps = {
-              -- You can use the capture groups defined in textobjects.scm
-              ["<leader>of"] = "@function.outer",
-              ["<leader>if"] = "@function.inner",
-              ["<leader>oc"] = "@class.outer",
-              ["<leader>ic"] = "@class.inner",
-            },
-          },
-        },
+      local language_by_ft = {
+        javascriptreact = "tsx",
+        typescriptreact = "tsx",
+        jsonc = "json",
+        sh = "bash",
+        zsh = "bash",
+        arduino = "cpp",
+      }
+
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("vega-treesitter-start", { clear = true }),
+        callback = function(args)
+          local ft = vim.bo[args.buf].filetype
+          local lang = language_by_ft[ft] or ft
+          if lang == "" then return end
+          local ok_parser = pcall(vim.treesitter.language.add, lang)
+          if not ok_parser then return end
+          pcall(vim.treesitter.start, args.buf, lang)
+          vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end,
       })
     end,
   },
-{
+  {
+    "nvim-treesitter/nvim-treesitter-context",
+    event = "BufReadPost",
+    opts = {
+      enable = true,
+      max_lines = 3,
+      multiline_threshold = 1,
+      trim_scope = "outer",
+      mode = "cursor",
+      separator = nil,
+    },
+  },
+  {
     "echasnovski/mini.ai",
     keys = {
       { "a", mode = { "x", "o" } },
@@ -140,6 +69,6 @@ return {
           c = ai.gen_spec.treesitter({ a = "@class.outer", i = "@class.inner" }, {}),
         },
       }
-    end
-  }
-  }
+    end,
+  },
+}

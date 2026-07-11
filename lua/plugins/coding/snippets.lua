@@ -11,10 +11,13 @@ return {
       local fmt = require("luasnip.extras.fmt").fmt
 
       require("luasnip.loaders.from_vscode").lazy_load()
+      require("luasnip.loaders.from_vscode").lazy_load({ paths = { vim.fn.stdpath("config") .. "/snippets" } })
 
       ls.config.set_config({
         history = true,
         updateevents = "TextChanged,TextChangedI",
+        region_check_events = "CursorMoved,CursorHold,InsertEnter",
+        delete_check_events = "TextChanged,InsertLeave",
         enable_autosnippets = false,
       })
 
@@ -45,6 +48,12 @@ return {
       })
 
       ls.add_snippets("python", {
+        s("main", fmt([[def main() -> None:
+    {}
+
+
+if __name__ == "__main__":
+    main()]], { i(1, "pass") })),
         s("trylog", fmt([[try:
     {}
 except {} as {}:
@@ -52,6 +61,9 @@ except {} as {}:
     raise]], { i(1, "pass"), i(2, "Exception"), i(3, "e"), i(4, "operation failed") })),
         s("withopen", fmt([[with open({}, "{}", encoding="utf-8") as {}:
     {}]], { i(1, "path"), i(2, "r"), i(3, "f"), i(4, "pass") })),
+        s("pytest", fmt([[def test_{}() -> None:
+    {}
+    assert {}]], { i(1, "behavior"), i(2, "result = None"), i(3, "result is None") })),
         s("fastapi", fmt([[from fastapi import FastAPI
 
 app = FastAPI()
@@ -77,12 +89,21 @@ def {}() -> dict[str, str]:
 		</div>
 	);
 }}]], { i(1, "Component"), i(2) })),
+        s("test", fmt([[describe("{}", () => {{
+	it("{}", () => {{
+		{};
+	}});
+}});]], { i(1, "unit"), i(2, "works"), i(3, "expect(true).toBe(true)") })),
       })
       ls.filetype_extend("typescriptreact", { "typescript" })
       ls.filetype_extend("javascript", { "typescript" })
       ls.filetype_extend("javascriptreact", { "typescript" })
 
       ls.add_snippets("c", {
+        s("main", fmt([[int main(void) {{
+	{}
+	return 0;
+}}]], { i(1) })),
         s("checknull", fmt([[if ({} == NULL) {{
 	fprintf(stderr, "{} is NULL\n");
 	return {};
@@ -101,6 +122,17 @@ def {}() -> dict[str, str]:
 }} catch (const std::exception& {}) {{
 	std::cerr << {}.what() << std::endl;
 }}]], { i(1), i(2, "e"), i(3, "e") })),
+      })
+
+      ls.add_snippets("rust", {
+        s("test", fmt([[#[test]
+fn {}() {{
+    {}
+}}]], { i(1, "it_works"), i(2, "assert!(true);") })),
+        s("res", fmt([[fn {}() -> Result<(), {}> {{
+    {}
+    Ok(())
+}}]], { i(1, "run"), i(2, "Box<dyn std::error::Error>"), i(3) })),
       })
 
       ls.add_snippets("lua", {
@@ -136,6 +168,7 @@ if (millis() - last_ms > {}) {{
   {
     "danymat/neogen",
     cmd = "Neogen",
+    keys = { { "<leader>cn", "<cmd>Neogen<cr>", desc = "Generate annotation" } },
     opts = {
       enabled = true,
       languages = { python = { template = { annotation_convention = "google_docstrings" } } },

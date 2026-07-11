@@ -42,7 +42,7 @@ o.signcolumn     = "yes" -- Show gutter
 -- Folding
 o.foldenable     = true                         -- Enable folds
 -- o.foldclose   = "all"
-o.foldexpr       = 'nvim_treesitter#foldexpr()' -- Treesitter folding
+o.foldexpr       = 'v:lua.vim.treesitter.foldexpr()' -- Treesitter folding
 o.foldmethod     = 'expr'                       -- Treesitter folding
 
 -- Completion
