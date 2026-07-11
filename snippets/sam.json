@@ -1,0 +1,542 @@
+{
+  "Base": {
+    "prefix": "sam",
+    "description": "Sam base template.",
+    "body": [
+      "Transform: AWS::Serverless-2016-10-31",
+      "Globals:",
+      "  set of globals",
+      "Description: >",
+      "  String",
+      "Metadata:",
+      "  template metadata",
+      "Parameters:",
+      "  set of parameters",
+      "Mappings:",
+      "  set of mappings",
+      "Conditions:",
+      "  set of conditions",
+      "Resources:",
+      "  set of resources",
+      "Outputs:",
+      "  set of outputs"
+    ]
+  },
+  "FunctionCode": {
+    "prefix": "sam-function-code",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-functioncode.html",
+    "body": [
+      "FunctionCode:",
+      "  Bucket: String",
+      "  Key: String # Required: Yes",
+      "  Version: String # Required: Yes"
+    ]
+  },
+  "ApiAuth: ApiUsagePlan": {
+    "prefix": "sam-api-usage-plan",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-api-apiusageplan.html",
+    "body": [
+      "Auth:",
+      "  UsagePlan:",
+      "    CreateUsagePlan: String # Required: Yes",
+      "    Description: String",
+      "    Quota: QuotaSettings",
+      "    Tags: List",
+      "    Throttle: ThrottleSettings",
+      "    UsagePlanName: String"
+    ]
+  },
+  "ApiAuth: CognitoAuthorizer": {
+    "prefix": "sam-api-cognito-authorizer",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-api-cognitoauthorizer.html",
+    "body": [
+      "Auth:",
+      "  Authorizers:",
+      "    MyCognitoAuth:",
+      "      AuthorizationScopes: List",
+      "      Identity: CognitoAuthorizationIdentity",
+      "      UserPoolArn: String # Required: Yes"
+    ]
+  },
+  "ApiAuth: LambdaRequestAuthorizer": {
+    "prefix": "sam-api-lambda-request-authorizer",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-api-lambdarequestauthorizer.html",
+    "body": [
+      "Auth:",
+      "  Authorizer:",
+      "    MyLambdaRequestAuth:",
+      "      AuthorizationScopes: List",
+      "      FunctionArn: String # Required: Yes",
+      "      FunctionInvokeRole: String",
+      "      FunctionPayloadType: String",
+      "      Identity: LambdaRequestAuthorizationIdentity"
+    ]
+  },
+  "ApiAuth: LambdaTokenAuthorizer": {
+    "prefix": "sam-api-lambda-token-authorizer",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-api-lambdatokenauthorizer.html",
+    "body": [
+      "Auth:",
+      "  Authorizers:",
+      "    MyLambdaTokenAuth:",
+      "      AuthorizationScopes: List",
+      "      FunctionArn: String # Required: Yes",
+      "      FunctionInvokeRole: String",
+      "      FunctionPayloadType: String",
+      "      Identity: LambdaTokenAuthorizationIdentity"
+    ]
+  },
+  "ApiAuth: ResourcePolicyStatement": {
+    "prefix": "sam-api-resouce-policy-statement",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-api-resourcepolicystatement.html",
+    "body": [
+      "Auth:",
+      "  ResourcePolicy:",
+      "    AwsAccountBlacklist: List",
+      "    AwsAccountWhitelist: List",
+      "    CustomStatements: List",
+      "    IntrinsicVpcBlacklist: List",
+      "    IntrinsicVpcWhitelist: List",
+      "    IntrinsicVpceBlacklist: List",
+      "    IntrinsicVpceWhitelist: List",
+      "    IpRangeBlacklist: List",
+      "    IpRangeWhitelist: List",
+      "    SourceVpcBlacklist: List",
+      "    SourceVpcWhitelist: List"
+    ]
+  },
+  "Events: AlexaSlill": {
+    "prefix": "sam-event-alexa-skill",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-alexaskill.html",
+    "body": [
+      "Events:",
+      "  ${1:AlexaSkillEvent}:",
+      "    Type: AlexaSkill",
+      "    Properties:",
+      "      SkillId: String"
+    ]
+  },
+  "Events: ApiEvent": {
+    "prefix": "sam-event-api",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-api.html",
+    "body": [
+      "Events:",
+      "  ${1:ApiEvent}:",
+      "    Type: Api",
+      "    Properties:",
+      "      Auth: ApiFunctionAuth",
+      "      Method: String # Required: Yes",
+      "      Path: String # Required: Yes",
+      "      RequestModel: RequestModel",
+      "      RequestParameters: String | RequestParameter",
+      "      RestApiId: String"
+    ]
+  },
+  "Events: CloudWatchEvent": {
+    "prefix": "sam-event-cloud-watch-event",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-cloudwatchevent.html",
+    "body": [
+      "Events:",
+      "  ${1:CWEvent}:",
+      "    Type: CloudWatchEvent",
+      "    Properties:",
+      "      EventBusName: String",
+      "      Input: String",
+      "      InputPath: String",
+      "      Pattern: EventPattern # Required: Yes"
+    ]
+  },
+  "Events: CloudWatchLogs": {
+    "prefix": "sam-event-cloud-watch-logs",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-cloudwatchlogs.html",
+    "body": [
+      "Events:",
+      "  ${1:CWLog}:",
+      "    Type: CloudWatchLogs",
+      "    Properties:",
+      "      FilterPattern: String # Required: Yes",
+      "      LogGroupName: String # Required: Yes"
+    ]
+  },
+  "Events: CognitoEvent": {
+    "prefix": "sam-event-cognito",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-cognito.html",
+    "body": [
+      "Events:",
+      "  ${1:CognitoUserPoolPreSignup}:",
+      "    Type: Cognito",
+      "    Properties:",
+      "      Trigger: List # Required: Yes",
+      "      UserPool: String # Required: Yes"
+    ]
+  },
+  "Events: DynamoDBEvent": {
+    "prefix": "sam-event-dynamo-db",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-dynamodb.html",
+    "body": [
+      "Events:",
+      "  ${1:DDBEvent}:",
+      "    Type: DynamoDB",
+      "    Properties:",
+      "      BatchSize: Integer",
+      "      BisectBatchOnFunctionError: Boolean",
+      "      DestinationConfig: DestinationConfig",
+      "      Enabled: Boolean",
+      "      FunctionResponseTypes: List",
+      "      MaximumBatchingWindowInSeconds: Integer",
+      "      MaximumRecordAgeInSeconds: Integer",
+      "      MaximumRetryAttempts: Integer",
+      "      ParallelizationFactor: Integer",
+      "      StartingPosition: String",
+      "      Stream: String # Required: Yes",
+      "      TumblingWindowInSeconds: Integer"
+    ]
+  },
+  "Events: EventBridgeRule": {
+    "prefix": "sam-event-event-bridge-rule",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-eventbridgerule.html",
+    "body": [
+      "Events:",
+      "  ${1:EBRule}:",
+      "    Type: EventBridgeRule",
+      "    Properties:",
+      "      DeadLetterConfig: DeadLetterConfig",
+      "      EventBusName: String",
+      "      Input: String",
+      "      InputPath: String",
+      "      Pattern: EventPattern # Required: Yes",
+      "      RetryPolicy: RetryPolicy",
+      "      Target: Target"
+    ]
+  },
+  "Events: HttpApiEvent": {
+    "prefix": "sam-event-http-api",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-httpapi.html",
+    "body": [
+      "Events:",
+      "  ${1:HttpApiEvent}:",
+      "    Type: HttpApi",
+      "    Properties:",
+      "      ApiId: String",
+      "      Auth: HttpApiFunctionAuth",
+      "      Method: String",
+      "      Path: String",
+      "      PayloadFormatVersion: String",
+      "      RouteSettings: RouteSettings",
+      "      TimeoutInMillis: Integer"
+    ]
+  },
+  "Events: IoTRuleEvent": {
+    "prefix": "sam-event-iot-rule",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-iotrule.html",
+    "body": [
+      "Events:",
+      "  ${1:IoTRule}:",
+      "    Type: IoTRule",
+      "    Properties:",
+      "      AwsIotSqlVersion: String",
+      "      Sql: String # Required: Yes"
+    ]
+  },
+  "Events: KinesisEvent": {
+    "prefix": "sam-event-kinesis",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-kinesis.html",
+    "body": [
+      "Events:",
+      "  ${1:KinesisEvent}:",
+      "    Type: Kinesis",
+      "    Properties:",
+      "      BatchSize: Integer",
+      "      BisectBatchOnFunctionError: Boolean",
+      "      DestinationConfig: DestinationConfig",
+      "      Enabled: Boolean",
+      "      FunctionResponseTypes: List",
+      "      MaximumBatchingWindowInSeconds: Integer",
+      "      MaximumRecordAgeInSeconds: Integer",
+      "      MaximumRetryAttempts: Integer",
+      "      ParallelizationFactor: Integer",
+      "      StartingPosition: String # Required: Yes",
+      "      Stream: String # Required: Yes",
+      "      TumblingWindowInSeconds: Integer"
+    ]
+  },
+  "Events: MQEvent": {
+    "prefix": "sam-event-mq",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-mq.html",
+    "body": [
+      "Events:",
+      "  ${1:KinesisEvent}:",
+      "    Type: MQ",
+      "    Properties:",
+      "      BatchSize: Integer",
+      "      Broker: String # Required: Yes",
+      "      Enabled: Boolean",
+      "      Queues: List # Required: Yes",
+      "      SecretsManagerKmsKeyId: String",
+      "      SourceAccessConfigurations: List # Required: Yes"
+    ]
+  },
+  "Events: MSKEvent": {
+    "prefix": "sam-event-msk",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-msk.html",
+    "body": [
+      "Events:",
+      "  ${1:MSKEvent}:",
+      "    Type: MSK",
+      "    Properties:",
+      "      StartingPosition: String # Required: Yes",
+      "      Stream: String # Required: Yes",
+      "      Topics: List # Required: Yes"
+    ]
+  },
+  "Events: S3Event": {
+    "prefix": "sam-event-s3",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-s3.html",
+    "body": [
+      "Events:",
+      "  ${1:S3Event}:",
+      "    Type: S3",
+      "    Properties:",
+      "      Bucket: String # Required: Yes",
+      "      Events: String | List # Required: Yes",
+      "      Filter: NotificationFilter"
+    ]
+  },
+  "Events: ScheduleEvent": {
+    "prefix": "sam-event-schedule",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-schedule.html",
+    "body": [
+      "Events:",
+      "  ${1:CWSchedule}:",
+      "    Type: Schedule",
+      "    Properties:",
+      "      DeadLetterConfig: DeadLetterConfig",
+      "      Description: String",
+      "      Enabled: Boolean",
+      "      Input: String",
+      "      Name: String",
+      "      RetryPolicy: RetryPolicy",
+      "      Schedule: String # Required: Yes"
+    ]
+  },
+  "Events: SNSEvent": {
+    "prefix": "sam-event-sns",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-sns.html",
+    "body": [
+      "Events:",
+      "  ${1:SNSEvent}:",
+      "    Type: SNS",
+      "    Properties:",
+      "      FilterPolicy: SnsFilterPolicy",
+      "      Region: String",
+      "      SqsSubscription: Boolean | SqsSubscriptionObject",
+      "      Topic: String # Required: Yes"
+    ]
+  },
+  "Events: SQSEvent": {
+    "prefix": "sam-event-sqs",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-sqs.html",
+    "body": [
+      "Events:",
+      "  ${1:SQSEvent}:",
+      "    Type: SQS",
+      "    Properties:",
+      "      BatchSize: Integer",
+      "      Enabled: Boolean",
+      "      MaximumBatchingWindowInSeconds: Integer",
+      "      Queue: String # Required: Yes"
+    ]
+  },
+  "Events: ApiEventStepFunction": {
+    "prefix": "sam-event-api-step-function",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-statemachine-statemachineapi.html",
+    "body": [
+      "Events:",
+      "  ${1:ApiEvent}:",
+      "    Type: Api",
+      "    Properties:",
+      "      Auth: ApiStateMachineAuth",
+      "      Method: String # Required: Yes",
+      "      Path: String # Required: Yes",
+      "      RestApiId: String"
+    ]
+  },
+  "Events: EventBridgeRuleStepFunction": {
+    "prefix": "sam-event-event-bridge-rule-step-function",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-eventbridgerule.html",
+    "body": [
+      "Events:",
+      "  ${1:EBRule}:",
+      "    Type: EventBridgeRule",
+      "    Properties:",
+      "      DeadLetterConfig: DeadLetterConfig",
+      "      EventBusName: String",
+      "      Input: String",
+      "      InputPath: String",
+      "      Pattern: EventPattern # Required: Yes",
+      "      RetryPolicy: RetryPolicy"
+    ]
+  },
+  "AWS::Serverless::HttpApi": {
+    "prefix": "sam-http-api-gateway",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-httpapi.html",
+    "body": [
+      "${1:SampleHttpApi}:",
+      "  Type: AWS::Serverless::HttpApi",
+      "  Properties:",
+      "    AccessLogSettings: AccessLogSettings",
+      "    Auth: HttpApiAuth",
+      "    CorsConfiguration: String | HttpApiCorsConfiguration",
+      "    DefaultRouteSettings: RouteSettings",
+      "    DefinitionBody: String",
+      "    DefinitionUri: String | HttpApiDefinition",
+      "    Description: String",
+      "    DisableExecuteApiEndpoint: Boolean",
+      "    Domain: HttpApiDomainConfiguration",
+      "    FailOnWarnings: Boolean",
+      "    RouteSettings: RouteSettings",
+      "    StageName: String",
+      "    StageVariables: Json",
+      "    Tags: Map"
+    ]
+  },
+  "AWS::Serverless::Api": {
+    "prefix": "sam-api-gateway",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-api.html",
+    "body": [
+      "${1:SampleApi}:",
+      "  Type: AWS::Serverless::Api",
+      "  Properties:",
+      "    AccessLogSetting: AccessLogSetting",
+      "    Auth: ApiAuth",
+      "    BinaryMediaTypes: List",
+      "    CacheClusterEnabled: Boolean",
+      "    CacheClusterSize: String",
+      "    CanarySetting: CanarySetting",
+      "    Cors: String | CorsConfiguration",
+      "    DefinitionBody: String",
+      "    DefinitionUri: String | ApiDefinition",
+      "    Description: String",
+      "    Domain: DomainConfiguration",
+      "    EndpointConfiguration: EndpointConfiguration",
+      "    GatewayResponses: Map",
+      "    MethodSettings: MethodSettings",
+      "    MinimumCompressionSize: Integer",
+      "    Mode: String",
+      "    Models: Map",
+      "    Name: String",
+      "    OpenApiVersion: String",
+      "    StageName: String # Required: Yes",
+      "    Tags: Map",
+      "    TracingEnabled: Boolean",
+      "    Variables: Map"
+    ]
+  },
+  "AWS::Serverless::SimpleTable": {
+    "prefix": "sam-dynamodb",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-simpletable.html",
+    "body": [
+      "${1:SampleDynamoTable}:",
+      "  Type: AWS::Serverless::SimpleTable",
+      "  Properties:",
+      "    PrimaryKey: PrimaryKeyObject",
+      "    ProvisionedThroughput: ProvisionedThroughput",
+      "    SSESpecification: SSESpecification",
+      "    TableName: String",
+      "    Tags: Map"
+    ]
+  },
+  "AWS::Serverless::Function": {
+    "prefix": "sam-lambda-function",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html",
+    "body": [
+      "${1:LambdaFunction}:",
+      "  Type: AWS::Serverless::Function",
+      "  Properties:",
+      "    Architectures: List",
+      "    AssumeRolePolicyDocument: JSON",
+      "    AutoPublishAlias: String",
+      "    AutoPublishCodeSha256: String",
+      "    CodeSigningConfigArn: String",
+      "    CodeUri: String | FunctionCode",
+      "    DeadLetterQueue: Map | DeadLetterQueue",
+      "    DeploymentPreference: DeploymentPreference",
+      "    Description: String",
+      "    Environment: Environment",
+      "    EventInvokeConfig: EventInvokeConfiguration",
+      "    Events: EventSource",
+      "    FileSystemConfigs: List",
+      "    FunctionName: String",
+      "    Handler: String",
+      "    ImageConfig: ImageConfig",
+      "    ImageUri: String",
+      "    InlineCode: String",
+      "    KmsKeyArn: String",
+      "    Layers: List",
+      "    MemorySize: Integer",
+      "    PackageType: String",
+      "    PermissionsBoundary: String",
+      "    Policies: String | List | Map",
+      "    ProvisionedConcurrencyConfig: ProvisionedConcurrencyConfig",
+      "    ReservedConcurrentExecutions: Integer",
+      "    Role: String",
+      "    Runtime: String",
+      "    Tags: Map",
+      "    Timeout: Integer",
+      "    Tracing: String",
+      "    VersionDescription: String",
+      "    VpcConfig: VpcConfig"
+    ]
+  },
+  "AWS::Serverless::LayerVersion": {
+    "prefix": "sam-layer",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-layerversion.html",
+    "body": [
+      "${1:SampleLayer}:",
+      "  Type: AWS::Serverless::LayerVersion",
+      "  Properties:",
+      "    CompatibleArchitectures: List",
+      "    CompatibleRuntimes: List",
+      "    ContentUri: String | LayerContent # Required: Yes",
+      "    Description: String",
+      "    LayerName: String",
+      "    LicenseInfo: String",
+      "    RetentionPolicy: String"
+    ]
+  },
+  "AWS::Serverless::Application": {
+    "prefix": "sam-application",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-application.html",
+    "body": [
+      "${1:ServerlessApplication}:",
+      "  Type: AWS::Serverless::Application",
+      "  Properties:",
+      "    Location: String | ApplicationLocationObject #Required",
+      "    NotificationARNs: List",
+      "    Parameters: Map",
+      "    Tags: Map",
+      "    TimeoutInMinutes: Integer"
+    ]
+  },
+  "AWS::Serverless::StateMachine": {
+    "prefix": "sam-step-functions",
+    "description": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-statemachine.html",
+    "body": [
+      "${1:SampleStepFunctions}:",
+      "  Type: AWS::Serverless::StateMachine",
+      "  Properties:",
+      "    Definition: Map",
+      "    DefinitionSubstitutions: Map",
+      "    DefinitionUri: String | S3Location",
+      "    Events: EventSource",
+      "    Logging: LoggingConfiguration",
+      "    Name: String",
+      "    PermissionsBoundary: String",
+      "    Policies: String | List | Map",
+      "    Role: String",
+      "    Tags: Map",
+      "    Tracing: TracingConfiguration",
+      "    Type: String"
+    ]
+  }
+}

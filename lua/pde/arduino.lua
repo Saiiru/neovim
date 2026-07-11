@@ -1,9 +1,6 @@
 local M = {}
 
-local function root(bufnr)
-  return require("pde.detect").root(bufnr or 0)
-end
-
+local function root(bufnr) return require("pde.detect").root(bufnr or 0) end
 local function read(path)
   local f = io.open(path, "r")
   if not f then return nil end
@@ -13,13 +10,8 @@ local function read(path)
 end
 
 function M.profile(bufnr)
-  local env = vim.env.ARDUINO_PROFILE
-  if env and env ~= "" then return env end
   local text = read(root(bufnr) .. "/pde.toml") or ""
-  local pde_profile = text:match("active_profile%s*=%s*\"([^\"]+)\"") or text:match("profile%s*=%s*\"([^\"]+)\"")
-  if pde_profile then return pde_profile end
-  local sketch = read(root(bufnr) .. "/sketch.yaml") or ""
-  return sketch:match("default_profile:%s*([%w%._%-]+)")
+  return vim.env.ARDUINO_PROFILE or text:match("active_profile%s*=%s*\"([^\"]+)\"") or text:match("profile%s*=%s*\"([^\"]+)\"") or (read(root(bufnr) .. "/sketch.yaml") or ""):match("default_profile:%s*([%w%._%-]+)")
 end
 
 function M.fqbn(bufnr)
@@ -27,12 +19,7 @@ function M.fqbn(bufnr)
   local pde_fqbn = text:match("fqbn%s*=%s*\"([^\"]+)\"")
   if pde_fqbn then return pde_fqbn end
   local sketch = read(root(bufnr) .. "/sketch.yaml") or ""
-  local profile = M.profile(bufnr)
-  if not profile then
-    return sketch:match("fqbn:%s*([^%s]+)")
-  end
-  local block = sketch:match(profile .. ":%s*\n(.-)\n%s*[%w%._%-]+:") or sketch:match(profile .. ":%s*\n(.+)") or sketch
-  return block:match("fqbn:%s*([^%s]+)")
+  return sketch:match("fqbn:%s*([^%s]+)")
 end
 
 function M.status_lines(bufnr)

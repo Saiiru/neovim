@@ -1,274 +1,325 @@
-# Tiny Neovim PDE
+# Sairu Neovim PDE
 
-Neovim configuration rebuilt for Sairu's mise-first PDE.
+Base: `NickCrew/nvim-pde`.
 
-## Architecture
+Camada local: VEGA / mise-first / snippets práticos / comandos PDE.
+
+## Backup
+
+Antes de substituir a `main`, foi criada e publicada a tag:
 
 ```txt
-mise      = runtimes / SDKs / CLIs / LSP servers / formatters / linters / tasks
-Neovim    = editor / LSP client / diagnostics / quickfix / navigation / git / task invocation
-Project   = declares stack locally via .mise.toml, pde.toml, sketch.yaml when embedded
-Hermes    = audit / briefing / manifest / documentation
+backup-main-before-nickcrew-pde-2026-07-11-052845
 ```
 
-## Rules
+Rollback rápido:
 
-- Neovim does not install toolchains.
-- Neovim does not run Mason as the primary installer.
-- Project actions go through `mise run <task>`.
-- Build/lint/test output goes to quickfix.
-- LSP diagnostics stay separate from compiler output.
-- Hardware flash/monitor only happens by explicit command.
-- No AI, dashboard, Obsidian, auto-session, remote-dev or plugin sprawl in v0.
-
-## Structure
-
-```txt
-init.lua
-lua/core/
-  options.lua
-  diagnostics.lua
-  autocmds.lua
-  lazy.lua
-  lsp.lua
-  keymaps.lua
-  quickfix.lua
-lua/plugins/
-  completion.lua
-  finder.lua
-  format.lua
-  git.lua
-  lsp.lua
-  statusline.lua
-  theme.lua
-  treesitter.lua
-  whichkey.lua
-lua/pde/
-  detect.lua
-  tasks.lua
-  commands.lua
-  arduino.lua
+```bash
+cd ~/dotfiles/config/nvim
+git switch main
+git reset --hard backup-main-before-nickcrew-pde-2026-07-11-052845
+git push --force-with-lease origin main
 ```
 
-## PDE Commands
+## Arquitetura
 
 ```txt
-:PDEStatus                 read project/root/framework/LSP/tasks
-:PDEFramework              show detected project type/framework
-:PDEToolchain              show mise active tools
-:PDEOpenMise               open project .mise.toml
-:PDEOpenProjectConfig      open project pde.toml
-:PDEDoctor                 mise run pde-doctor
-:PDEVersion                mise run pde-version
-:PDEDev                    mise run dev
-:PDEBuild                  mise run build -> quickfix
-:PDETest                   mise run test -> quickfix
-:PDELint                   mise run lint -> quickfix
-:PDEFormat                 mise run format
-:PDETypecheck              mise run typecheck -> quickfix
-:PDERun                    mise run run
-:PDEQuickfix               open quickfix
-:PDEBoards                 mise run arduino-boards
-:PDEArduinoProfile         show sketch/pde Arduino profile
-:PDEArduinoCompileDB       mise run arduino-compile-db
-:PDEArduinoCompile         mise run arduino-compile -> quickfix
-:PDEArduinoUpload          mise run arduino-upload
-:PDEArduinoFlash           mise run arduino-flash
-:PDEArduinoMonitor         mise run arduino-monitor
-:PDEArduinoRestartLSP      restart Arduino language server
+mise      = linguagens / SDKs / CLIs / versões / tasks por projeto
+Neovim    = editor / LSP client / completion / snippets / quickfix / git / task invocation
+Projeto   = declara .mise.toml, pde.toml, package.json, go.mod, sketch.yaml etc.
+Hermes    = auditor / briefing / manifesto
 ```
 
-Task names use hyphenated form by default because unquoted TOML keys do not accept `:`. Quoted task names with `:` are still resolved as fallback when present.
-
-## Project detection
+Regra principal:
 
 ```txt
-sketch.yaml       -> Arduino CLI
-platformio.ini    -> PlatformIO
-vite.config.*     -> Vite
-next.config.*     -> Next.js
-angular.json      -> Angular
-nuxt.config.*     -> Nuxt
-svelte.config.*   -> SvelteKit
-astro.config.*    -> Astro
-nest-cli.json     -> NestJS
-pom.xml           -> Maven/Java
-build.gradle      -> Gradle/Java
-go.mod            -> Go
-Cargo.toml        -> Rust
-manage.py         -> Django
-pyproject.toml    -> Python
-package.json      -> Node
+Neovim não instala toolchain.
+Neovim não instala SDK.
+Neovim não faz flash automático.
+Neovim chama mise tasks do projeto.
 ```
 
-## Arduino / embedded
+Plugins Neovim são geridos por Lazy. Toolchains são do mise/projeto.
 
-Arduino projects should declare metadata in:
+## Completion
+
+Completion usa `nvim-cmp`.
+
+Keymaps em insert mode:
 
 ```txt
-sketch.yaml
-pde.toml
-.mise.toml
+<C-Space>   abrir completion
+<C-n>       próximo item
+<C-p>       item anterior
+<Tab>       próximo item / expandir snippet / próximo campo
+<S-Tab>     item anterior / campo anterior
+<CR>        aceitar item selecionado
+<C-y>       aceitar item selecionado
+<C-e>       fechar completion
+<C-b>       subir documentação
+<C-f>       descer documentação
 ```
 
-Flow:
+Sources configuradas:
 
 ```txt
-mise run arduino:compile-db -> generate compile_commands.json
-clangd reads compile_commands.json
-Neovim shows real diagnostics
-mise run arduino:compile -> compiler output to quickfix
-mise run arduino:upload/flash/monitor -> explicit only
+nvim_lsp
+luasnip
+path
+nvim_lua
+buffer
+cmdline
 ```
 
-## Keymaps
+## Snippets no completion
 
-Core:
+Snippets aparecem no popup do completion.
+
+Fluxo:
 
 ```txt
-<C-s>           save
-<leader>w       save
-<leader>q       quit window
-<leader>Q       quit all
-<esc>           clear search highlight
-<S-h>/<S-l>     previous/next buffer
-<leader>bd      delete buffer
-<leader><tab>   alternate buffer
-<leader>sv/sh   vertical/horizontal split
+1. entra em insert mode
+2. digita o trigger, exemplo: errwrap
+3. aperta <C-Space> se o menu não abrir sozinho
+4. seleciona o snippet
+5. aceita com <Tab>, <CR> ou <C-y>
+6. navega campos com <Tab>/<S-Tab>
 ```
 
-Finder:
+Atalhos extras:
 
 ```txt
-<leader>ff      find files
-<leader>fg      live grep
-<leader>fb      buffers
-<leader>fh      help
-<leader>fr      resume picker
+<C-j>       expandir/pular para próximo campo do snippet
+<C-k>       voltar campo anterior do snippet
+<leader>sl  listar snippets disponíveis
 ```
 
-Code/LSP:
+Comando útil:
 
-```txt
-gd              go to definition
-gD              go to declaration
-gi              go to implementation
-gr              references
-K               hover
-[d / ]d         previous/next diagnostic
-<leader>cd      line diagnostic
-<leader>cl      diagnostics to loclist
-<leader>ca      code action
-<leader>cr      rename
-<leader>cf      format buffer
+```vim
+:LuaSnipListAvailable
 ```
 
-Quickfix:
+## Snippets práticos adicionados
+
+Além de `friendly-snippets`, há snippets VEGA extras.
+
+Go:
 
 ```txt
-[q / ]q         previous/next quickfix
-<leader>qo      open quickfix
-<leader>qc      close quickfix
-[l / ]l         previous/next loclist
+err
+errnil
+errwrap
+tabletest
 ```
 
-PDE:
+Exemplo:
+
+```go
+if err != nil {
+	return nil, fmt.Errorf("operation failed: %w", err)
+}
+```
+
+Python:
 
 ```txt
-<leader>ps      PDE status
-<leader>pd      PDE doctor
-<leader>pv      PDE version
-<leader>pb      PDE build -> quickfix
-<leader>pt      PDE test -> quickfix
-<leader>pl      PDE lint -> quickfix
-<leader>pf      PDE format
-<leader>pm      open .mise.toml
-<leader>pc      open pde.toml
+trylog
+withopen
+fastapi
+```
+
+TypeScript / JavaScript:
+
+```txt
+typeimp
+awaittry
+react
+```
+
+C/C++:
+
+```txt
+checknull
+guard
+try
+```
+
+Lua:
+
+```txt
+pcall
+usercmd
 ```
 
 Arduino:
 
 ```txt
-<leader>ab      boards
-<leader>ap      profile
-<leader>ac      compile -> quickfix
-<leader>aC      compile database
-<leader>au      upload
-<leader>af      flash
-<leader>am      monitor
+sketch
+debounce
 ```
 
-## Snippets
+## PDE commands
 
-This config uses Neovim 0.12 native snippets, not LuaSnip. No snippet engine is installed by Neovim.
-
-Commands:
+Comandos de projeto:
 
 ```vim
-:PDESnippets          list snippets for current filetype
-:PDESnippet           pick snippet via vim.ui.select
-:PDESnippet main      insert snippet named main
+:PDEStatus
+:PDEBuild
+:PDETest
+:PDELint
+:PDEFormat
+:PDETypecheck
+:PDEDev
+:PDERun
+:PDEVersion
+:PDEDoctor
+:PDEOpenMise
+:PDEOpenProjectConfig
+:PDEQuickfix
 ```
 
-Keymaps:
-
-```txt
-<leader>si      pick snippet
-<leader>sl      list snippets
-<leader>sm      insert main snippet
-<C-j>           jump forward through snippet placeholders
-<C-k>           jump backward through snippet placeholders
-```
-
-Completion:
-
-```txt
-<Tab>/<S-Tab>   handled by blink.cmp for completion menu and snippet movement
-<C-space>       open completion
-<CR>            accept completion
-```
-
-Available built-in snippets:
-
-```txt
-c:          checknull, fprintf, fori, guard, inc, incl, main, printf
-cpp:        cerr, class, cout, inc, incl, main, try
-lua:        autocmd, fn, mod, pcall, req, usercmd
-python:     cls, dataclass, fastapi, fn, from, imp, main, pytest, try, trylog, withopen
-javascript: afn, async, awaittry, error, fn, imp, imn, log, try, warn
-typescript: afn, awaittry, fn, iface, imp, imn, react, try, type, typeimp
-go:         deferclose, err, errnil, errwrap, fn, http, httperr, im, ims, main, tabletest, test
-rust:       derive, fn, iflet, main, matcherr, resultfn, test, use
-java:       class, imp, main, method, pkg, serr, sout, try, tryres
-arduino:    debounce, digital, pinin, pinout, serial, sketch
-```
-
-Example:
+Arduino/embedded:
 
 ```vim
-:PDESnippet main
+:PDEBoards
+:PDEArduinoProfile
+:PDEArduinoCompileDB
+:PDEArduinoCompile
+:PDEArduinoUpload
+:PDEArduinoFlash
+:PDEArduinoMonitor
 ```
 
-When called from normal mode, the snippet opens a new line below the cursor before expanding. Then use `<C-j>` / `<C-k>` to move through placeholders.
+## PDE keymaps
 
-## Validation
+```txt
+<leader>ps  PDEStatus
+<leader>pb  PDEBuild -> quickfix
+<leader>pt  PDETest -> quickfix
+<leader>pl  PDELint -> quickfix
+<leader>pf  PDEFormat
+<leader>pm  abrir .mise.toml
+<leader>pc  abrir pde.toml
+```
+
+Arduino:
+
+```txt
+<leader>ab  boards
+<leader>ap  profile
+<leader>ac  compile -> quickfix
+<leader>aC  compile DB
+<leader>au  upload
+<leader>af  flash
+<leader>am  monitor
+```
+
+Quickfix:
+
+```txt
+[q          item anterior
+]q          próximo item
+<leader>qo  abrir quickfix
+<leader>qc  fechar quickfix
+```
+
+LSP:
+
+```txt
+gd          definition
+gD          declaration
+gi          implementation
+gr          references
+K           hover
+[d / ]d     diagnostics
+<leader>ca  code action
+<leader>cr  rename
+<leader>cd  line diagnostic
+```
+
+## Como um projeto deve declarar tasks
+
+Exemplo `.mise.toml`:
+
+```toml
+[tasks.build]
+run = "cc -Wall -Wextra -std=c11 main.c -o main"
+
+[tasks.lint]
+run = "cc -Wall -Wextra -std=c11 -fsyntax-only main.c"
+
+[tasks.test]
+run = "echo define tests"
+
+[tasks.pde-version]
+run = "mise ls --current"
+```
+
+Então no Neovim:
+
+```vim
+:PDEStatus
+:PDEBuild
+```
+
+Erros de build/lint/test vão para quickfix.
+
+## Arduino contract
+
+Projeto Arduino deve preferir:
+
+```txt
+sketch.yaml
+.mise.toml
+pde.toml
+compile_commands.json
+```
+
+Exemplo tasks:
+
+```toml
+[tasks.arduino-compile]
+run = "arduino-cli compile --fqbn esp32:esp32:esp32 sketch"
+
+[tasks.arduino-upload]
+run = "arduino-cli upload -p ${ARDUINO_PORT:-/dev/ttyUSB0} --fqbn esp32:esp32:esp32 sketch"
+
+[tasks.arduino-monitor]
+run = "arduino-cli monitor -p ${ARDUINO_PORT:-/dev/ttyUSB0} -c baudrate=115200"
+
+[tasks.arduino-flash]
+depends = ["arduino-compile", "arduino-upload"]
+```
+
+Flash/upload só acontecem se você chamar explicitamente o comando.
+
+## Teste rápido
 
 ```bash
-nvim --headless '+qa'
-nvim --headless '+PDEStatus' '+qa'
-nvim --headless '+PDEFramework' '+qa'
+mkdir -p /tmp/pde-smoke
+cd /tmp/pde-smoke
+cat > main.go <<'EOF'
+package main
+
+func main() {}
+EOF
+cat > .mise.toml <<'EOF'
+[tasks.build]
+run = "go build ./..."
+EOF
+nvim main.go
 ```
 
-## Backup
+Dentro do Neovim:
 
-Previous accumulated config is preserved at:
-
-```txt
-backup/current-nvim-before-tiny-pde-2026-07-11
+```vim
+:PDEStatus
+:PDEBuild
 ```
 
-Commit:
+Para snippet:
 
 ```txt
-be966cc backup: preserve current nvim before tiny pde rebuild
+insert mode -> digita errwrap -> <C-Space> -> seleciona -> <CR>
 ```

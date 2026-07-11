@@ -1,0 +1,23 @@
+{
+  "Vimspector: Json": {
+    "prefix": ["vspector-js"],
+    "body": [
+      "{",
+      "  \"configurations\": {",
+      "    \"run\": {",
+      "      \"adapter\": \"vscode-node\",",
+      "      \"configuration\": {",
+      "        \"request\": \"launch\",",
+      "        \"protocol\": \"auto\",",
+      "        \"stopOnEntry\": true,",
+      "        \"console\": \"integratedTerminal\",",
+      "        \"program\": \"\\${workspaceRoot}/${1:app.js}\",",
+      "        \"cwd\": \"\\${workspaceRoot}\"",
+      "      }",
+      "    }",
+      "  }",
+      "}"
+    ],
+    "description": "Vimspector configuration for Javascript"
+  }
+}

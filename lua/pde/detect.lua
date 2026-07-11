@@ -23,34 +23,17 @@ local markers = {
 }
 
 local function exists(root, name)
-  return vim.uv.fs_stat(root .. "/" .. name) ~= nil
-end
-
-local function buffer_dir(bufnr)
-  bufnr = bufnr or 0
-  local name = vim.api.nvim_buf_get_name(bufnr)
-  if name == "" then
-    return vim.uv.cwd()
-  end
-  return vim.fs.dirname(name) or vim.uv.cwd()
+  return root and vim.uv.fs_stat(root .. "/" .. name) ~= nil
 end
 
 function M.root(bufnr)
   bufnr = bufnr or 0
-  local start = buffer_dir(bufnr)
-  local root = vim.fs.root(start, {
-    "pde.toml",
-    ".mise.toml",
-    "sketch.yaml",
-    "platformio.ini",
-    "package.json",
-    "go.mod",
-    "Cargo.toml",
-    "pyproject.toml",
-    "compile_commands.json",
-    ".git",
-  })
-  return root or start
+  local name = vim.api.nvim_buf_get_name(bufnr)
+  local start = name ~= "" and vim.fs.dirname(name) or vim.uv.cwd()
+  return vim.fs.root(start, {
+    "pde.toml", ".mise.toml", "sketch.yaml", "platformio.ini", "package.json",
+    "go.mod", "Cargo.toml", "pyproject.toml", "compile_commands.json", ".git",
+  }) or start or vim.uv.cwd()
 end
 
 function M.detect(bufnr)

@@ -1,0 +1,9 @@
+tags
+sessions/
+*.log
+lua/wip/
+packer_compiled.lua
+!/doc/tags
+.python-version
+env
+Session.vim
