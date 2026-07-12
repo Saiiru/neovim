@@ -30,7 +30,7 @@ o.hidden         = true -- Allow switching buffers with unsaved changes
 
 -- Input
 o.backspace      = "indent,eol,start" -- Traditional backspace behavior
--- o.clipboard   = "unnamedplus"      -- Sync with system clipboard
+o.clipboard      = "unnamedplus"      -- Sync yanks/pastes with Wayland/system clipboard
 o.mouse          = "a"                -- Enable mouse support for all modes
 
 -- Status
