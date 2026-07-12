@@ -24,8 +24,11 @@ return {
         return text:sub(col, col):match("%s") == nil
       end
 
-      local function border(name)
-        return cmp.config.window.bordered({ border = "rounded", winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:Visual,Search:None" })
+      local function border(_name)
+        return cmp.config.window.bordered({
+          border = "rounded",
+          winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
+        })
       end
 
       cmp.setup({
@@ -47,11 +50,13 @@ return {
           ["<C-y>"] = cmp.mapping.confirm({ select = true }),
           ["<C-b>"] = cmp.mapping.scroll_docs(-4),
           ["<C-f>"] = cmp.mapping.scroll_docs(4),
-          ["<C-n>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
-          ["<C-p>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
+          ["<C-d>"] = cmp.mapping.scroll_docs(4),
+          ["<C-u>"] = cmp.mapping.scroll_docs(-4),
+          ["<C-n>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+          ["<C-p>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
           ["<Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
-              cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
+              cmp.confirm({ select = true })
             elseif luasnip.expand_or_locally_jumpable() then
               luasnip.expand_or_jump()
             elseif has_words_before() then
@@ -62,7 +67,7 @@ return {
           end, { "i", "s" }),
           ["<S-Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
-              cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert })
+              cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
             elseif luasnip.locally_jumpable(-1) then
               luasnip.jump(-1)
             else
@@ -70,7 +75,7 @@ return {
             end
           end, { "i", "s" }),
           ["<C-j>"] = cmp.mapping(function(fallback)
-            if luasnip.locally_jumpable(1) then luasnip.jump(1) else fallback() end
+            if luasnip.expand_or_locally_jumpable() then luasnip.expand_or_jump() else fallback() end
           end, { "i", "s" }),
           ["<C-k>"] = cmp.mapping(function(fallback)
             if luasnip.locally_jumpable(-1) then luasnip.jump(-1) else fallback() end
@@ -97,6 +102,9 @@ return {
         window = {
           completion = border("completion"),
           documentation = border("documentation"),
+        },
+        view = {
+          docs = { auto_open = true },
         },
         experimental = { ghost_text = false },
       })
