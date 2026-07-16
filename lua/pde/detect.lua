@@ -2,13 +2,38 @@ local M = {}
 
 local uv = vim.uv or vim.loop
 
-local markers = {
-  { file = "pde.toml", type = "pde", framework = "explicit" },
-  { file = ".mise.toml", type = "toolchain", framework = "mise" },
-  { file = "mise.toml", type = "toolchain", framework = "mise" },
+-- Root markers are ordered by project-contract priority. Metadata/task files
+-- participate in root detection, but they do not override the real project type.
+local root_markers = {
+  "pde.toml",
+  ".mise.toml",
+  "mise/tasks",
+  "sketch.yaml",
+  "platformio.ini",
+  "compile_commands.json",
+  "vite.config.ts",
+  "vite.config.js",
+  "next.config.js",
+  "next.config.mjs",
+  "angular.json",
+  "nuxt.config.ts",
+  "svelte.config.js",
+  "astro.config.mjs",
+  "nest-cli.json",
+  "pom.xml",
+  "build.gradle",
+  "settings.gradle",
+  "go.mod",
+  "Cargo.toml",
+  "manage.py",
+  "pyproject.toml",
+  "package.json",
+  ".git",
+}
+
+local type_markers = {
   { file = "sketch.yaml", type = "embedded", framework = "arduino-cli" },
   { file = "platformio.ini", type = "embedded", framework = "platformio" },
-  { file = "compile_commands.json", type = "native", framework = "compile-db" },
   { file = "vite.config.ts", type = "frontend", framework = "vite" },
   { file = "vite.config.js", type = "frontend", framework = "vite" },
   { file = "next.config.js", type = "frontend", framework = "next" },
@@ -26,15 +51,9 @@ local markers = {
   { file = "manage.py", type = "backend", framework = "django" },
   { file = "pyproject.toml", type = "backend", framework = "python" },
   { file = "package.json", type = "node", framework = "node" },
+  { file = "compile_commands.json", type = "native", framework = "compile-db" },
   { file = ".git", type = "git", framework = "generic" },
 }
-
-local root_markers = {}
-for _, marker in ipairs(markers) do
-  table.insert(root_markers, marker.file)
-end
-
-table.insert(root_markers, "mise/tasks")
 
 local function exists(path)
   return path and uv.fs_stat(path) ~= nil
@@ -55,42 +74,53 @@ local function buffer_start(bufnr)
   return uv.cwd()
 end
 
+local function parent(path)
+  if not path or path == "/" then return nil end
+  local next_parent = vim.fs.dirname(path)
+  if next_parent == path then return nil end
+  return next_parent
+end
+
+local function marker_in(dir)
+  for _, marker in ipairs(root_markers) do
+    if M.exists(dir, marker) then return marker end
+  end
+  return nil
+end
+
+-- Walk upward from the current buffer directory. The closest project root wins;
+-- marker order only breaks ties in the same directory.
 function M.root(bufnr)
-  local start = buffer_start(bufnr)
-  return vim.fs.root(start, root_markers) or start or uv.cwd()
+  local dir = buffer_start(bufnr) or uv.cwd()
+  while dir do
+    if marker_in(dir) then return dir end
+    dir = parent(dir)
+  end
+  return buffer_start(bufnr) or uv.cwd()
 end
 
 function M.detect(bufnr)
   local root = M.root(bufnr)
+  local has_mise_toml = M.exists(root, ".mise.toml")
+  local has_mise_tasks = M.exists(root, "mise/tasks")
   local info = {
     root = root,
     type = "unknown",
     framework = "unknown",
     marker = nil,
-    has_mise = M.exists(root, ".mise.toml") or M.exists(root, "mise.toml") or M.exists(root, "mise/tasks"),
+    has_mise = has_mise_toml,
     has_pde = M.exists(root, "pde.toml"),
     has_compile_db = M.exists(root, "compile_commands.json"),
-    has_local_tasks = M.exists(root, ".mise.toml") or M.exists(root, "mise.toml") or M.exists(root, "mise/tasks"),
+    has_local_tasks = has_mise_toml or has_mise_tasks,
+    task_source = has_mise_toml and ".mise.toml" or (has_mise_tasks and "mise/tasks" or nil),
   }
 
-  for _, marker in ipairs(markers) do
+  for _, marker in ipairs(type_markers) do
     if M.exists(root, marker.file) then
       info.type = marker.type
       info.framework = marker.framework
       info.marker = marker.file
       break
-    end
-  end
-
-  if info.framework == "mise" then
-    if M.exists(root, "sketch.yaml") then
-      info.type = "embedded"
-      info.framework = "arduino-cli"
-      info.marker = "sketch.yaml"
-    elseif M.exists(root, "platformio.ini") then
-      info.type = "embedded"
-      info.framework = "platformio"
-      info.marker = "platformio.ini"
     end
   end
 

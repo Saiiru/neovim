@@ -2,18 +2,6 @@ local M = {}
 
 local uv = vim.uv or vim.loop
 
-local canonical = {
-  build = true,
-  test = true,
-  lint = true,
-  format = true,
-  dev = true,
-  run = true,
-  monitor = true,
-  flash = true,
-  typecheck = true,
-}
-
 local function read(path)
   local f = io.open(path, "r")
   if not f then return nil end
@@ -36,12 +24,12 @@ local function strip_quotes(name)
   return (name or ""):gsub('^"', ''):gsub('"$', ''):gsub("^'", ""):gsub("'$", "")
 end
 
-local function toml_tasks(root, filename, tasks, seen)
-  local path = root .. "/" .. filename
+local function toml_tasks(root, tasks, seen)
+  local path = root .. "/.mise.toml"
   local text = read(path)
   if not text then return end
   for name in text:gmatch("%[tasks%.([^%]]+)%]") do
-    add_task(tasks, seen, strip_quotes(name), filename)
+    add_task(tasks, seen, strip_quotes(name), ".mise.toml")
   end
 end
 
@@ -61,8 +49,7 @@ end
 function M.entries(root)
   root = root or require("pde.detect").root(0)
   local tasks, seen = {}, {}
-  toml_tasks(root, ".mise.toml", tasks, seen)
-  toml_tasks(root, "mise.toml", tasks, seen)
+  toml_tasks(root, tasks, seen)
   file_tasks(root, tasks, seen)
   table.sort(tasks, function(a, b) return a.name < b.name end)
   return tasks
@@ -78,7 +65,7 @@ end
 
 function M.has_local_tasks(root)
   root = root or require("pde.detect").root(0)
-  return stat(root .. "/.mise.toml") ~= nil or stat(root .. "/mise.toml") ~= nil or stat(root .. "/mise/tasks") ~= nil
+  return stat(root .. "/.mise.toml") ~= nil or stat(root .. "/mise/tasks") ~= nil
 end
 
 function M.resolve(task, root)
@@ -86,6 +73,7 @@ function M.resolve(task, root)
   local set = {}
   for _, name in ipairs(M.list(root)) do set[name] = true end
   if set[task] then return task end
+
   local alt = task:find(":", 1, true) and task:gsub(":", "-") or task:gsub("-", ":")
   if set[alt] then return alt end
   return nil
@@ -127,19 +115,16 @@ local function terminal_run(root, resolved)
   vim.cmd("terminal " .. cmd)
 end
 
+function M.missing_message(task)
+  return "project does not define local mise task: " .. task
+end
+
 function M.run(task, opts)
   opts = opts or {}
   local root = require("pde.detect").root(0)
-  if not M.has_local_tasks(root) then
-    vim.notify("project has no local mise task source (.mise.toml, mise.toml, or mise/tasks)", vim.log.levels.WARN)
-    return
-  end
-
   local resolved = M.resolve(task, root)
   if not resolved then
-    local msg = "project does not define local mise task: " .. task
-    if canonical[task] then msg = msg .. " (expected project-owned task)" end
-    vim.notify(msg, vim.log.levels.WARN)
+    vim.notify(M.missing_message(task), vim.log.levels.WARN)
     return
   end
 

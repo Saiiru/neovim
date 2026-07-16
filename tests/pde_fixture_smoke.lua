@@ -21,7 +21,7 @@ local fixtures = {
     file = "lua/init.lua",
     body = "print('ok')\n",
     markers = { ["lua/.mise.toml"] = "[tasks.build]\nrun = 'lua init.lua'\n[tasks.lint]\nrun = 'luacheck .'\n" },
-    expected = { type = "toolchain", framework = "mise", tasks = { "build", "lint" } },
+    expected = { type = "unknown", framework = "unknown", tasks = { "build", "lint" } },
   },
   python = {
     file = "python/main.py",
@@ -33,7 +33,13 @@ local fixtures = {
     file = "javascript/src/main.js",
     body = "console.log('ok')\n",
     markers = { ["javascript/package.json"] = '{"scripts":{"test":"node src/main.js"}}\n', ["javascript/.mise.toml"] = "[tasks.dev]\nrun = 'node src/main.js'\n" },
-    expected = { type = "toolchain", framework = "mise", tasks = { "dev" } },
+    expected = { type = "node", framework = "node", tasks = { "dev" } },
+  },
+  vite = {
+    file = "vite/src/main.ts",
+    body = "console.log('ok')\n",
+    markers = { ["vite/package.json"] = '{"scripts":{"dev":"vite"}}\n', ["vite/vite.config.ts"] = "export default {}\n", ["vite/.mise.toml"] = "[tasks.build]\nrun = 'vite build'\n" },
+    expected = { type = "frontend", framework = "vite", tasks = { "build" } },
   },
   typescript = {
     file = "typescript/src/main.ts",
@@ -45,7 +51,7 @@ local fixtures = {
     file = "c/main.c",
     body = "int main(void){return 0;}\n",
     markers = { ["c/compile_commands.json"] = "[]\n", ["c/.mise.toml"] = "[tasks.build]\nrun = 'cc main.c'\n" },
-    expected = { type = "toolchain", framework = "mise", tasks = { "build" } },
+    expected = { type = "native", framework = "compile-db", tasks = { "build" } },
   },
   arduino = {
     file = "arduino/fixture.ino",
@@ -63,7 +69,13 @@ local fixtures = {
     file = "rust/src/main.rs",
     body = "fn main() {}\n",
     markers = { ["rust/Cargo.toml"] = "[package]\nname='fixture'\nversion='0.0.0'\nedition='2021'\n", ["rust/.mise.toml"] = "[tasks.build]\nrun = 'cargo build'\n" },
-    expected = { type = "toolchain", framework = "mise", tasks = { "build" } },
+    expected = { type = "backend", framework = "rust", tasks = { "build" } },
+  },
+  quoted_tasks = {
+    file = "quoted/main.txt",
+    body = "ok\n",
+    markers = { ["quoted/.mise.toml"] = "[tasks.\"dash-task\"]\nrun = 'true'\n[tasks.'colon:task']\nrun = 'true'\n" },
+    expected = { type = "unknown", framework = "unknown", tasks = { "dash-task", "colon:task" } },
   },
 }
 
@@ -91,8 +103,12 @@ for name, fixture in pairs(fixtures) do
   end
 end
 
+if tasks.missing_message("lint") ~= "project does not define local mise task: lint" then
+  table.insert(failures, "missing task message changed")
+end
+
 if #failures > 0 then
   error(table.concat(failures, "\n"))
 end
 
-print("PDE fixture smoke OK: lua python javascript typescript c arduino go rust")
+print("PDE fixture smoke OK: lua python javascript vite typescript c arduino go rust quoted_tasks")

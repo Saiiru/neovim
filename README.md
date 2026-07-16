@@ -36,7 +36,14 @@ Regra principal:
 Neovim não instala toolchain.
 Neovim não instala SDK.
 Neovim não faz flash automático.
-Neovim chama mise tasks do projeto.
+Neovim chama apenas mise tasks locais do projeto.
+Não existe fallback para tasks globais.
+```
+
+Mensagem determinística quando uma task não existe:
+
+```txt
+project does not define local mise task: X
 ```
 
 Plugins Neovim são geridos por Lazy. Toolchains são do mise/projeto.
@@ -254,6 +261,16 @@ run = "echo define tests"
 
 [tasks.pde-version]
 run = "mise ls --current"
+```
+
+Nomes com aspas também são aceitos:
+
+```toml
+[tasks."arduino-compile"]
+run = "arduino-cli compile"
+
+[tasks.'typecheck']
+run = "tsc --noEmit"
 ```
 
 Então no Neovim:
