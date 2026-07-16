@@ -17,6 +17,8 @@ local command_to_task = {
   PDEDoctor = "pde-doctor",
   PDEVersion = "pde-version",
   PDEDev = "dev",
+  PDEServe = "serve",
+  PDECompile = "compile",
   PDEBuild = "build",
   PDETest = "test",
   PDELint = "lint",
@@ -31,7 +33,7 @@ local command_to_task = {
   PDEArduinoMonitor = "arduino-monitor",
 }
 
-local qf_tasks = { build = true, test = true, lint = true, typecheck = true, ["arduino-compile"] = true }
+local qf_tasks = { build = true, test = true, lint = true, typecheck = true, compile = true, check = true, clippy = true, ["arduino-compile"] = true }
 
 local function task_complete(_, line)
   local tasks = require("pde.tasks").list(require("pde.detect").root(0))
@@ -56,7 +58,9 @@ function M.setup()
       "root: " .. info.root,
       "type: " .. info.type,
       "framework: " .. info.framework,
+      "language: " .. tostring(info.language),
       "marker: " .. tostring(info.marker),
+      "package manager: " .. tostring(info.package_manager or "none"),
       "has .mise.toml: " .. tostring(detect.exists(info.root, ".mise.toml")),
       "has pde.toml: " .. tostring(info.has_pde),
       "compile_commands.json: " .. tostring(info.has_compile_db),
@@ -67,10 +71,17 @@ function M.setup()
     echo(lines)
   end, { desc = "Show PDE project status" })
 
+  vim.api.nvim_create_user_command("PDEOverview", function()
+    require("pde.overview").open(0)
+  end, { desc = "Show PDE project overview" })
+
   vim.api.nvim_create_user_command("PDEQuickfix", "copen", { desc = "Open quickfix" })
   vim.api.nvim_create_user_command("PDETask", function(opts)
     require("pde.tasks").run(opts.args, { quickfix = qf_tasks[opts.args] })
   end, { nargs = 1, complete = task_complete, desc = "Run a project-local mise task" })
+  vim.api.nvim_create_user_command("PDETmuxTask", function(opts)
+    require("pde.tasks").run(opts.args, { quickfix = false, focus = true })
+  end, { nargs = 1, complete = task_complete, desc = "Run project-local mise task in tmux window" })
   vim.api.nvim_create_user_command("PDEOpenMise", function()
     local path = require("pde.detect").root(0) .. "/.mise.toml"
     if vim.uv.fs_stat(path) then vim.cmd.edit(path); return end

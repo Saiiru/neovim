@@ -39,6 +39,10 @@ return {
         return vim.fs.root(0, patterns) or vim.uv.cwd()
       end
 
+      local function has_workspace_typescript()
+        return has(root_has({ "package.json", "tsconfig.json", "jsconfig.json", ".git" }), "node_modules/typescript/lib/typescript.js")
+      end
+
       local function on_attach(client, bufnr)
         local map = function(mode, lhs, rhs, desc)
           vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true, desc = desc })
@@ -91,7 +95,12 @@ return {
           cmd = { "rust-analyzer" },
           filetypes = { "rust" },
           root_markers = { "Cargo.toml", "rust-project.json", ".git" },
-          settings = { ["rust-analyzer"] = { cargo = { allFeatures = true }, check = { command = "clippy" } } },
+          settings = { ["rust-analyzer"] = { cargo = { allTargets = true, buildScripts = { enable = true } }, procMacro = { enable = true }, check = { command = "clippy" } } },
+        },
+        jdtls = {
+          cmd = { "jdtls" },
+          filetypes = { "java" },
+          root_markers = { "pom.xml", "build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts", ".git" },
         },
         basedpyright = {
           cmd = { "basedpyright-langserver", "--stdio" },
@@ -104,13 +113,37 @@ return {
           filetypes = { "python" },
           root_markers = { "pyproject.toml", "ruff.toml", ".ruff.toml", ".git" },
         },
+        vtsls = {
+          cmd = { "vtsls", "--stdio" },
+          filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
+          root_markers = { "package.json", "tsconfig.json", "jsconfig.json", ".git" },
+          enabled = function()
+            return has_workspace_typescript()
+          end,
+          settings = { vtsls = { autoUseWorkspaceTsdk = true }, typescript = { tsserver = { maxTsServerMemory = 4096 } } },
+        },
         ts_ls = {
           cmd = { "typescript-language-server", "--stdio" },
           filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
           root_markers = { "package.json", "tsconfig.json", "jsconfig.json", ".git" },
           enabled = function()
-            return has(root_has({ "package.json", ".git" }), "node_modules/typescript/lib/typescript.js")
+            return not executable("vtsls") and has_workspace_typescript()
           end,
+        },
+        vue_ls = {
+          cmd = { "vue-language-server", "--stdio" },
+          filetypes = { "vue" },
+          root_markers = { "package.json", "vue.config.js", "vite.config.ts", "vite.config.js", "nuxt.config.ts", ".git" },
+        },
+        svelte = {
+          cmd = { "svelte-language-server", "--stdio" },
+          filetypes = { "svelte" },
+          root_markers = { "package.json", "svelte.config.js", "svelte.config.ts", ".git" },
+        },
+        astro = {
+          cmd = { "astro-ls", "--stdio" },
+          filetypes = { "astro" },
+          root_markers = { "package.json", "astro.config.mjs", "astro.config.ts", ".git" },
         },
         jsonls = {
           cmd = { "vscode-json-language-server", "--stdio" },

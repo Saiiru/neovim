@@ -22,37 +22,55 @@ local fixtures = {
     file = "lua/init.lua",
     body = "print('ok')\n",
     markers = { ["lua/.mise.toml"] = "[tasks.build]\nrun = 'lua init.lua'\n[tasks.lint]\nrun = 'luacheck .'\n" },
-    expected = { type = "unknown", framework = "unknown", tasks = { "build", "lint" } },
+    expected = { type = "unknown", framework = "unknown", language = "unknown", tasks = { "build", "lint" } },
   },
   python = {
     file = "python/main.py",
     body = "print('ok')\n",
     markers = { ["python/pyproject.toml"] = "[project]\nname='fixture'\nversion='0.0.0'\n", ["python/mise/tasks/test"] = "#!/usr/bin/env bash\npython -m pytest\n" },
-    expected = { type = "backend", framework = "python", tasks = { "test" } },
+    expected = { type = "backend", framework = "python", language = "python", tasks = { "test" } },
   },
   javascript = {
     file = "javascript/src/main.js",
     body = "console.log('ok')\n",
     markers = { ["javascript/package.json"] = '{"scripts":{"test":"node src/main.js"}}\n', ["javascript/.mise.toml"] = "[tasks.dev]\nrun = 'node src/main.js'\n" },
-    expected = { type = "node", framework = "node", tasks = { "dev" } },
+    expected = { type = "node", framework = "node", language = "node", tasks = { "dev" } },
   },
   vite = {
     file = "vite/src/main.ts",
     body = "console.log('ok')\n",
     markers = { ["vite/package.json"] = '{"scripts":{"dev":"vite"}}\n', ["vite/vite.config.ts"] = "export default {}\n", ["vite/.mise.toml"] = "[tasks.build]\nrun = 'vite build'\n" },
-    expected = { type = "frontend", framework = "vite", tasks = { "build" } },
+    expected = { type = "frontend", framework = "vite", language = "node", tasks = { "build" } },
   },
   typescript = {
     file = "typescript/src/main.ts",
     body = "const ok: boolean = true\n",
     markers = { ["typescript/package.json"] = '{"devDependencies":{"typescript":"local"}}\n', ["typescript/mise/tasks/typecheck"] = "#!/usr/bin/env bash\ntsc --noEmit\n" },
-    expected = { type = "node", framework = "node", tasks = { "typecheck" } },
+    expected = { type = "node", framework = "node", language = "node", tasks = { "typecheck" } },
+  },
+  nextjs = {
+    file = "nextjs/app/page.tsx",
+    body = "export default function Page(){ return null }\n",
+    markers = { ["nextjs/package.json"] = '{"dependencies":{"next":"latest","react":"latest","typescript":"latest"}}\n', ["nextjs/tsconfig.json"] = "{}\n", ["nextjs/.mise.toml"] = "[tasks.dev]\nrun = 'next dev'\n[tasks.build]\nrun = 'next build'\n" },
+    expected = { type = "frontend", framework = "next", language = "node", tasks = { "dev", "build" } },
+  },
+  vue = {
+    file = "vue/src/App.vue",
+    body = "<template><div /></template>\n",
+    markers = { ["vue/package.json"] = '{"dependencies":{"vue":"latest","typescript":"latest"}}\n', ["vue/vite.config.ts"] = "export default {}\n", ["vue/.mise.toml"] = "[tasks.typecheck]\nrun = 'vue-tsc --noEmit'\n" },
+    expected = { type = "frontend", framework = "vue", language = "node", tasks = { "typecheck" } },
   },
   c = {
     file = "c/main.c",
     body = "int main(void){return 0;}\n",
     markers = { ["c/compile_commands.json"] = "[]\n", ["c/.mise.toml"] = "[tasks.build]\nrun = 'cc main.c'\n" },
-    expected = { type = "native", framework = "compile-db", tasks = { "build" } },
+    expected = { type = "native", framework = "compile-db", language = "clang", tasks = { "build" } },
+  },
+  cmake = {
+    file = "cmake/main.cpp",
+    body = "int main(){return 0;}\n",
+    markers = { ["cmake/CMakeLists.txt"] = "cmake_minimum_required(VERSION 3.20)\n", ["cmake/.mise.toml"] = "[tasks.build]\nrun = 'cmake --build build'\n" },
+    expected = { type = "native", framework = "cmake", language = "clang", tasks = { "build" } },
   },
   arduino = {
     file = "arduino/fixture.ino",
@@ -63,25 +81,31 @@ local fixtures = {
       ["arduino/compile_commands.json"] = "[]\n",
       ["arduino/.mise.toml"] = "[tasks.arduino-compile]\nrun = 'arduino-cli compile'\n[tasks.\"arduino-compile-db\"]\nrun = 'arduino-cli compile --build-path build'\n",
     },
-    expected = { type = "embedded", framework = "arduino-cli", tasks = { "arduino-compile", "arduino-compile-db" } },
+    expected = { type = "embedded", framework = "arduino-cli", language = "clang", tasks = { "arduino-compile", "arduino-compile-db" } },
+  },
+  java_maven = {
+    file = "java_maven/src/main/java/App.java",
+    body = "class App {}\n",
+    markers = { ["java_maven/pom.xml"] = "<project></project>\n", ["java_maven/.mise.toml"] = "[tasks.test]\nrun = 'mvn test'\n" },
+    expected = { type = "backend", framework = "maven/java", language = "java", tasks = { "test" } },
   },
   go = {
     file = "go/main.go",
     body = "package main\nfunc main(){}\n",
     markers = { ["go/go.mod"] = "module fixture\n", ["go/mise/tasks/test"] = "#!/usr/bin/env bash\ngo test ./...\n" },
-    expected = { type = "backend", framework = "go", tasks = { "test" } },
+    expected = { type = "backend", framework = "go", language = "go", tasks = { "test" } },
   },
   rust = {
     file = "rust/src/main.rs",
     body = "fn main() {}\n",
     markers = { ["rust/Cargo.toml"] = "[package]\nname='fixture'\nversion='0.0.0'\nedition='2021'\n", ["rust/.mise.toml"] = "[tasks.build]\nrun = 'cargo build'\n" },
-    expected = { type = "backend", framework = "rust", tasks = { "build" } },
+    expected = { type = "backend", framework = "rust", language = "rust", tasks = { "build" } },
   },
   quoted_tasks = {
     file = "quoted/main.txt",
     body = "ok\n",
     markers = { ["quoted/.mise.toml"] = "[tasks.\"dash-task\"]\nrun = 'true'\n[tasks.'colon:task']\nrun = 'true'\n" },
-    expected = { type = "unknown", framework = "unknown", tasks = { "dash-task", "colon:task" } },
+    expected = { type = "unknown", framework = "unknown", language = "unknown", tasks = { "dash-task", "colon:task" } },
   },
 }
 
@@ -100,6 +124,9 @@ for name, fixture in pairs(fixtures) do
   local info = detect.detect(0)
   if info.type ~= fixture.expected.type or info.framework ~= fixture.expected.framework then
     table.insert(failures, string.format("%s detect got %s/%s at %s", name, info.type, info.framework, info.root))
+  end
+  if info.language ~= fixture.expected.language then
+    table.insert(failures, string.format("%s language got %s", name, tostring(info.language)))
   end
   local found = tasks.list(info.root)
   for _, task in ipairs(fixture.expected.tasks) do
@@ -124,4 +151,4 @@ if #failures > 0 then
   error(table.concat(failures, "\n"))
 end
 
-print("PDE fixture smoke OK: lua python javascript vite typescript c arduino go rust quoted_tasks")
+print("PDE fixture smoke OK: lua python javascript vite typescript nextjs vue c cmake arduino java go rust quoted_tasks")

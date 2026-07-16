@@ -51,12 +51,16 @@ map("n", "<leader>sl", "<cmd>LuaSnipListAvailable<cr>", { desc = "List snippets"
 
 -- PDE / mise-first tasks
 map("n", "<leader>ps", "<cmd>PDEStatus<cr>", { desc = "PDE status" })
+map("n", "<leader>po", "<cmd>PDEOverview<cr>", { desc = "PDE overview" })
 map("n", "<leader>pd", "<cmd>PDEDoctor<cr>", { desc = "PDE doctor" })
 map("n", "<leader>pv", "<cmd>PDEVersion<cr>", { desc = "PDE version" })
+map("n", "<leader>pC", "<cmd>PDECompile<cr>", { desc = "PDE compile" })
 map("n", "<leader>pb", "<cmd>PDEBuild<cr>", { desc = "PDE build" })
 map("n", "<leader>pt", "<cmd>PDETest<cr>", { desc = "PDE test" })
 map("n", "<leader>pl", "<cmd>PDELint<cr>", { desc = "PDE lint" })
 map("n", "<leader>pf", "<cmd>PDEFormat<cr>", { desc = "PDE format" })
+map("n", "<leader>pr", "<cmd>PDERun<cr>", { desc = "PDE run" })
+map("n", "<leader>pS", "<cmd>PDEServe<cr>", { desc = "PDE serve" })
 map("n", "<leader>pm", "<cmd>PDEOpenMise<cr>", { desc = "Open .mise.toml" })
 map("n", "<leader>pc", "<cmd>PDEOpenProjectConfig<cr>", { desc = "Open pde.toml" })
 

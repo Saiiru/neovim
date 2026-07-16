@@ -172,6 +172,8 @@ Comandos de projeto:
 
 ```vim
 :PDEStatus
+:PDEOverview
+:PDECompile
 :PDEBuild
 :PDETest
 :PDELint
@@ -179,6 +181,8 @@ Comandos de projeto:
 :PDETypecheck
 :PDEDev
 :PDERun
+:PDEServe
+:PDETmuxTask <task>
 :PDEVersion
 :PDEDoctor
 :PDEOpenMise
@@ -202,12 +206,63 @@ Arduino/embedded:
 
 ```txt
 <leader>ps  PDEStatus
+<leader>po  PDEOverview
+<leader>pC  PDECompile -> quickfix
 <leader>pb  PDEBuild -> quickfix
 <leader>pt  PDETest -> quickfix
 <leader>pl  PDELint -> quickfix
 <leader>pf  PDEFormat
+<leader>pr  PDERun -> tmux/terminal
+<leader>pS  PDEServe -> tmux/terminal
 <leader>pm  abrir .mise.toml
 <leader>pc  abrir pde.toml
+```
+
+## PDE overview e roteamento
+
+O overview é o cockpit do projeto, inspirado no painel de projeto/Tasks do VSCode:
+
+```vim
+:PDEOverview
+```
+
+Ele mostra:
+
+```txt
+root
+type/framework/language
+package manager
+LSP esperado e LSP ativo
+markers detectados
+tasks locais do mise
+contrato de tasks esperado para o framework
+rota quickfix vs tmux/terminal
+```
+
+Roteamento:
+
+```txt
+build/test/lint/typecheck/compile/check/clippy -> quickfix/compiler
+dev/run/serve/monitor/arduino-monitor       -> tmux window se estiver em tmux; terminal split se não estiver
+arduino-upload/arduino-flash                -> só por comando explícito
+```
+
+O Neovim não usa task global do mise. Se a task não existir localmente:
+
+```txt
+project does not define local mise task: X
+```
+
+## Linguagens e frameworks detectados
+
+```txt
+C/C++/Arduino: compile_commands.json, compile_flags.txt, CMakeLists.txt, Makefile, meson.build, platformio.ini, sketch.yaml -> clangd
+Java: pom.xml, build.gradle(.kts), settings.gradle(.kts) -> jdtls quando disponível
+Rust: Cargo.toml, rust-project.json -> rust_analyzer
+Go: go.mod, go.work -> gopls
+Node/JS/TS: package.json, tsconfig.json, jsconfig.json -> vtsls se disponível, ts_ls como fallback
+Frontend: Vite, React, Next, Vue/Nuxt, SvelteKit, Astro
+Python: pyproject.toml, manage.py, requirements.txt -> basedpyright + ruff
 ```
 
 Arduino:

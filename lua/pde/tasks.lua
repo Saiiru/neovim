@@ -109,10 +109,15 @@ local function qf(title, output, root, code)
   vim.cmd("copen")
 end
 
-local function terminal_run(root, resolved)
+local function terminal_run(root, resolved, opts)
+  opts = opts or {}
+  if opts.tmux ~= false then
+    return require("pde.tmux").run(root, resolved, { focus = opts.focus, window = opts.window })
+  end
   vim.cmd("botright split")
   local cmd = string.format("cd %s && mise run %s", vim.fn.shellescape(root), vim.fn.shellescape(resolved))
   vim.cmd("terminal " .. cmd)
+  return "terminal"
 end
 
 function M.missing_message(task)
@@ -139,7 +144,7 @@ function M.run(task, opts)
     return
   end
 
-  terminal_run(root, resolved)
+  terminal_run(root, resolved, opts)
 end
 
 return M
