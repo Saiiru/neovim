@@ -293,11 +293,55 @@ pde.toml
 compile_commands.json
 ```
 
+Contrato de status, sem ação de hardware:
+
+```toml
+# pde.toml
+profile = "esp32"
+
+[profiles.esp32]
+fqbn = "esp32:esp32:esp32"
+port = "/dev/ttyUSB0"
+baud = 115200
+compile_db = "compile_commands.json"
+```
+
+Contrato equivalente em `sketch.yaml`:
+
+```yaml
+default_profile: esp32
+profiles:
+  esp32:
+    fqbn: esp32:esp32:esp32
+    port: /dev/ttyUSB0
+    baud: 115200
+```
+
+`:PDEStatus` / `:PDEArduinoProfile` leem esses campos e reportam:
+
+```txt
+profile
+fqbn
+port
+baud
+sketch.yaml
+platformio.ini
+pde.toml
+compile_commands.json
+compile db path
+```
+
+Esses comandos não fazem scan de porta, não instalam cores/libs, não abrem monitor,
+não fazem upload e não fazem flash.
+
 Exemplo tasks:
 
 ```toml
 [tasks.arduino-compile]
 run = "arduino-cli compile --fqbn esp32:esp32:esp32 sketch"
+
+[tasks.arduino-compile-db]
+run = "arduino-cli compile --fqbn esp32:esp32:esp32 --build-path build --only-compilation-database sketch"
 
 [tasks.arduino-upload]
 run = "arduino-cli upload -p ${ARDUINO_PORT:-/dev/ttyUSB0} --fqbn esp32:esp32:esp32 sketch"

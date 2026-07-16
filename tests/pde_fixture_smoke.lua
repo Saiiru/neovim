@@ -2,6 +2,7 @@ local uv = vim.uv or vim.loop
 
 local detect = require("pde.detect")
 local tasks = require("pde.tasks")
+local arduino = require("pde.arduino")
 
 local root = vim.fn.stdpath("run") .. "/pde-fixtures-smoke"
 vim.fn.delete(root, "rf")
@@ -56,8 +57,13 @@ local fixtures = {
   arduino = {
     file = "arduino/fixture.ino",
     body = "void setup(){}\nvoid loop(){}\n",
-    markers = { ["arduino/sketch.yaml"] = "default_profile: esp32\nprofiles:\n  esp32:\n    fqbn: esp32:esp32:esp32\n", ["arduino/.mise.toml"] = "[tasks.arduino-compile]\nrun = 'arduino-cli compile'\n" },
-    expected = { type = "embedded", framework = "arduino-cli", tasks = { "arduino-compile" } },
+    markers = {
+      ["arduino/sketch.yaml"] = "default_profile: esp32\nprofiles:\n  esp32:\n    fqbn: esp32:esp32:esp32\n    port: /dev/ttyUSB0\n    baud: 115200\n",
+      ["arduino/pde.toml"] = "profile = 'esp32'\n[profiles.esp32]\nfqbn = 'esp32:esp32:esp32'\nport = '/dev/ttyUSB0'\nbaud = 115200\ncompile_db = 'compile_commands.json'\n",
+      ["arduino/compile_commands.json"] = "[]\n",
+      ["arduino/.mise.toml"] = "[tasks.arduino-compile]\nrun = 'arduino-cli compile'\n[tasks.\"arduino-compile-db\"]\nrun = 'arduino-cli compile --build-path build'\n",
+    },
+    expected = { type = "embedded", framework = "arduino-cli", tasks = { "arduino-compile", "arduino-compile-db" } },
   },
   go = {
     file = "go/main.go",
@@ -100,6 +106,13 @@ for name, fixture in pairs(fixtures) do
     if not contains(found, task) then
       table.insert(failures, string.format("%s missing task %s; got %s", name, task, table.concat(found, ",")))
     end
+  end
+  if name == "arduino" then
+    if arduino.profile(0) ~= "esp32" then table.insert(failures, "arduino profile mismatch") end
+    if arduino.fqbn(0) ~= "esp32:esp32:esp32" then table.insert(failures, "arduino fqbn mismatch") end
+    if arduino.port(0) ~= "/dev/ttyUSB0" then table.insert(failures, "arduino port mismatch") end
+    if tostring(arduino.baud(0)) ~= "115200" then table.insert(failures, "arduino baud mismatch") end
+    if not arduino.compile_db(0):match("compile_commands%.json$") then table.insert(failures, "arduino compile db mismatch") end
   end
 end
 
