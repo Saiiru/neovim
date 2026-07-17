@@ -95,6 +95,11 @@ return {
           cmd = { "rust-analyzer" },
           filetypes = { "rust" },
           root_markers = { "Cargo.toml", "rust-project.json", ".git" },
+          enabled = function()
+            -- rustaceanvim starts and configures rust-analyzer itself. Avoid
+            -- attaching a second native client to the same Rust buffer.
+            return not pcall(require, "rustaceanvim")
+          end,
           settings = { ["rust-analyzer"] = { cargo = { allTargets = true, buildScripts = { enable = true } }, procMacro = { enable = true }, check = { command = "clippy" } } },
         },
         jdtls = {

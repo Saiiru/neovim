@@ -19,7 +19,7 @@ M.languages = {
   },
   rust = {
     label = "Rust",
-    lsp = { "rust_analyzer" },
+    lsp = { "rust-analyzer", "rust_analyzer" },
     markers = { "Cargo.toml", "Cargo.lock", "rust-project.json" },
     quickfix = { "build", "test", "lint", "typecheck", "check", "clippy" },
     terminal = { "run", "dev" },
