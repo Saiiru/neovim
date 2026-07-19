@@ -39,6 +39,11 @@ function M.lines(bufnr)
     "tmux: " .. tostring(vim.env.TMUX ~= nil),
   }
 
+  section(lines, "Suggested next actions")
+  for _, action in ipairs(require("pde.help").next_actions(bufnr)) do
+    table.insert(lines, "- " .. action)
+  end
+
   section(lines, "LSP")
   table.insert(lines, "expected: " .. (#lang.lsp > 0 and table.concat(lang.lsp, ", ") or "none"))
   table.insert(lines, "active: " .. (#active_lsp > 0 and table.concat(active_lsp, ", ") or "none"))

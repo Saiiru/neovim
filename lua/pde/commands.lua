@@ -75,7 +75,34 @@ function M.setup()
     require("pde.overview").open(0)
   end, { desc = "Show PDE project overview" })
 
+  vim.api.nvim_create_user_command("PDEHelp", function()
+    require("pde.help").open(0)
+  end, { desc = "Show PDE guide, shortcuts, templates, and workflow" })
+
+  vim.api.nvim_create_user_command("PDETemplates", function()
+    require("pde.templates").open()
+  end, { desc = "List PDE project templates" })
+
+  vim.api.nvim_create_user_command("PDENewProject", function(opts)
+    local args = opts.fargs or {}
+    local template = args[1]
+    local path = args[2]
+    local force = false
+    for _, arg in ipairs(args) do if arg == "--force" or arg == "-f" then force = true end end
+    if not template or not path then
+      vim.notify("usage: :PDENewProject <template> <path> [--force]", vim.log.levels.WARN)
+      return
+    end
+    local ok, result = require("pde.new_project").create(template, path, { force = force })
+    if not ok then
+      vim.notify("PDENewProject failed: " .. tostring(result), vim.log.levels.ERROR)
+      return
+    end
+    vim.notify("created " .. result.template .. " project: " .. result.root .. " (" .. #result.files .. " files)", vim.log.levels.INFO)
+  end, { nargs = "*", complete = function(arglead) return require("pde.new_project").complete(arglead) end, desc = "Create a project from a PDE template" })
+
   vim.api.nvim_create_user_command("PDEQuickfix", "copen", { desc = "Open quickfix" })
+  vim.api.nvim_create_user_command("PDEErrors", "copen", { desc = "Open quickfix/errors" })
   vim.api.nvim_create_user_command("PDETask", function(opts)
     require("pde.tasks").run(opts.args, { quickfix = qf_tasks[opts.args] })
   end, { nargs = 1, complete = task_complete, desc = "Run a project-local mise task" })

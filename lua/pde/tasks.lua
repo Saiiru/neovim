@@ -107,6 +107,12 @@ local function qf(title, output, root, code)
   end
   vim.fn.setqflist({}, " ", { title = title, items = #parsed > 0 and parsed or raw })
   vim.cmd("copen")
+  vim.cmd("wincmd p")
+end
+
+local function current_root()
+  if vim.bo.buftype == "quickfix" and M.last_root then return M.last_root end
+  return require("pde.detect").root(0)
 end
 
 local function terminal_run(root, resolved, opts)
@@ -126,7 +132,8 @@ end
 
 function M.run(task, opts)
   opts = opts or {}
-  local root = require("pde.detect").root(0)
+  local root = current_root()
+  M.last_root = root
   local resolved = M.resolve(task, root)
   if not resolved then
     vim.notify(M.missing_message(task), vim.log.levels.WARN)
@@ -134,11 +141,18 @@ function M.run(task, opts)
   end
 
   if opts.quickfix then
-    vim.notify("mise run " .. resolved, vim.log.levels.INFO)
+    local title = "mise run " .. resolved
+    vim.fn.setqflist({}, " ", { title = title .. " (running)", items = {} })
+    vim.notify(title .. " running...", vim.log.levels.INFO)
     vim.system({ "mise", "run", resolved }, { text = true, cwd = root }, function(result)
       vim.schedule(function()
-        qf("mise run " .. resolved, (result.stdout or "") .. (result.stderr or ""), root, result.code)
-        vim.notify("mise run " .. resolved .. (result.code == 0 and " OK" or (" failed: " .. result.code)), result.code == 0 and vim.log.levels.INFO or vim.log.levels.ERROR)
+        qf(title, (result.stdout or "") .. (result.stderr or ""), root, result.code)
+        if result.code == 0 then
+          vim.notify(title .. " OK — quickfix cleared", vim.log.levels.INFO)
+        else
+          local count = #vim.fn.getqflist()
+          vim.notify(title .. " failed: " .. result.code .. " — quickfix items: " .. count, vim.log.levels.ERROR)
+        end
       end)
     end)
     return

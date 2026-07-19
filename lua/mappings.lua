@@ -50,17 +50,41 @@ end, { desc = "Snippet jump backward" })
 map("n", "<leader>sl", "<cmd>LuaSnipListAvailable<cr>", { desc = "List snippets" })
 
 -- PDE / mise-first tasks
+map("n", "<leader>ph", "<cmd>PDEHelp<cr>", { desc = "PDE help" })
 map("n", "<leader>ps", "<cmd>PDEStatus<cr>", { desc = "PDE status" })
 map("n", "<leader>po", "<cmd>PDEOverview<cr>", { desc = "PDE overview" })
-map("n", "<leader>pd", "<cmd>PDEDoctor<cr>", { desc = "PDE doctor" })
+map("n", "<leader>pD", "<cmd>PDEDoctor<cr>", { desc = "PDE doctor" })
 map("n", "<leader>pv", "<cmd>PDEVersion<cr>", { desc = "PDE version" })
 map("n", "<leader>pC", "<cmd>PDECompile<cr>", { desc = "PDE compile" })
 map("n", "<leader>pb", "<cmd>PDEBuild<cr>", { desc = "PDE build" })
 map("n", "<leader>pt", "<cmd>PDETest<cr>", { desc = "PDE test" })
 map("n", "<leader>pl", "<cmd>PDELint<cr>", { desc = "PDE lint" })
+map("n", "<leader>py", "<cmd>PDETypecheck<cr>", { desc = "PDE typecheck" })
 map("n", "<leader>pf", "<cmd>PDEFormat<cr>", { desc = "PDE format" })
+map("n", "<leader>pd", "<cmd>PDETmuxTask dev<cr>", { desc = "PDE dev in tmux" })
 map("n", "<leader>pr", "<cmd>PDERun<cr>", { desc = "PDE run" })
 map("n", "<leader>pS", "<cmd>PDEServe<cr>", { desc = "PDE serve" })
+map("n", "<leader>pq", "<cmd>PDEQuickfix<cr>", { desc = "PDE quickfix" })
+map("n", "<leader>pe", "<cmd>PDEErrors<cr>", { desc = "PDE errors" })
+map("n", "<leader>pT", "<cmd>PDETemplates<cr>", { desc = "PDE templates" })
+map("n", "<leader>pn", function()
+  vim.ui.input({ prompt = "PDE template: " }, function(template)
+    if not template or template == "" then return end
+    vim.ui.input({ prompt = "Project path: " }, function(path)
+      if not path or path == "" then return end
+      if template:find("[\n\r]") or path:find("[\n\r]") then
+        vim.notify("PDENewProject input cannot contain newlines", vim.log.levels.ERROR)
+        return
+      end
+      local ok, result = require("pde.new_project").create(template, path, {})
+      if not ok then
+        vim.notify("PDENewProject failed: " .. tostring(result), vim.log.levels.ERROR)
+        return
+      end
+      vim.notify("created " .. result.template .. " project: " .. result.root, vim.log.levels.INFO)
+    end)
+  end)
+end, { desc = "PDE new project" })
 map("n", "<leader>pm", "<cmd>PDEOpenMise<cr>", { desc = "Open .mise.toml" })
 map("n", "<leader>pc", "<cmd>PDEOpenProjectConfig<cr>", { desc = "Open pde.toml" })
 
