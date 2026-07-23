@@ -78,18 +78,18 @@ end
 
 local function define_tpipeline_highlights()
   local groups = {
-    VegaTpMode = { fg = "#050508", bg = "#37f8ff", bold = true },
-    VegaTpModeInsert = { fg = "#050508", bg = "#8cff98", bold = true },
-    VegaTpModeVisual = { fg = "#050508", bg = "#9b5cff", bold = true },
-    VegaTpModeCommand = { fg = "#050508", bg = "#ffd166", bold = true },
-    VegaTpFile = { fg = "#e6e6f0", bg = "#050508" },
-    VegaTpSignal = { fg = "#37f8ff", bg = "#050508" },
-    VegaTpWarn = { fg = "#ffd166", bg = "#050508" },
-    VegaTpError = { fg = "#ff5c7a", bg = "#050508", bold = true },
-    VegaTpDim = { fg = "#6f7488", bg = "#050508" },
-    VegaTpPde = { fg = "#8cff98", bg = "#050508" },
-    VegaTpLsp = { fg = "#7aa2ff", bg = "#050508" },
-    VegaTpRight = { fg = "#ffd166", bg = "#050508" },
+    VegaTpMode = { fg = "#37f8ff", bg = "#080a10", bold = true },
+    VegaTpModeInsert = { fg = "#8cff98", bg = "#080a10", bold = true },
+    VegaTpModeVisual = { fg = "#9b5cff", bg = "#080a10", bold = true },
+    VegaTpModeCommand = { fg = "#ffd166", bg = "#080a10", bold = true },
+    VegaTpFile = { fg = "#d7dcf5", bg = "#080a10" },
+    VegaTpSignal = { fg = "#37f8ff", bg = "#080a10" },
+    VegaTpWarn = { fg = "#ffd166", bg = "#080a10" },
+    VegaTpError = { fg = "#ff5c7a", bg = "#080a10", bold = true },
+    VegaTpDim = { fg = "#5f6680", bg = "#080a10" },
+    VegaTpPde = { fg = "#8cff98", bg = "#080a10" },
+    VegaTpLsp = { fg = "#7aa2ff", bg = "#080a10" },
+    VegaTpRight = { fg = "#d7b56d", bg = "#080a10" },
   }
   for name, spec in pairs(groups) do
     vim.api.nvim_set_hl(0, name, spec)
@@ -118,16 +118,15 @@ _G.vega_tpipeline_statusline = function()
   local diag_group = diagnostics:find("E:") and "VegaTpError" or (diagnostics:find("W:") and "VegaTpWarn" or "VegaTpSignal")
 
   return table.concat({
-    "%#" .. mode_group .. "# ", esc(mode), " ",
-    "%#VegaTpDim#▊ ",
+    "%#" .. mode_group .. "#", esc(mode), " ",
     "%#VegaTpFile#", esc(file), esc(modified), esc(readonly), " ",
-    "%#VegaTpDim#│ ",
+    "%#VegaTpDim#· ",
     "%#VegaTpPde#", esc(pde), " ",
-    "%#VegaTpDim#│ ",
+    "%#VegaTpDim#· ",
     "%#VegaTpLsp#", esc(lsp),
     "%=",
     "%#" .. diag_group .. "#", esc(diagnostics), " ",
-    "%#VegaTpDim#│ ",
+    "%#VegaTpDim#· ",
     "%#VegaTpRight#", esc(filetype), " %l:%c %p%% ",
   })
 end
