@@ -82,7 +82,7 @@ local function define_tpipeline_highlights()
     VegaTpModeInsert = { fg = "#161616", bg = "#d7d7d7", bold = true },
     VegaTpModeVisual = { fg = "#d7d7d7", bg = "#393939", bold = true },
     VegaTpModeCommand = { fg = "#161616", bg = "#c8a43a", bold = true },
-    VegaTpFile = { fg = "#d7d7d7", bg = "#161616" },
+    VegaTpFile = { fg = "#d7d7d7", bg = "#161616", italic = true },
     VegaTpSignal = { fg = "#787878", bg = "#161616" },
     VegaTpWarn = { fg = "#c8a43a", bg = "#161616" },
     VegaTpError = { fg = "#b86b6b", bg = "#161616", bold = true },
@@ -118,15 +118,15 @@ _G.vega_tpipeline_statusline = function()
   local diag_group = diagnostics:find("E:") and "VegaTpError" or (diagnostics:find("W:") and "VegaTpWarn" or "VegaTpSignal")
 
   return table.concat({
-    "%#" .. mode_group .. "# 󰚚 ", esc(mode), " ",
+    "%#" .. mode_group .. "#▌ ", esc(mode), " ",
     "%#VegaTpFile#", esc(file), esc(modified), esc(readonly), " ",
-    "%#VegaTpDim# ",
+    "%#VegaTpDim#· ",
     "%#VegaTpPde#", esc(pde), " ",
-    "%#VegaTpDim# ",
+    "%#VegaTpDim#· ",
     "%#VegaTpLsp#", esc(lsp),
     "%=",
     "%#" .. diag_group .. "#", esc(diagnostics), " ",
-    "%#VegaTpDim# ",
+    "%#VegaTpDim#· ",
     "%#VegaTpRight#", esc(filetype), " %l:%c %p%% ",
   })
 end
@@ -158,15 +158,15 @@ return {
             c = { fg = "#525252", bg = "#161616" },
           },
         },
-        component_separators = { left = "│", right = "│" },
-        section_separators = { left = "", right = "" },
+        component_separators = { left = "·", right = "·" },
+        section_separators = { left = "", right = "" },
         disabled_filetypes = {
           statusline = { "dashboard", "snacks_dashboard" },
           winbar = { "dashboard", "snacks_dashboard", "help", "quickfix" },
         },
       },
       sections = {
-        lualine_a = { { "mode", fmt = function(str) return "󰚚 " .. str end } },
+        lualine_a = { { "mode", fmt = function(str) return "▌ " .. str end } },
         lualine_b = { "branch", "diff" },
         lualine_c = { { "filename", path = 1 } },
         lualine_x = { pde_component, lsp_component, "diagnostics", "filetype" },
