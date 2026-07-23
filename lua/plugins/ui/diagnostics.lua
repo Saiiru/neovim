@@ -55,7 +55,28 @@ return {
     event = "VeryLazy", -- Or `LspAttach`
     priority = 1000,    -- needs to be loaded in first
     config = function()
-      require('tiny-inline-diagnostic').setup()
+      vim.diagnostic.config({
+        signs = {
+          text = {
+            [vim.diagnostic.severity.ERROR] = "",
+            [vim.diagnostic.severity.WARN] = "",
+            [vim.diagnostic.severity.INFO] = "",
+            [vim.diagnostic.severity.HINT] = "",
+          },
+        },
+        virtual_text = false,
+      })
+      require('tiny-inline-diagnostic').setup({
+        preset = "modern",
+        transparent_bg = false,
+        transparent_cursorline = true,
+        signs = {
+          left = "▌",
+          right = "",
+          diag = "",
+          arrow = "",
+        },
+      })
     end
   }
 }

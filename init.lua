@@ -8,7 +8,7 @@ require("plugins")
 require("mappings")
 
 pcall(function()
-  vim.cmd.colorscheme("tokyonight-night")
+  vim.cmd.colorscheme("carbonfox")
 end)
 
 pcall(function()

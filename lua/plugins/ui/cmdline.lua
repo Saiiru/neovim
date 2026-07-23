@@ -1,7 +1,8 @@
 return {
 {
     "VonHeikemen/fine-cmdline.nvim",
-    enabled = true,
+    -- Noice owns cmdline UI; keep fine-cmdline disabled to avoid duplicate command surfaces.
+    enabled = false,
     lazy = true,
     event = "CmdlineEnter"
   },
