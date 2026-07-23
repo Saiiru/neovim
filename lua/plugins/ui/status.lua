@@ -78,18 +78,18 @@ end
 
 local function define_tpipeline_highlights()
   local groups = {
-    VegaTpMode = { fg = "#37f8ff", bg = "#080a10", bold = true },
-    VegaTpModeInsert = { fg = "#8cff98", bg = "#080a10", bold = true },
-    VegaTpModeVisual = { fg = "#9b5cff", bg = "#080a10", bold = true },
-    VegaTpModeCommand = { fg = "#ffd166", bg = "#080a10", bold = true },
-    VegaTpFile = { fg = "#d7dcf5", bg = "#080a10" },
-    VegaTpSignal = { fg = "#37f8ff", bg = "#080a10" },
-    VegaTpWarn = { fg = "#ffd166", bg = "#080a10" },
-    VegaTpError = { fg = "#ff5c7a", bg = "#080a10", bold = true },
-    VegaTpDim = { fg = "#5f6680", bg = "#080a10" },
-    VegaTpPde = { fg = "#8cff98", bg = "#080a10" },
-    VegaTpLsp = { fg = "#7aa2ff", bg = "#080a10" },
-    VegaTpRight = { fg = "#d7b56d", bg = "#080a10" },
+    VegaTpMode = { fg = "#161616", bg = "#c8a43a", bold = true },
+    VegaTpModeInsert = { fg = "#161616", bg = "#d7d7d7", bold = true },
+    VegaTpModeVisual = { fg = "#d7d7d7", bg = "#393939", bold = true },
+    VegaTpModeCommand = { fg = "#161616", bg = "#c8a43a", bold = true },
+    VegaTpFile = { fg = "#d7d7d7", bg = "#161616" },
+    VegaTpSignal = { fg = "#787878", bg = "#161616" },
+    VegaTpWarn = { fg = "#c8a43a", bg = "#161616" },
+    VegaTpError = { fg = "#b86b6b", bg = "#161616", bold = true },
+    VegaTpDim = { fg = "#525252", bg = "#161616" },
+    VegaTpPde = { fg = "#b0b0b0", bg = "#161616" },
+    VegaTpLsp = { fg = "#9b9b9b", bg = "#161616" },
+    VegaTpRight = { fg = "#787878", bg = "#161616" },
   }
   for name, spec in pairs(groups) do
     vim.api.nvim_set_hl(0, name, spec)
@@ -118,15 +118,15 @@ _G.vega_tpipeline_statusline = function()
   local diag_group = diagnostics:find("E:") and "VegaTpError" or (diagnostics:find("W:") and "VegaTpWarn" or "VegaTpSignal")
 
   return table.concat({
-    "%#" .. mode_group .. "#", esc(mode), " ",
+    "%#" .. mode_group .. "# 󰚚 ", esc(mode), " ",
     "%#VegaTpFile#", esc(file), esc(modified), esc(readonly), " ",
-    "%#VegaTpDim#· ",
+    "%#VegaTpDim# ",
     "%#VegaTpPde#", esc(pde), " ",
-    "%#VegaTpDim#· ",
+    "%#VegaTpDim# ",
     "%#VegaTpLsp#", esc(lsp),
     "%=",
     "%#" .. diag_group .. "#", esc(diagnostics), " ",
-    "%#VegaTpDim#· ",
+    "%#VegaTpDim# ",
     "%#VegaTpRight#", esc(filetype), " %l:%c %p%% ",
   })
 end
@@ -142,16 +142,31 @@ return {
     opts = {
       options = {
         globalstatus = true,
-        theme = "tokyonight",
+        theme = {
+          normal = {
+            a = { fg = "#161616", bg = "#c8a43a", gui = "bold" },
+            b = { fg = "#b0b0b0", bg = "#262626" },
+            c = { fg = "#787878", bg = "#161616" },
+          },
+          insert = { a = { fg = "#161616", bg = "#d7d7d7", gui = "bold" } },
+          visual = { a = { fg = "#d7d7d7", bg = "#393939", gui = "bold" } },
+          replace = { a = { fg = "#161616", bg = "#d7d7d7", gui = "bold" } },
+          command = { a = { fg = "#161616", bg = "#c8a43a", gui = "bold" } },
+          inactive = {
+            a = { fg = "#525252", bg = "#161616" },
+            b = { fg = "#525252", bg = "#161616" },
+            c = { fg = "#525252", bg = "#161616" },
+          },
+        },
         component_separators = { left = "│", right = "│" },
-        section_separators = { left = "", right = "" },
+        section_separators = { left = "", right = "" },
         disabled_filetypes = {
           statusline = { "dashboard", "snacks_dashboard" },
           winbar = { "dashboard", "snacks_dashboard", "help", "quickfix" },
         },
       },
       sections = {
-        lualine_a = { "mode" },
+        lualine_a = { { "mode", fmt = function(str) return "󰚚 " .. str end } },
         lualine_b = { "branch", "diff" },
         lualine_c = { { "filename", path = 1 } },
         lualine_x = { pde_component, lsp_component, "diagnostics", "filetype" },

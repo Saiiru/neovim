@@ -1,40 +1,77 @@
 return {
-  -- Visual baseline: one active primary theme.
-  -- Configure TokyoNight before `vim.cmd.colorscheme("tokyonight-night")` runs in init.lua.
+  -- Blackout Gotham baseline: Carbonfox gives graphite/black without neon wash.
   {
-    "folke/tokyonight.nvim",
+    "EdenEast/nightfox.nvim",
     enabled = true,
     lazy = false,
     priority = 1000,
     opts = {
-      style = "night",
-      light_style = "day",
-      terminal_colors = true,
-      transparent = false,
-      styles = {
-        comments = { italic = false },
-        keywords = { italic = false },
-        functions = {},
-        variables = {},
-        sidebars = "dark",
-        floats = "dark",
+      options = {
+        transparent = false,
+        terminal_colors = true,
+        styles = {
+          comments = "NONE",
+          conditionals = "NONE",
+          constants = "NONE",
+          functions = "NONE",
+          keywords = "NONE",
+          operators = "NONE",
+          strings = "NONE",
+          types = "NONE",
+          variables = "NONE",
+        },
       },
-      sidebars = { "qf", "help", "terminal", "lazy", "mason" },
-      dim_inactive = false,
-      lualine_bold = false,
-      on_highlights = function(hl, c)
-        -- VEGA neon-noir accents over TokyoNight night: dark shell, cyan/violet/yellow signal.
-        hl.FloatBorder = { fg = c.cyan, bg = c.bg_dark }
-        hl.NormalFloat = { bg = c.bg_dark }
-        hl.WinSeparator = { fg = c.bg_highlight }
-        hl.CursorLineNr = { fg = c.yellow, bold = true }
-        hl.DiagnosticVirtualTextError = { fg = c.error, bg = c.bg_dark }
-        hl.DiagnosticVirtualTextWarn = { fg = c.warning, bg = c.bg_dark }
-        hl.DiagnosticVirtualTextInfo = { fg = c.info, bg = c.bg_dark }
-        hl.DiagnosticVirtualTextHint = { fg = c.hint, bg = c.bg_dark }
-      end,
+      palettes = {
+        carbonfox = {
+          bg0 = "#0b0b0d",
+          bg1 = "#111113",
+          bg2 = "#161616",
+          bg3 = "#1f1f1f",
+          bg4 = "#262626",
+          fg1 = "#d7d7d7",
+          fg2 = "#b0b0b0",
+          fg3 = "#787878",
+          sel0 = "#262626",
+          sel1 = "#303030",
+          comment = "#5f5f5f",
+          yellow = "#c8a43a",
+        },
+      },
+      specs = {
+        carbonfox = {
+          syntax = {
+            keyword = "#b0b0b0",
+            func = "#d7d7d7",
+            string = "#9b9b9b",
+            type = "#b0b0b0",
+            variable = "#d7d7d7",
+          },
+          diag = {
+            ok = "#787878",
+            warn = "#c8a43a",
+          },
+        },
+      },
+      groups = {
+        carbonfox = {
+          CursorLineNr = { fg = "#c8a43a", style = "bold" },
+          FloatBorder = { fg = "#393939", bg = "#111113" },
+          NormalFloat = { bg = "#111113" },
+          WinSeparator = { fg = "#262626" },
+          DiagnosticVirtualTextError = { fg = "#8a5a5a", bg = "#111113" },
+          DiagnosticVirtualTextWarn = { fg = "#c8a43a", bg = "#111113" },
+          DiagnosticVirtualTextInfo = { fg = "#787878", bg = "#111113" },
+          DiagnosticVirtualTextHint = { fg = "#787878", bg = "#111113" },
+        },
+      },
     },
+    config = function(_, opts)
+      require("nightfox").setup(opts)
+      vim.cmd.colorscheme("carbonfox")
+    end,
   },
+
+  { "folke/tokyonight.nvim", enabled = false },
 
   -- Alternate themes are kept available in history but disabled for v0 calm baseline.
   { "dupeiran001/nord.nvim", enabled = false },
@@ -45,7 +82,7 @@ return {
   { "rebelot/kanagawa.nvim", enabled = false },
   { "sainnhe/gruvbox-material", enabled = false },
   { "arcticicestudio/nord-vim", enabled = false },
-  { "EdenEast/nightfox.nvim", enabled = false },
+
   { "uloco/bluloco.nvim", enabled = false },
   { "scottmckendry/cyberdream.nvim", enabled = false },
   { "shatur/neovim-ayu", enabled = false },

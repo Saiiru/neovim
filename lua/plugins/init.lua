@@ -28,7 +28,7 @@ require("lazy").setup({
   install = {
     -- Plugin/tool installs are explicit operator actions, not startup side effects.
     missing = false,
-    colorscheme = { "tokyonight-night" },
+    colorscheme = { "carbonfox" },
   },
   rocks = {
     enabled = false,
