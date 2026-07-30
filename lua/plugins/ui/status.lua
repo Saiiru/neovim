@@ -1,17 +1,17 @@
 local colors = {
-  bg = "#202328",
-  fg = "#bbc2cf",
-  yellow = "#ECBE7B",
-  cyan = "#008080",
-  darkblue = "#081633",
-  green = "#98be65",
-  orange = "#C7823B",
-  violet = "#a9a1e1",
-  magenta = "#c678dd",
-  blue = "#51afef",
-  red = "#ec5f67",
+  bg = "#0b0b0d",
+  fg = "#d0d0c8",
+  yellow = "#c8a43a",
+  cyan = "#6f8faa",
+  darkblue = "#111113",
+  green = "#8f9a72",
+  orange = "#d6b85a",
+  violet = "#8c86a8",
+  magenta = "#ecece6",
+  blue = "#6f8faa",
+  red = "#8a5f5f",
   graphite = "#161616",
-  dim = "#525252",
+  dim = "#686868",
 }
 
 local conditions = {
@@ -171,7 +171,7 @@ end
 local function define_tpipeline_highlights()
   vim.api.nvim_set_hl(0, "VegaTpRail", { fg = mode_color(), bg = colors.bg, bold = true })
   vim.api.nvim_set_hl(0, "VegaTpMode", { fg = mode_color(), bg = colors.bg, bold = true })
-  vim.api.nvim_set_hl(0, "VegaTpFile", { fg = colors.magenta, bg = colors.bg, bold = true, italic = true })
+  vim.api.nvim_set_hl(0, "VegaTpFile", { fg = colors.blue, bg = colors.bg, bold = true })
   vim.api.nvim_set_hl(0, "VegaTpDim", { fg = colors.dim, bg = colors.bg })
   vim.api.nvim_set_hl(0, "VegaTpText", { fg = colors.fg, bg = colors.bg })
   vim.api.nvim_set_hl(0, "VegaTpPde", { fg = colors.yellow, bg = colors.bg })
@@ -270,7 +270,7 @@ local function lualine_config()
   ins_left({ function() return "▊" end, color = function() return { fg = mode_color(), bg = colors.bg, gui = "bold" } end, padding = { left = 0, right = 0 } })
   ins_left({ mode_name, color = function() return { fg = mode_color(), bg = colors.bg, gui = "bold" } end, padding = { left = 1, right = 1 } })
   ins_left({ file_size, cond = conditions.buffer_not_empty, color = { fg = colors.fg, bg = colors.bg } })
-  ins_left({ "filename", cond = conditions.buffer_not_empty, path = 1, color = { fg = colors.magenta, bg = colors.bg, gui = "bold,italic" } })
+  ins_left({ "filename", cond = conditions.buffer_not_empty, path = 1, color = { fg = colors.blue, bg = colors.bg, gui = "bold" } })
   ins_left({ "location", color = { fg = colors.fg, bg = colors.bg } })
   ins_left({ "progress", color = { fg = colors.fg, bg = colors.bg, gui = "bold" } })
   ins_left({
@@ -285,7 +285,7 @@ local function lualine_config()
     },
   })
   ins_left({ function() return "%=" end })
-  ins_left({ lsp_component, icon = " LSP:", color = { fg = "#ffffff", bg = colors.bg, gui = "bold" } })
+  ins_left({ lsp_component, icon = " LSP:", color = { fg = colors.fg, bg = colors.bg, gui = "bold" } })
   ins_left({ pde_component, color = { fg = colors.yellow, bg = colors.bg } })
 
   ins_right({ "o:encoding", upper = true, cond = conditions.hide_in_width, color = { fg = colors.green, bg = colors.bg, gui = "bold" } })
