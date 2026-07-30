@@ -59,6 +59,7 @@ return {
         map("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, "Next diagnostic")
         map("n", "<leader>cq", vim.diagnostic.setqflist, "Diagnostics quickfix")
         if client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
+          pcall(vim.lsp.inlay_hint.enable, true, { bufnr = bufnr })
           map("n", "<leader>uh", function()
             vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }), { bufnr = bufnr })
           end, "Toggle inlay hints")
@@ -76,6 +77,7 @@ return {
               diagnostics = { globals = { "vim", "Snacks" } },
               workspace = { checkThirdParty = false },
               telemetry = { enable = false },
+              hint = { enable = true, arrayIndex = "Disable", await = true, paramName = "Literal", paramType = true, semicolon = "Disable", setType = true },
             },
           },
         },
@@ -125,7 +127,30 @@ return {
           enabled = function()
             return has_workspace_typescript()
           end,
-          settings = { vtsls = { autoUseWorkspaceTsdk = true }, typescript = { tsserver = { maxTsServerMemory = 4096 } } },
+          settings = {
+            vtsls = { autoUseWorkspaceTsdk = true },
+            typescript = {
+              inlayHints = {
+                parameterNames = { enabled = "literals" },
+                parameterTypes = { enabled = true },
+                variableTypes = { enabled = true },
+                propertyDeclarationTypes = { enabled = true },
+                functionLikeReturnTypes = { enabled = true },
+                enumMemberValues = { enabled = true },
+              },
+              tsserver = { maxTsServerMemory = 4096 },
+            },
+            javascript = {
+              inlayHints = {
+                parameterNames = { enabled = "literals" },
+                parameterTypes = { enabled = true },
+                variableTypes = { enabled = true },
+                propertyDeclarationTypes = { enabled = true },
+                functionLikeReturnTypes = { enabled = true },
+                enumMemberValues = { enabled = true },
+              },
+            },
+          },
         },
         ts_ls = {
           cmd = { "typescript-language-server", "--stdio" },
