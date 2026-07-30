@@ -1,17 +1,19 @@
+local p = require("theme.palette")
+
 local colors = {
-  bg = "#0b0b0d",
-  fg = "#d0d0c8",
-  yellow = "#ffcc4d",
-  cyan = "#38c7ff",
-  darkblue = "#111113",
-  green = "#a6e36f",
-  orange = "#ffd36e",
-  violet = "#b69cff",
-  magenta = "#f2f7ff",
-  blue = "#38c7ff",
-  red = "#8a5f5f",
-  graphite = "#161616",
-  dim = "#686868",
+  bg = p.bg0,
+  fg = p.fg0,
+  yellow = p.amber,
+  cyan = p.cyan,
+  darkblue = p.bg1,
+  green = p.green,
+  orange = p.orange,
+  violet = p.violet,
+  magenta = p.violet,
+  blue = p.blue,
+  red = p.red,
+  graphite = p.bg2,
+  dim = p.muted,
 }
 
 local conditions = {
