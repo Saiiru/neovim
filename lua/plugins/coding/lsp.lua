@@ -111,7 +111,7 @@ return {
           vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost" }, {
             group = group,
             buffer = bufnr,
-            callback = function() vim.lsp.codelens.refresh({ bufnr = bufnr }) end,
+            callback = function() pcall(vim.lsp.codelens.refresh) end,
           })
           map("n", "<leader>cl", function() vim.lsp.codelens.run() end, "Run code lens")
         end
