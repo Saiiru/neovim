@@ -1,23 +1,25 @@
 return {
-  bg0 = "#0B0E14",
-  bg1 = "#11151C",
-  bg2 = "#171C25",
-  bg3 = "#1A2130",
-  border = "#293142",
+	-- Noir/Gotham base: dark graphite, not pure-black crush.
+	bg0 = "#0A0D12",
+	bg1 = "#10151D",
+	bg2 = "#161C26",
+	bg3 = "#202938",
+	border = "#2B3445",
 
-  fg0 = "#D8DEE9",
-  fg1 = "#AAB6C5",
-  muted = "#667085",
-  subtle = "#4C566A",
+	fg0 = "#D7DEE8",
+	fg1 = "#AEB8C6",
+	muted = "#6B7482",
+	subtle = "#505A68",
 
-  cyan = "#5CCFE6",
-  blue = "#7AA2F7",
-  violet = "#BB9AF7",
-  teal = "#73DACA",
-  green = "#9ECE6A",
-  amber = "#E0AF68",
-  orange = "#FF9E64",
-  red = "#F7768E",
+	-- Flavor colors: noirbuddy-style primary/secondary, used sparingly.
+	cyan = "#6ED7E8",
+	blue = "#82A8F8",
+	violet = "#B7A4E8",
+	teal = "#7DD6C7",
+	green = "#A8C77B",
+	amber = "#DDB26F",
+	orange = "#E6A06A",
+	red = "#E06C7F",
 
-  none = "NONE",
+	none = "NONE",
 }
