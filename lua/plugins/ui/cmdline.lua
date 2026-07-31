@@ -39,7 +39,7 @@ return {
 				enabled = true,
 				view = "cmdline_popup",
 				format = {
-					cmdline = { pattern = "^:", icon = "", lang = "vim" },
+					cmdline = { pattern = "^:", icon = "CMD", lang = "vim" },
 					search_down = {
 						kind = "search",
 						pattern = "^/",
@@ -139,10 +139,10 @@ return {
 			views = {
 				cmdline_popup = {
 					position = { row = "38%", col = "50%" },
-					size = { width = 72, height = "auto" },
+					size = { width = 78, height = "auto" },
 					border = {
 						style = "rounded",
-						padding = { 0, 1 },
+						padding = { 1, 2 },
 					},
 					filter_options = {},
 					win_options = {
@@ -153,8 +153,8 @@ return {
 				popupmenu = {
 					relative = "editor",
 					position = { row = "46%", col = "50%" },
-					size = { width = 72, height = 10 },
-					border = { style = "rounded", padding = { 0, 1 } },
+					size = { width = 78, height = 10 },
+					border = { style = "rounded", padding = { 1, 2 } },
 					win_options = {
 						winblend = 0,
 						winhighlight = "Normal:NoicePopupmenu,FloatBorder:NoicePopupmenuBorder,CursorLine:NoicePopupmenuSelected",
