@@ -19,11 +19,29 @@ map("n", "<leader>bd", "<cmd>bdelete<cr>", { desc = "Delete buffer" })
 map("n", "<leader>sv", "<cmd>vsplit<cr>", { desc = "Vertical split" })
 map("n", "<leader>sh", "<cmd>split<cr>", { desc = "Horizontal split" })
 
+-- Built-in file navigation. Keep the MVP inside Neovim; no external file manager.
+map("n", "<leader>e", "<cmd>Explore<cr>", { desc = "Open file explorer" })
+map(
+	"n",
+	"<leader>E",
+	"<cmd>Explore .<cr>",
+	{ desc = "Explore current directory" }
+)
+
 -- Diagnostics / LSP
-map("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, { desc = "Previous diagnostic" })
-map("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, { desc = "Next diagnostic" })
+map("n", "[d", function()
+	vim.diagnostic.jump({ count = -1, float = true })
+end, { desc = "Previous diagnostic" })
+map("n", "]d", function()
+	vim.diagnostic.jump({ count = 1, float = true })
+end, { desc = "Next diagnostic" })
 map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line diagnostics" })
-map("n", "<leader>cl", vim.diagnostic.setloclist, { desc = "Diagnostics to loclist" })
+map(
+	"n",
+	"<leader>cl",
+	vim.diagnostic.setloclist,
+	{ desc = "Diagnostics to loclist" }
+)
 map("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action" })
 map("n", "<leader>cr", vim.lsp.buf.rename, { desc = "Rename symbol" })
 map("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
@@ -40,14 +58,23 @@ map("n", "<leader>qc", "<cmd>cclose<cr>", { desc = "Close quickfix" })
 
 -- Completion / snippets. nvim-cmp owns <Tab>/<S-Tab> in insert mode.
 map({ "i", "s" }, "<C-j>", function()
-  local ok, ls = pcall(require, "luasnip")
-  if ok and ls.expand_or_jumpable() then ls.expand_or_jump() end
+	local ok, ls = pcall(require, "luasnip")
+	if ok and ls.expand_or_jumpable() then
+		ls.expand_or_jump()
+	end
 end, { desc = "Snippet expand/jump forward" })
 map({ "i", "s" }, "<C-k>", function()
-  local ok, ls = pcall(require, "luasnip")
-  if ok and ls.jumpable(-1) then ls.jump(-1) end
+	local ok, ls = pcall(require, "luasnip")
+	if ok and ls.jumpable(-1) then
+		ls.jump(-1)
+	end
 end, { desc = "Snippet jump backward" })
-map("n", "<leader>sl", "<cmd>LuaSnipListAvailable<cr>", { desc = "List snippets" })
+map(
+	"n",
+	"<leader>sl",
+	"<cmd>LuaSnipListAvailable<cr>",
+	{ desc = "List snippets" }
+)
 
 -- PDE / mise-first tasks
 map("n", "<leader>ph", "<cmd>PDEHelp<cr>", { desc = "PDE help" })
@@ -68,33 +95,119 @@ map("n", "<leader>pq", "<cmd>PDEQuickfix<cr>", { desc = "PDE quickfix" })
 map("n", "<leader>pe", "<cmd>PDEErrors<cr>", { desc = "PDE errors" })
 map("n", "<leader>pT", "<cmd>PDETemplates<cr>", { desc = "PDE templates" })
 map("n", "<leader>pn", function()
-  vim.ui.input({ prompt = "PDE template: " }, function(template)
-    if not template or template == "" then return end
-    vim.ui.input({ prompt = "Project path: " }, function(path)
-      if not path or path == "" then return end
-      if template:find("[\n\r]") or path:find("[\n\r]") then
-        vim.notify("PDENewProject input cannot contain newlines", vim.log.levels.ERROR)
-        return
-      end
-      local ok, result = require("pde.new_project").create(template, path, {})
-      if not ok then
-        vim.notify("PDENewProject failed: " .. tostring(result), vim.log.levels.ERROR)
-        return
-      end
-      vim.notify("created " .. result.template .. " project: " .. result.root, vim.log.levels.INFO)
-    end)
-  end)
+	vim.ui.input({ prompt = "PDE template: " }, function(template)
+		if not template or template == "" then
+			return
+		end
+		vim.ui.input({ prompt = "Project path: " }, function(path)
+			if not path or path == "" then
+				return
+			end
+			if template:find("[\n\r]") or path:find("[\n\r]") then
+				vim.notify(
+					"PDENewProject input cannot contain newlines",
+					vim.log.levels.ERROR
+				)
+				return
+			end
+			local ok, result =
+				require("pde.new_project").create(template, path, {})
+			if not ok then
+				vim.notify(
+					"PDENewProject failed: " .. tostring(result),
+					vim.log.levels.ERROR
+				)
+				return
+			end
+			vim.notify(
+				"created " .. result.template .. " project: " .. result.root,
+				vim.log.levels.INFO
+			)
+		end)
+	end)
 end, { desc = "PDE new project" })
 map("n", "<leader>pm", "<cmd>PDEOpenMise<cr>", { desc = "Open .mise.toml" })
-map("n", "<leader>pc", "<cmd>PDEOpenProjectConfig<cr>", { desc = "Open pde.toml" })
+map(
+	"n",
+	"<leader>pc",
+	"<cmd>PDEOpenProjectConfig<cr>",
+	{ desc = "Open pde.toml" }
+)
+
+-- Notes / Obsidian / portfolio workflow. Plain Markdown first; Obsidian plugin is optional.
+local vault = vim.fn.expand("~/Documents/Obsidian")
+local portfolio_notes = vault .. "/02-Projects/Portfolio"
+local function edit_note(path)
+	vim.cmd("edit " .. vim.fn.fnameescape(vim.fn.expand(path)))
+end
+
+map("n", "<leader>op", function()
+	edit_note(portfolio_notes .. "/00 - Index.md")
+end, { desc = "Open portfolio notes" })
+
+map("n", "<leader>od", function()
+	edit_note(vault .. "/01-Daily/" .. os.date("%Y-%m-%d") .. ".md")
+end, { desc = "Open daily note" })
+
+map("n", "<leader>oi", function()
+	edit_note(vault .. "/00-Inbox/Inbox.md")
+end, { desc = "Open notes inbox" })
+
+map("n", "<leader>og", function()
+	vim.ui.input({ prompt = "grep notes: " }, function(query)
+		if not query or query == "" then
+			return
+		end
+		vim.cmd(
+			"silent grep! "
+				.. vim.fn.shellescape(query)
+				.. " "
+				.. vim.fn.fnameescape(vault)
+				.. "/**/*.md"
+		)
+		vim.cmd("copen")
+	end)
+end, { desc = "Grep Obsidian notes" })
+
+map("n", "<leader>ob", function()
+	edit_note("Brief.md")
+end, { desc = "Open local Brief.md" })
+
+map("n", "<leader>oj", function()
+	edit_note("Diário.md")
+end, { desc = "Open local Diário.md" })
+
+map("n", "<leader>or", function()
+	edit_note("README.md")
+end, { desc = "Open local README.md" })
 
 -- Arduino / embedded
 map("n", "<leader>ab", "<cmd>PDEBoards<cr>", { desc = "Arduino boards" })
-map("n", "<leader>ap", "<cmd>PDEArduinoProfile<cr>", { desc = "Arduino profile" })
-map("n", "<leader>ac", "<cmd>PDEArduinoCompile<cr>", { desc = "Arduino compile" })
-map("n", "<leader>aC", "<cmd>PDEArduinoCompileDB<cr>", { desc = "Arduino compile DB" })
+map(
+	"n",
+	"<leader>ap",
+	"<cmd>PDEArduinoProfile<cr>",
+	{ desc = "Arduino profile" }
+)
+map(
+	"n",
+	"<leader>ac",
+	"<cmd>PDEArduinoCompile<cr>",
+	{ desc = "Arduino compile" }
+)
+map(
+	"n",
+	"<leader>aC",
+	"<cmd>PDEArduinoCompileDB<cr>",
+	{ desc = "Arduino compile DB" }
+)
 map("n", "<leader>au", "<cmd>PDEArduinoUpload<cr>", { desc = "Arduino upload" })
 map("n", "<leader>af", "<cmd>PDEArduinoFlash<cr>", { desc = "Arduino flash" })
-map("n", "<leader>am", "<cmd>PDEArduinoMonitor<cr>", { desc = "Arduino monitor" })
+map(
+	"n",
+	"<leader>am",
+	"<cmd>PDEArduinoMonitor<cr>",
+	{ desc = "Arduino monitor" }
+)
 
 map("t", "<esc><esc>", "<C-\\><C-n>", opts)
