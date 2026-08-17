@@ -1,6 +1,11 @@
 tags
 sessions/
 *.log
+*.bak
+*.backup
+*.bak.*
+*-backup
+*-backup-*
 lua/wip/
 packer_compiled.lua
 !/doc/tags

@@ -1,441 +1,75 @@
-# Sairu Neovim PDE
+# Neovim
 
-Base: `NickCrew/nvim-pde`.
+Configuração pessoal de Neovim usada na workstation de Sairu e versionada separadamente dos dotfiles.
 
-Camada local: VEGA / mise-first / snippets práticos / comandos PDE.
+O foco é uma PDE pequena e previsível: edição rápida, descoberta por contexto de projeto e execução explícita de tarefas. Runtimes e ferramentas pertencem ao Mise; o Neovim apenas os consome.
 
-## Backup
+## Requisitos
 
-Antes de substituir a `main`, foi criada e publicada a tag:
+- Neovim recente
+- Git
+- Mise
+- ferramentas opcionais conforme a linguagem do projeto
 
-```txt
-backup-main-before-nickcrew-pde-2026-07-11-052845
+A configuração não instala plugins ou toolchains automaticamente durante a inicialização. O `lazy.nvim` precisa existir no diretório de dados do Neovim.
+
+## Estrutura
+
+```text
+init.lua
+lua/
+├── autocmds.lua
+├── mappings.lua
+├── options.lua
+├── pde/             detecção, comandos, tarefas e views
+├── plugins/         specs do lazy.nvim por domínio
+└── theme/           paleta e highlights compartilhados
 ```
 
-Rollback rápido:
+## Uso
 
-```bash
-cd ~/dotfiles/config/nvim
-git switch main
-git reset --hard backup-main-before-nickcrew-pde-2026-07-11-052845
-git push --force-with-lease origin main
-```
-
-## Arquitetura
-
-```txt
-mise      = linguagens / SDKs / CLIs / versões / tasks por projeto
-Neovim    = editor / LSP client / completion / snippets / quickfix / git / task invocation
-Projeto   = declara .mise.toml, pde.toml, package.json, go.mod, sketch.yaml etc.
-Hermes    = auditor / briefing / manifesto
-```
-
-Regra principal:
-
-```txt
-Neovim não instala toolchain.
-Neovim não instala SDK.
-Neovim não faz flash automático.
-Neovim chama apenas mise tasks locais do projeto.
-Não existe fallback para tasks globais.
-```
-
-Mensagem determinística quando uma task não existe:
-
-```txt
-project does not define local mise task: X
-```
-
-Plugins Neovim são geridos por Lazy. Toolchains são do mise/projeto.
-
-## Completion
-
-Completion usa `nvim-cmp`.
-
-Keymaps em insert mode:
-
-```txt
-<C-Space>   abrir completion
-<C-n>       próximo item
-<C-p>       item anterior
-<Tab>       próximo item / expandir snippet / próximo campo
-<S-Tab>     item anterior / campo anterior
-<CR>        aceitar item selecionado
-<C-y>       aceitar item selecionado
-<C-e>       fechar completion
-<C-b>       subir documentação
-<C-f>       descer documentação
-```
-
-Sources configuradas:
-
-```txt
-nvim_lsp
-luasnip
-path
-nvim_lua
-buffer
-cmdline
-```
-
-## Snippets no completion
-
-Snippets aparecem no popup do completion.
-
-Fluxo:
-
-```txt
-1. entra em insert mode
-2. digita o trigger, exemplo: errwrap
-3. aperta <C-Space> se o menu não abrir sozinho
-4. seleciona o snippet
-5. aceita com <Tab>, <CR> ou <C-y>
-6. navega campos com <Tab>/<S-Tab>
-```
-
-Atalhos extras:
-
-```txt
-<C-j>       expandir/pular para próximo campo do snippet
-<C-k>       voltar campo anterior do snippet
-<leader>sl  listar snippets disponíveis
-```
-
-Comando útil:
+Abra o guia interno:
 
 ```vim
-:LuaSnipListAvailable
+:PDEHelp
 ```
 
-## Snippets práticos adicionados
-
-Além de `friendly-snippets`, há snippets VEGA extras.
-
-Go:
-
-```txt
-err
-errnil
-errwrap
-tabletest
-```
-
-Exemplo:
-
-```go
-if err != nil {
-	return nil, fmt.Errorf("operation failed: %w", err)
-}
-```
-
-Python:
-
-```txt
-trylog
-withopen
-fastapi
-```
-
-TypeScript / JavaScript:
-
-```txt
-typeimp
-awaittry
-react
-```
-
-C/C++:
-
-```txt
-checknull
-guard
-try
-```
-
-Lua:
-
-```txt
-pcall
-usercmd
-```
-
-Arduino:
-
-```txt
-sketch
-debounce
-```
-
-## PDE commands
-
-Comandos de projeto:
+Comandos úteis:
 
 ```vim
 :PDEStatus
 :PDEOverview
-:PDECompile
-:PDEBuild
-:PDETest
-:PDELint
-:PDEFormat
-:PDETypecheck
-:PDEDev
-:PDERun
-:PDEServe
-:PDETmuxTask <task>
-:PDEVersion
-:PDEDoctor
+:PDETemplates
+:PDETask <nome>
+:PDETmuxTask <nome>
 :PDEOpenMise
-:PDEOpenProjectConfig
-:PDEQuickfix
 ```
 
-Arduino/embedded:
+A camada PDE detecta o contexto do projeto e usa tarefas declaradas pelo projeto/Mise em vez de manter comandos específicos espalhados por mappings.
 
-```vim
-:PDEBoards
-:PDEArduinoProfile
-:PDEArduinoCompileDB
-:PDEArduinoCompile
-:PDEArduinoUpload
-:PDEArduinoFlash
-:PDEArduinoMonitor
-```
-
-## PDE keymaps
-
-```txt
-<leader>ps  PDEStatus
-<leader>po  PDEOverview
-<leader>pC  PDECompile -> quickfix
-<leader>pb  PDEBuild -> quickfix
-<leader>pt  PDETest -> quickfix
-<leader>pl  PDELint -> quickfix
-<leader>pf  PDEFormat
-<leader>pr  PDERun -> tmux/terminal
-<leader>pS  PDEServe -> tmux/terminal
-<leader>pm  abrir .mise.toml
-<leader>pc  abrir pde.toml
-```
-
-## PDE overview e roteamento
-
-O overview é o cockpit do projeto, inspirado no painel de projeto/Tasks do VSCode:
-
-```vim
-:PDEOverview
-```
-
-Ele mostra:
-
-```txt
-root
-type/framework/language
-package manager
-LSP esperado e LSP ativo
-markers detectados
-tasks locais do mise
-contrato de tasks esperado para o framework
-rota quickfix vs tmux/terminal
-```
-
-Roteamento:
-
-```txt
-build/test/lint/typecheck/compile/check/clippy -> quickfix/compiler
-dev/run/serve/monitor/arduino-monitor       -> tmux window se estiver em tmux; terminal split se não estiver
-arduino-upload/arduino-flash                -> só por comando explícito
-```
-
-O Neovim não usa task global do mise. Se a task não existir localmente:
-
-```txt
-project does not define local mise task: X
-```
-
-## Linguagens e frameworks detectados
-
-```txt
-C/C++/Arduino: compile_commands.json, compile_flags.txt, CMakeLists.txt, Makefile, meson.build, platformio.ini, sketch.yaml -> clangd
-Java: pom.xml, build.gradle(.kts), settings.gradle(.kts) -> jdtls quando disponível
-Rust: Cargo.toml, rust-project.json -> rust_analyzer
-Go: go.mod, go.work -> gopls
-Node/JS/TS: package.json, tsconfig.json, jsconfig.json -> vtsls se disponível, ts_ls como fallback
-Frontend: Vite, React, Next, Vue/Nuxt, SvelteKit, Astro
-Python: pyproject.toml, manage.py, requirements.txt -> basedpyright + ruff
-```
-
-Arduino:
-
-```txt
-<leader>ab  boards
-<leader>ap  profile
-<leader>ac  compile -> quickfix
-<leader>aC  compile DB
-<leader>au  upload
-<leader>af  flash
-<leader>am  monitor
-```
-
-Quickfix:
-
-```txt
-[q          item anterior
-]q          próximo item
-<leader>qo  abrir quickfix
-<leader>qc  fechar quickfix
-```
-
-LSP:
-
-```txt
-gd          definition
-gD          declaration
-gi          implementation
-gr          references
-K           hover
-[d / ]d     diagnostics
-<leader>ca  code action
-<leader>cr  rename
-<leader>cd  line diagnostic
-```
-
-## Como um projeto deve declarar tasks
-
-Exemplo `.mise.toml`:
-
-```toml
-[tasks.build]
-run = "cc -Wall -Wextra -std=c11 main.c -o main"
-
-[tasks.lint]
-run = "cc -Wall -Wextra -std=c11 -fsyntax-only main.c"
-
-[tasks.test]
-run = "echo define tests"
-
-[tasks.pde-version]
-run = "mise ls --current"
-```
-
-Nomes com aspas também são aceitos:
-
-```toml
-[tasks."arduino-compile"]
-run = "arduino-cli compile"
-
-[tasks.'typecheck']
-run = "tsc --noEmit"
-```
-
-Então no Neovim:
-
-```vim
-:PDEStatus
-:PDEBuild
-```
-
-Erros de build/lint/test vão para quickfix.
-
-## Arduino contract
-
-Projeto Arduino deve preferir:
-
-```txt
-sketch.yaml
-.mise.toml
-pde.toml
-compile_commands.json
-```
-
-Contrato de status, sem ação de hardware:
-
-```toml
-# pde.toml
-profile = "esp32"
-
-[profiles.esp32]
-fqbn = "esp32:esp32:esp32"
-port = "/dev/ttyUSB0"
-baud = 115200
-compile_db = "compile_commands.json"
-```
-
-Contrato equivalente em `sketch.yaml`:
-
-```yaml
-default_profile: esp32
-profiles:
-  esp32:
-    fqbn: esp32:esp32:esp32
-    port: /dev/ttyUSB0
-    baud: 115200
-```
-
-`:PDEStatus` / `:PDEArduinoProfile` leem esses campos e reportam:
-
-```txt
-profile
-fqbn
-port
-baud
-sketch.yaml
-platformio.ini
-pde.toml
-compile_commands.json
-compile db path
-```
-
-Esses comandos não fazem scan de porta, não instalam cores/libs, não abrem monitor,
-não fazem upload e não fazem flash.
-
-Exemplo tasks:
-
-```toml
-[tasks.arduino-compile]
-run = "arduino-cli compile --fqbn esp32:esp32:esp32 sketch"
-
-[tasks.arduino-compile-db]
-run = "arduino-cli compile --fqbn esp32:esp32:esp32 --build-path build --only-compilation-database sketch"
-
-[tasks.arduino-upload]
-run = "arduino-cli upload -p ${ARDUINO_PORT:-/dev/ttyUSB0} --fqbn esp32:esp32:esp32 sketch"
-
-[tasks.arduino-monitor]
-run = "arduino-cli monitor -p ${ARDUINO_PORT:-/dev/ttyUSB0} -c baudrate=115200"
-
-[tasks.arduino-flash]
-depends = ["arduino-compile", "arduino-upload"]
-```
-
-Flash/upload só acontecem se você chamar explicitamente o comando.
-
-## Teste rápido
+## Instalação isolada
 
 ```bash
-mkdir -p /tmp/pde-smoke
-cd /tmp/pde-smoke
-cat > main.go <<'EOF'
-package main
-
-func main() {}
-EOF
-cat > .mise.toml <<'EOF'
-[tasks.build]
-run = "go build ./..."
-EOF
-nvim main.go
+git clone git@github.com:Saiiru/neovim.git ~/.config/nvim
 ```
 
-Dentro do Neovim:
+Dentro dos dotfiles, este repositório é usado como submódulo em `config/nvim`.
 
-```vim
-:PDEStatus
-:PDEBuild
+## Verificação
+
+```bash
+nvim --headless '+lua print("NVIM_OK")' +qa
 ```
 
-Para snippet:
+Arquivos Lua podem ser validados com:
 
-```txt
-insert mode -> digita errwrap -> <C-Space> -> seleciona -> <CR>
+```bash
+find . -name '*.lua' -print0 | xargs -0 -n1 luac -p
 ```
+
+## Política
+
+- Sem instalação silenciosa durante o startup.
+- Sem segredos ou dados pessoais no repositório.
+- Plugins desativados não permanecem como configuração morta.
+- Mudanças devem preservar inicialização headless e passar pela validação Lua.
