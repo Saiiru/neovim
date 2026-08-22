@@ -1,7 +1,7 @@
 local o = vim.opt
 local g = vim.g
 
-o.guifont = "OperatorMono Nerd Font:h16"
+o.guifont = "Monaspace Neon NF:h16"
 
 if vim.g.neovide then
   g.neovide_padding_left = 0
